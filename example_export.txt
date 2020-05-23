@@ -1,0 +1,4 @@
+# 2FA example from https://www.raspberrypi.org/blog/setting-up-two-factor-authentication-on-your-raspberry-pi/
+# Secret key: 7KSQL2JTUDIS5EF65KLMRQIIGY
+# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B
