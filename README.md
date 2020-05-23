@@ -6,11 +6,10 @@ Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of
 
 1. Export the QR codes from "Google Authenticator" app
 2. Read QR codes with QR code reader
-3. Save the captured QR codes in a text file. Save each QR code on a new line. (The captured QR codes look like "otpauth-migration://offline?data=...")
+3. Save the captured QR codes in a text file. Save each QR code on a new line. (The captured QR codes look like `otpauth-migration://offline?data=...`)
 4. Call this script with the file as input:
-    ```
-   python extract_otp_secret_keys.py -q example_export.txt
-    ```
+
+        python extract_otp_secret_keys.py -q example_export.txt
 
 ## Requirement
 
@@ -26,10 +25,10 @@ For printing QR codes, the qrcode module is required
 
 ## Technical background
 
-The export QR code of "Google Authenticator" contains the URL "otpauth-migration://offline?data=...".
+The export QR code of "Google Authenticator" contains the URL `otpauth-migration://offline?data=...`.
 The data parameter is a base64 encoded proto3 message (Google Protocol Buffers).
 
-Command for regeneration of Python code from proto3 message definition file (only necessary in case of changes of the proto3 message defintion):
+Command for regeneration of Python code from proto3 message definition file (only necessary in case of changes of the proto3 message definition):
 
     protoc --python_out=generated_python google_auth.proto
 
