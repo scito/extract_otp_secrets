@@ -19,7 +19,7 @@
 # The export QR code of "Google Authenticator" contains the URL "otpauth-migration://offline?data=...".
 # The data parameter is a base64 encoded proto3 message (Google Protocol Buffers).
 #
-# Command for regeneration of Python code from proto3 message definition file (only necessary in case of changes of the proto3 message defintion):
+# Command for regeneration of Python code from proto3 message definition file (only necessary in case of changes of the proto3 message definition):
 # protoc --python_out=generated_python google_auth.proto
 #
 # References:
