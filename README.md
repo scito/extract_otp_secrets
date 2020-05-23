@@ -35,5 +35,5 @@ Command for regeneration of Python code from proto3 message definition file (onl
 
 ## References
 
-Proto3 documentation: https://developers.google.com/protocol-buffers/docs/pythontutorial
-Template code: https://github.com/beemdevelopment/Aegis/pull/406
+* Proto3 documentation: https://developers.google.com/protocol-buffers/docs/pythontutorial
+* Template code: https://github.com/beemdevelopment/Aegis/pull/406
