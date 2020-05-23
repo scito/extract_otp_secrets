@@ -1,6 +1,6 @@
 # Extract TOTP/HOTP secret keys from Google Authenticator
 
-Extract two-factor autentication (2FA, TFA) secret keys from export QR codes of "Google Authenticator" app
+Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of "Google Authenticator" app
 
 ## Usage
 
