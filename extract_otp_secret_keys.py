@@ -45,7 +45,7 @@ import argparse
 import base64
 import fileinput
 import sys
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse, quote
 
 import generated_python.google_auth_pb2
 
@@ -94,7 +94,7 @@ for line in (line.strip() for line in fileinput.input(args.infile)):
         url_params = { 'secret': secret }
         if otp.type == 1: url_params['counter'] = otp.counter
         if otp.issuer: url_params['issuer'] = otp.issuer
-        otp_url = 'otpauth://{}/{}?'.format('totp' if otp.type == 2 else 'hotp', otp.name) + urlencode(url_params)
+        otp_url = 'otpauth://{}/{}?'.format('totp' if otp.type == 2 else 'hotp', quote(otp.name)) + urlencode(url_params)
         if args.qr:
             if verbose: print(otp_url)
             print_qr(otp_url)
