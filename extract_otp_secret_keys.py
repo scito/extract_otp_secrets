@@ -48,6 +48,7 @@ import sys
 from urllib.parse import parse_qs, urlencode, urlparse, quote
 
 import generated_python.google_auth_pb2
+import os,re,string
 
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('--verbose', '-v', help='verbose output', action='store_true')
@@ -68,10 +69,12 @@ def convert_secret_from_bytes_to_base32_str(bytes):
     return str(base64.b32encode(otp.secret), 'utf-8').replace('=', '')
 
 
-def print_qr(data):
+def print_qr(data, name):
     qr = QRCode()
     qr.add_data(data)
-    qr.print_tty()
+    img = qr.make_image(fill_color="black", back_color="white")
+    img.save(name)
+        
 
 for line in (line.strip() for line in fileinput.input(args.infile)):
     if verbose: print(line)
@@ -85,7 +88,9 @@ for line in (line.strip() for line in fileinput.input(args.infile)):
     if verbose: print(payload)
 
     # pylint: disable=no-member
+    i = int(0)
     for otp in payload.otp_parameters:
+        i+=1
         print('\nName:   {}'.format(otp.name))
         secret = convert_secret_from_bytes_to_base32_str(otp.secret)
         print('Secret: {}'.format(secret))
@@ -97,4 +102,9 @@ for line in (line.strip() for line in fileinput.input(args.infile)):
         otp_url = 'otpauth://{}/{}?'.format('totp' if otp.type == 2 else 'hotp', quote(otp.name)) + urlencode(url_params)
         if args.qr:
             if verbose: print(otp_url)
-            print_qr(otp_url)
+            if not(os.path.exists("qr")):os.mkdir("qr")
+            pattern = re.compile('[\W_]+')
+            file_otp_name = pattern.sub('', otp.name)
+            file_otp_issuer = pattern.sub('',otp.issuer)
+            if not(file_otp_issuer):print_qr(otp_url, "qr/{}-{}.png".format(i,file_otp_name))
+            if file_otp_issuer: print_qr(otp_url, "qr/{}-{}-{}.png".format(i,file_otp_name,file_otp_issuer))
