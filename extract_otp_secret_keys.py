@@ -53,8 +53,8 @@ import generated_python.google_auth_pb2
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('--verbose', '-v', help='verbose output', action='store_true')
 arg_parser.add_argument('--qr', '-q', help='generate QR codes (otpauth://...)', action='store_true')
-arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the "qr" folder', action='store_true')
-arg_parser.add_argument('--printqr', '-p', help='print the QR code(s) as text to the terminal', action='store_true')
+arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the "qr" subfolder', action='store_true')
+arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal', action='store_true')
 arg_parser.add_argument('infile', help='file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
 args = arg_parser.parse_args()
 
