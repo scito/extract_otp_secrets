@@ -72,12 +72,11 @@ def get_enum_name_by_number(parent, field_name):
 def convert_secret_from_bytes_to_base32_str(bytes):
     return str(base64.b32encode(otp.secret), 'utf-8').replace('=', '')
 
-
 def save_qr(data, name):
     qr = QRCode()
     qr.add_data(data)
-    img = qr.make_image(fill_color="black", back_color="white")
-    if verbose: print("Saving to {}".format(name))
+    img = qr.make_image(fill_color='black', back_color='white')
+    if verbose: print('Saving to {}'.format(name))
     img.save(name)
 
 def print_qr(data):
@@ -111,12 +110,12 @@ for line in (line.strip() for line in fileinput.input(args.infile)):
         otp_url = 'otpauth://{}/{}?'.format('totp' if otp.type == 2 else 'hotp', quote(otp.name)) + urlencode(url_params)
         if saveqr:
             if verbose: print(otp_url)
-            if not(path.exists("qr")): mkdir("qr")
-            pattern = rcompile('[\W_]+')
+            if not(path.exists('qr')): mkdir('qr')
+            pattern = rcompile(r'[\W_]+')
             file_otp_name = pattern.sub('', otp.name)
             file_otp_issuer = pattern.sub('', otp.issuer)
-            if not(file_otp_issuer): print_qr(otp_url, "qr/{}-{}.png".format(i, file_otp_name))
-            if file_otp_issuer: save_qr(otp_url, "qr/{}-{}-{}.png".format(i,file_otp_name, file_otp_issuer))
+            if not(file_otp_issuer): print_qr(otp_url)
+            if file_otp_issuer: save_qr(otp_url, 'qr/{}-{}-{}.png'.format(i, file_otp_name, file_otp_issuer))
         if printqr:
             if verbose: print(otp_url)
             print_qr(otp_url)
