@@ -21,7 +21,7 @@ The protobuf package of Google for proto3 is required for running this script.
 
 For printing QR codes, the qrcode module is required
 
-    pip install qrcode
+    pip install qrcode[pil]
 
 ## Technical background
 
