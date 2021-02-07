@@ -9,7 +9,7 @@ Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of
 3. Save the captured QR codes in a text file. Save each QR code on a new line. (The captured QR codes look like `otpauth-migration://offline?data=...`)
 4. Call this script with the file as input:
 
-        python extract_otp_secret_keys.py -q example_export.txt
+        python extract_otp_secret_keys.py -p example_export.txt
 
 ## Requirement
 
