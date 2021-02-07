@@ -13,9 +13,14 @@ Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of
 
 ## Requirement
 
-The protobuf package of Google for proto3 is required for running this script.
+The protobuf package of Google for proto3 is required for running this script. protobuf >= 3.14 is recommended.
 
     pip install protobuf
+
+Known to work with
+
+* Python 3.6.12 and protobuf 3.14.0
+* Python 3.8.5 and protobuf 3.14.0
 
 ### Optional
 
