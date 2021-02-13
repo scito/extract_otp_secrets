@@ -2,3 +2,10 @@
 # Secret key: 7KSQL2JTUDIS5EF65KLMRQIIGY
 # otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
 otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B
+
+# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+otpauth-migration://offline?data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACEAEYASAAKLzjp5n4%2F%2F%2F%2F%2FwE%3D
+
+# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+otpauth-migration://offline?data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACCjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACiQ7OOa%2Bf%2F%2F%2F%2F8B
