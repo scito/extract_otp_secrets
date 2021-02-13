@@ -86,7 +86,7 @@ def print_qr(data):
 
 for line in (line.strip() for line in fileinput.input(args.infile)):
     if verbose: print(line)
-    if line.startswith('#'): continue
+    if line.startswith('#') or line == '': continue
     parsed_url = urlparse(line)
     params = parse_qs(parsed_url.query)
     data_encoded = params['data'][0]
