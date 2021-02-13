@@ -87,8 +87,12 @@ def print_qr(data):
 for line in (line.strip() for line in fileinput.input(args.infile)):
     if verbose: print(line)
     if line.startswith('#') or line == '': continue
+    if not line.startswith('otpauth-migration://'): print('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
     parsed_url = urlparse(line)
     params = parse_qs(parsed_url.query)
+    if not 'data' in params:
+        print('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
+        sys.exit(1)
     data_encoded = params['data'][0]
     data = base64.b64decode(data_encoded)
     payload = generated_python.google_auth_pb2.MigrationPayload()
