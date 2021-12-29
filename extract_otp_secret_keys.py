@@ -78,7 +78,7 @@ def save_qr(data, name):
 def print_qr(data):
     qr = QRCode()
     qr.add_data(data)
-    qr.print_tty()
+    qr.print_ascii()
 
 i = j = 0
 for line in (line.strip() for line in fileinput.input(args.infile)):
