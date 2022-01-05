@@ -28,6 +28,18 @@ For printing QR codes, the qrcode module is required
 
     pip install qrcode[pil]
 
+### Alternative installation method
+
+Alternatively, you can use a python virtual env for the dependencies:
+
+    python -m venv venv
+    . venv/bin/activate
+    pip install -r requirements-buildenv.txt
+    pip install -r requirements.txt
+
+The requirements\*.txt files contain all the dependencies (also the optional ones).
+To leave the python virtual env just call `deactivate`.
+
 ## Technical background
 
 The export QR code of "Google Authenticator" contains the URL `otpauth-migration://offline?data=...`.
