@@ -45,6 +45,8 @@ import argparse
 import base64
 import fileinput
 import sys
+import csv
+import json
 from urllib.parse import parse_qs, urlencode, urlparse, quote
 from os import path, mkdir
 from re import sub, compile as rcompile
@@ -54,6 +56,8 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('--verbose', '-v', help='verbose output', action='store_true')
 arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the "qr" subfolder', action='store_true')
 arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal', action='store_true')
+arg_parser.add_argument('--json', '-j', help='export to json file')
+arg_parser.add_argument('--csv', '-c', help='export to csv file')
 arg_parser.add_argument('infile', help='file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
 args = arg_parser.parse_args()
 
@@ -79,6 +83,8 @@ def print_qr(data):
     qr = QRCode()
     qr.add_data(data)
     qr.print_ascii()
+
+otps = []
 
 i = j = 0
 for line in (line.strip() for line in fileinput.input(args.infile)):
@@ -106,7 +112,8 @@ for line in (line.strip() for line in fileinput.input(args.infile)):
         secret = convert_secret_from_bytes_to_base32_str(otp.secret)
         print('Secret: {}'.format(secret))
         if otp.issuer: print('Issuer: {}'.format(otp.issuer))
-        print('Type:   {}'.format(get_enum_name_by_number(otp, 'type')))
+        otp_type = get_enum_name_by_number(otp, 'type')
+        print('Type:   {}'.format(otp_type))
         url_params = { 'secret': secret }
         if otp.type == 1: url_params['counter'] = otp.counter
         if otp.issuer: url_params['issuer'] = otp.issuer
@@ -120,3 +127,23 @@ for line in (line.strip() for line in fileinput.input(args.infile)):
             file_otp_name = pattern.sub('', otp.name)
             file_otp_issuer = pattern.sub('', otp.issuer)
             save_qr(otp_url, 'qr/{}-{}{}.png'.format(j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
+
+        otps.append({
+            "name": otp.name,
+            "secret": secret,
+            "issuer": otp.issuer,
+            "type": otp_type,
+            "url": otp_url
+            })
+
+if args.csv and len(otps) > 0:
+    with open(args.csv, "w") as outfile:
+        writer = csv.DictWriter(outfile, otps[0].keys())
+        writer.writeheader()
+        writer.writerows(otps)
+    print("Exported {} otps to csv".format(len(otps)))
+
+if args.json:
+    with open(args.json, "w") as outfile:
+        json.dump(otps, outfile, indent = 4)
+    print("Exported {} otp entries to json".format(len(otps)))

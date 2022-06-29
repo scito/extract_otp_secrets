@@ -2,3 +2,5 @@ generated_python/__pycache__/
 qr/
 venv/
 
+*.csv
+*.json
