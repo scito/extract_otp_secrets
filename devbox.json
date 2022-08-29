@@ -1,0 +1,7 @@
+{
+  "packages": [
+    "python310",
+    "python310Packages.protobuf",
+    "python310Packages.qrcode"
+  ]
+}

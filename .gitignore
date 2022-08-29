@@ -4,3 +4,4 @@ venv/
 
 *.csv
 *.json
+!devbox.json
