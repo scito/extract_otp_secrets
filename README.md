@@ -11,7 +11,7 @@ Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of
 
         python extract_otp_secret_keys.py -p example_export.txt
 
-## Requirement
+## Dependencies
 
 The protobuf package of Google for proto3 is required for running this script. protobuf >= 3.14 is recommended.
 
@@ -28,18 +28,6 @@ For printing QR codes, the qrcode module is required
 
     pip install qrcode[pil]
 
-### Alternative installation method
-
-Alternatively, you can use a python virtual env for the dependencies:
-
-    python -m venv venv
-    . venv/bin/activate
-    pip install -r requirements-buildenv.txt
-    pip install -r requirements.txt
-
-The requirements\*.txt files contain all the dependencies (also the optional ones).
-To leave the python virtual env just call `deactivate`.
-
 ## Technical background
 
 The export QR code of "Google Authenticator" contains the URL `otpauth-migration://offline?data=...`.
@@ -53,3 +41,25 @@ Command for regeneration of Python code from proto3 message definition file (onl
 
 * Proto3 documentation: https://developers.google.com/protocol-buffers/docs/pythontutorial
 * Template code: https://github.com/beemdevelopment/Aegis/pull/406
+
+## Alternative installation methods
+
+### venv
+
+Alternatively, you can use a python virtual env for the dependencies:
+
+    python -m venv venv
+    . venv/bin/activate
+    pip install -r requirements-buildenv.txt
+    pip install -r requirements.txt
+
+The requirements\*.txt files contain all the dependencies (also the optional ones).
+To leave the python virtual env just call `deactivate`.
+
+### devbox
+
+Install [devbox](https://github.com/jetpack-io/devbox), which is a wrapper for nix. Then enter the environment with Python and the packages installed with:
+
+```
+devbox shell
+```
