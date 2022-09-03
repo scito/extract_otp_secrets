@@ -4,5 +4,3 @@ ignore =
 exclude =
     protobuf_generated_python
     __pycache__
-per-file-ignores =
-    extract_otp_secret_keys.py: F821, F401

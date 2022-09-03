@@ -63,7 +63,8 @@ def convert_secret_from_bytes_to_base32_str(bytes):
     return str(base64.b32encode(bytes), 'utf-8').replace('=', '')
 
 
-def save_qr(data, name):
+def save_qr(args, data, name):
+    from qrcode import QRCode
     global verbose
     qr = QRCode()
     qr.add_data(data)
@@ -72,7 +73,8 @@ def save_qr(data, name):
     img.save(name)
 
 
-def print_qr(data):
+def print_qr(args, data):
+    from qrcode import QRCode
     qr = QRCode()
     qr.add_data(data)
     qr.print_ascii()
@@ -101,7 +103,6 @@ def sys_main():
 def main(sys_args):
     global verbose, quiet
     args = parse_args(sys_args)
-    if args.saveqr or args.printqr: from qrcode import QRCode
     verbose = args.verbose
     quiet = args.quiet
 
@@ -149,13 +150,13 @@ def extract_otps(args):
             otp_url = 'otpauth://{}/{}?'.format('totp' if otp.type == 2 else 'hotp', quote(otp.name)) + urlencode(url_params)
             if verbose: print(otp_url)
             if args.printqr:
-                print_qr(otp_url)
+                print_qr(args, otp_url)
             if args.saveqr:
                 if not (path.exists('qr')): mkdir('qr')
                 pattern = rcompile(r'[\W_]+')
                 file_otp_name = pattern.sub('', otp.name)
                 file_otp_issuer = pattern.sub('', otp.issuer)
-                save_qr(otp_url, 'qr/{}-{}{}.png'.format(j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
+                save_qr(args, otp_url, 'qr/{}-{}{}.png'.format(j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
             if not quiet: print()
 
             otps.append({
