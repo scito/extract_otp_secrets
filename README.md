@@ -2,6 +2,10 @@
 
 Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of "Google Authenticator" app
 
+## Testing Status
+
+[![extract_otp_secret_keys](https://github.com/scito/extract_otp_secret_keys/actions/workflows/extract_otp_secret_keys.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/extract_otp_secret_keys.yml)
+
 ## Usage
 
 1. Export the QR codes from "Google Authenticator" app
