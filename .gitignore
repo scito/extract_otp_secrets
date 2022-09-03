@@ -7,3 +7,5 @@ venv/
 !devbox.json
 !example_output.json
 !example_output.csv
+!.github/
+!.flake8
