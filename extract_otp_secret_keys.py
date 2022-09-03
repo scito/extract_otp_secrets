@@ -70,7 +70,7 @@ def get_enum_name_by_number(parent, field_name):
     return parent.DESCRIPTOR.fields_by_name[field_name].enum_type.values_by_number.get(field_value).name
 
 def convert_secret_from_bytes_to_base32_str(bytes):
-    return str(base64.b32encode(otp.secret), 'utf-8').replace('=', '')
+    return str(base64.b32encode(bytes), 'utf-8').replace('=', '')
 
 def save_qr(data, name):
     qr = QRCode()
