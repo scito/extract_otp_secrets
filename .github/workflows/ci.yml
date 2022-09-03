@@ -1,4 +1,4 @@
-name: extract_otp_secret_keys
+name: tests
 
 on: [push]
 
@@ -30,6 +30,3 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
-      - name: Test with unittest
-        run: |
-          python -m unittest
