@@ -1,0 +1,5 @@
+name,secret,issuer,type,url
+pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,raspberrypi,OTP_TOTP,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,,OTP_TOTP,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,,OTP_TOTP,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,raspberrypi,OTP_TOTP,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi

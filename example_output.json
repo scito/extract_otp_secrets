@@ -1,0 +1,30 @@
+[
+    {
+        "name": "pi@raspberrypi",
+        "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
+        "issuer": "raspberrypi",
+        "type": "OTP_TOTP",
+        "url": "otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi"
+    },
+    {
+        "name": "pi@raspberrypi",
+        "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
+        "issuer": "",
+        "type": "OTP_TOTP",
+        "url": "otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY"
+    },
+    {
+        "name": "pi@raspberrypi",
+        "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
+        "issuer": "",
+        "type": "OTP_TOTP",
+        "url": "otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY"
+    },
+    {
+        "name": "pi@raspberrypi",
+        "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
+        "issuer": "raspberrypi",
+        "type": "OTP_TOTP",
+        "url": "otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi"
+    }
+]

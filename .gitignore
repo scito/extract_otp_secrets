@@ -5,3 +5,5 @@ venv/
 *.csv
 *.json
 !devbox.json
+!example_output.json
+!example_output.csv
