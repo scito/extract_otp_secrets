@@ -1,10 +1,13 @@
 # Extract TOTP/HOTP secret keys from Google Authenticator
 
+[![CI Status](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/protobuf)
+![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/scito/extract_otp_secret_keys)
+![License](https://img.shields.io/github/license/scito/extract_otp_secret_keys)
+
+---
+
 Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of "Google Authenticator" app
-
-## Testing Status
-
-[![extract_otp_secret_keys](https://github.com/scito/extract_otp_secret_keys/actions/workflows/extract_otp_secret_keys.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/extract_otp_secret_keys.yml)
 
 ## Usage
 
@@ -79,21 +82,11 @@ devbox shell
 
 ## Tests
 
-### unittest
-
-There are basic unit tests, see `unittest_extract_otp_secret_keys.py`.
-
-Run unit tests:
-
-```
-python -m unittest
-```
-
 ### PyTest
 
-There are basic pytests, see `test_extract_otp_secret_keys.py`.
+There are basic pytests, see `test_extract_otp_secret_keys_pytest.py`.
 
-Run pytests:
+Run tests:
 
 ```
 pytest unittest
@@ -102,4 +95,14 @@ or
 
 ```
 python -m pytest
+```
+
+### unittest
+
+There are basic unit tests, see `test_extract_otp_secret_keys_unittest.py`.
+
+Run unit tests:
+
+```
+python -m unittest
 ```
