@@ -24,6 +24,7 @@ import os
 
 import extract_otp_secret_keys
 
+
 def test_extract_csv():
     # Arrange
     cleanup()
@@ -35,10 +36,11 @@ def test_extract_csv():
     expected_csv = read_csv('example_output.csv')
     actual_csv = read_csv('test_example_output.csv')
 
-    assert actual_csv == actual_csv
+    assert actual_csv == expected_csv
 
     # Clean up
     cleanup()
+
 
 def test_extract_json():
     # Arrange
@@ -55,12 +57,15 @@ def test_extract_json():
     # Clean up
     cleanup()
 
+
 def cleanup():
     remove_file('test_example_output.csv')
     remove_file('test_example_output.json')
 
+
 def remove_file(filename):
     if os.path.exists(filename): os.remove(filename)
+
 
 def read_csv(filename):
     """Returns a list of lines."""
@@ -70,6 +75,7 @@ def read_csv(filename):
         for line in reader:
             lines.append(line)
         return lines
+
 
 def read_json(filename):
     """Returns a list or a dictionary."""
