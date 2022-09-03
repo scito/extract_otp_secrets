@@ -63,7 +63,9 @@ Install [devbox](https://github.com/jetpack-io/devbox), which is a wrapper for n
 devbox shell
 ```
 
-## Unit Tests
+## Tests
+
+### unittest
 
 There are basic unit tests, see `unittest_extract_otp_secret_keys.py`.
 
@@ -71,4 +73,19 @@ Run unit tests:
 
 ```
 python -m unittest
+```
+
+### PyTest
+
+There are basic pytests, see `test_extract_otp_secret_keys.py`.
+
+Run pytests:
+
+```
+pytest unittest
+```
+or
+
+```
+python -m pytest
 ```
