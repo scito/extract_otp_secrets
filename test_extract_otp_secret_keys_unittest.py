@@ -25,6 +25,7 @@ import os
 
 import extract_otp_secret_keys
 
+
 class TestExtract(unittest.TestCase):
 
     def test_extract_csv(self):
@@ -53,8 +54,10 @@ class TestExtract(unittest.TestCase):
         remove_file('test_example_output.csv')
         remove_file('test_example_output.json')
 
+
 def remove_file(filename):
     if os.path.exists(filename): os.remove(filename)
+
 
 def read_csv(filename):
     """Returns a list of lines."""
@@ -64,6 +67,7 @@ def read_csv(filename):
         for line in reader:
             lines.append(line)
         return lines
+
 
 def read_json(filename):
     """Returns a list or a dictionary."""

@@ -49,16 +49,19 @@ import csv
 import json
 from urllib.parse import parse_qs, urlencode, urlparse, quote
 from os import path, mkdir
-from re import sub, compile as rcompile
+from re import compile as rcompile
 import protobuf_generated_python.google_auth_pb2
+
 
 # https://stackoverflow.com/questions/40226049/find-enums-listed-in-python-descriptor-for-protobuf
 def get_enum_name_by_number(parent, field_name):
     field_value = getattr(parent, field_name)
     return parent.DESCRIPTOR.fields_by_name[field_name].enum_type.values_by_number.get(field_value).name
 
+
 def convert_secret_from_bytes_to_base32_str(bytes):
     return str(base64.b32encode(bytes), 'utf-8').replace('=', '')
+
 
 def save_qr(data, name):
     global verbose
@@ -68,10 +71,12 @@ def save_qr(data, name):
     if verbose: print('Saving to {}'.format(name))
     img.save(name)
 
+
 def print_qr(data):
     qr = QRCode()
     qr.add_data(data)
     qr.print_ascii()
+
 
 def parse_args(sys_args):
     arg_parser = argparse.ArgumentParser()
@@ -88,8 +93,10 @@ def parse_args(sys_args):
         sys.exit(1)
     return args
 
+
 def sys_main():
     main(sys.argv[1:])
+
 
 def main(sys_args):
     global verbose, quiet
@@ -101,6 +108,7 @@ def main(sys_args):
     otps = extract_otps(args)
     write_csv(args, otps)
     write_json(args, otps)
+
 
 def extract_otps(args):
     global verbose, quiet
@@ -115,7 +123,7 @@ def extract_otps(args):
         if not line.startswith('otpauth-migration://'): print('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
         parsed_url = urlparse(line)
         params = parse_qs(parsed_url.query)
-        if not 'data' in params:
+        if 'data' not in params:
             print('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
             sys.exit(1)
         data_encoded = params['data'][0]
@@ -135,7 +143,7 @@ def extract_otps(args):
             if otp.issuer and not quiet: print('Issuer: {}'.format(otp.issuer))
             otp_type = get_enum_name_by_number(otp, 'type')
             if not quiet: print('Type:   {}'.format(otp_type))
-            url_params = { 'secret': secret }
+            url_params = {'secret': secret}
             if otp.type == 1: url_params['counter'] = otp.counter
             if otp.issuer: url_params['issuer'] = otp.issuer
             otp_url = 'otpauth://{}/{}?'.format('totp' if otp.type == 2 else 'hotp', quote(otp.name)) + urlencode(url_params)
@@ -143,7 +151,7 @@ def extract_otps(args):
             if args.printqr:
                 print_qr(otp_url)
             if args.saveqr:
-                if not(path.exists('qr')): mkdir('qr')
+                if not (path.exists('qr')): mkdir('qr')
                 pattern = rcompile(r'[\W_]+')
                 file_otp_name = pattern.sub('', otp.name)
                 file_otp_issuer = pattern.sub('', otp.issuer)
@@ -156,8 +164,9 @@ def extract_otps(args):
                 "issuer": otp.issuer,
                 "type": otp_type,
                 "url": otp_url
-                })
+            })
     return otps
+
 
 def write_csv(args, otps):
     global verbose, quiet
@@ -168,12 +177,14 @@ def write_csv(args, otps):
             writer.writerows(otps)
         if not quiet: print("Exported {} otps to csv".format(len(otps)))
 
+
 def write_json(args, otps):
     global verbose, quiet
     if args.json:
         with open(args.json, "w") as outfile:
-            json.dump(otps, outfile, indent = 4)
+            json.dump(otps, outfile, indent=4)
         if not quiet: print("Exported {} otp entries to json".format(len(otps)))
+
 
 if __name__ == '__main__':
     sys_main()
