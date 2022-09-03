@@ -18,9 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import csv
-import json
-import os
+from utils import read_csv, read_json, remove_file
 
 import extract_otp_secret_keys
 
@@ -61,23 +59,3 @@ def test_extract_json():
 def cleanup():
     remove_file('test_example_output.csv')
     remove_file('test_example_output.json')
-
-
-def remove_file(filename):
-    if os.path.exists(filename): os.remove(filename)
-
-
-def read_csv(filename):
-    """Returns a list of lines."""
-    with open(filename, "r") as infile:
-        lines = []
-        reader = csv.reader(infile)
-        for line in reader:
-            lines.append(line)
-        return lines
-
-
-def read_json(filename):
-    """Returns a list or a dictionary."""
-    with open(filename, "r") as infile:
-        return json.load(infile)
