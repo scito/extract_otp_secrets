@@ -16,6 +16,27 @@
 import csv
 import json
 import os
+from io import StringIO
+import sys
+
+
+# Ref. https://stackoverflow.com/a/16571630
+class Capturing(list):
+    '''Capture stdout and stderr
+Usage:
+with Capturing() as output:
+    print("Output")
+'''
+    def __enter__(self):
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        del self._stringio    # free up some memory
+        sys.stdout = self._stdout
+
 
 def remove_file(filename):
     if os.path.exists(filename): os.remove(filename)
@@ -35,3 +56,14 @@ def read_json(filename):
     """Returns a list or a dictionary."""
     with open(filename, "r") as infile:
         return json.load(infile)
+
+
+def read_file_to_list(filename):
+    """Returns a list of lines."""
+    with open(filename, "r") as infile:
+        return infile.readlines()
+
+
+def read_file_to_str(filename):
+    """Returns a str."""
+    return "".join(read_file_to_list(filename))

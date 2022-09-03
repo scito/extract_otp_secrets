@@ -19,7 +19,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest
-from utils import read_csv, read_json, remove_file
+import io
+from contextlib import redirect_stdout
+from utils import read_csv, read_json, remove_file, Capturing, read_file_to_str
 
 import extract_otp_secret_keys
 
@@ -41,6 +43,70 @@ class TestExtract(unittest.TestCase):
         actual_json = read_json('test_example_output.json')
 
         self.assertEqual(actual_json, expected_json)
+
+    def test_extract_stdout_1(self):
+        with Capturing() as output:
+            extract_otp_secret_keys.main(['example_export.txt'])
+
+        expected_output = [
+            'Name:   pi@raspberrypi',
+            'Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Issuer: raspberrypi',
+            'Type:   OTP_TOTP',
+            '',
+            'Name:   pi@raspberrypi',
+            'Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Type:   OTP_TOTP',
+            '',
+            'Name:   pi@raspberrypi',
+            'Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Type:   OTP_TOTP',
+            '',
+            'Name:   pi@raspberrypi',
+            'Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Issuer: raspberrypi',
+            'Type:   OTP_TOTP',
+            ''
+        ]
+        self.assertEqual(output, expected_output)
+
+    # Ref for capturing https://stackoverflow.com/a/40984270
+    def test_extract_stdout_2(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            extract_otp_secret_keys.main(['example_export.txt'])
+        actual_output = out.getvalue()
+
+        expected_output = '''Name:   pi@raspberrypi
+Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer: raspberrypi
+Type:   OTP_TOTP
+
+Name:   pi@raspberrypi
+Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:   OTP_TOTP
+
+Name:   pi@raspberrypi
+Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:   OTP_TOTP
+
+Name:   pi@raspberrypi
+Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer: raspberrypi
+Type:   OTP_TOTP
+
+'''
+        self.assertEqual(actual_output, expected_output)
+
+    def test_extract_printqr(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            extract_otp_secret_keys.main(['-p', 'example_export.txt'])
+        actual_output = out.getvalue()
+
+        expected_output = read_file_to_str('test/printqr_output.txt')
+
+        self.assertEqual(actual_output, expected_output)
 
     def setUp(self):
         self.cleanup()

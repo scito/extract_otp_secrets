@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from utils import read_csv, read_json, remove_file
+from utils import read_csv, read_json, remove_file, read_file_to_str
 
 import extract_otp_secret_keys
 
@@ -47,6 +47,7 @@ def test_extract_json():
     # Act
     extract_otp_secret_keys.main(['-q', '-j', 'test_example_output.json', 'example_export.txt'])
 
+    # Assert
     expected_json = read_json('example_output.json')
     actual_json = read_json('test_example_output.json')
 
@@ -54,6 +55,50 @@ def test_extract_json():
 
     # Clean up
     cleanup()
+
+
+def test_extract_stdout(capsys):
+    # Act
+    extract_otp_secret_keys.main(['example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout = '''Name:   pi@raspberrypi
+Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer: raspberrypi
+Type:   OTP_TOTP
+
+Name:   pi@raspberrypi
+Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:   OTP_TOTP
+
+Name:   pi@raspberrypi
+Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:   OTP_TOTP
+
+Name:   pi@raspberrypi
+Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer: raspberrypi
+Type:   OTP_TOTP
+
+'''
+
+    assert captured.out == expected_stdout
+    assert captured.err == ''
+
+
+def test_extract_printqr(capsys):
+    # Act
+    extract_otp_secret_keys.main(['-p', 'example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout = read_file_to_str('test/printqr_output.txt')
+
+    assert captured.out == expected_stdout
+    assert captured.err == ''
 
 
 def cleanup():

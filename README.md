@@ -84,24 +84,23 @@ devbox shell
 
 ### PyTest
 
-There are basic pytests, see `test_extract_otp_secret_keys_pytest.py`.
+There are basic [pytest](https://pytest.org)s, see `test_extract_otp_secret_keys_pytest.py`.
 
 Run tests:
 
 ```
-pytest unittest
+pytest
 ```
 or
-
 ```
 python -m pytest
 ```
 
 ### unittest
 
-There are basic unit tests, see `test_extract_otp_secret_keys_unittest.py`.
+There are basic [unittest](https://docs.python.org/3.10/library/unittest.html)s, see `test_extract_otp_secret_keys_unittest.py`.
 
-Run unit tests:
+Run tests:
 
 ```
 python -m unittest
