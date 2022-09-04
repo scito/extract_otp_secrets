@@ -122,3 +122,12 @@ Run tests:
 ```
 python -m unittest
 ```
+
+### VSCode Setup
+
+Setup for running the tests in VSCode.
+
+1. Open VSCode command palette (Ctrl-Shift-P)
+2. Type command "Python: Configure Tests"
+3. Choose unittest or pytest. (pytest is recommended, both are supported)
+4. Set ". Root" directory
