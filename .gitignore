@@ -9,3 +9,4 @@ venv/
 !example_output.csv
 !.github/
 !.flake8
+!.vscode/settings.json
