@@ -8,7 +8,8 @@
 
 ---
 
-Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of "Google Authenticator" app
+Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of "Google Authenticator" app.
+The secret and otp values can be printed and exported to json or csv. The QR codes can be printed or saved as PNG images.
 
 ## Usage
 
@@ -26,6 +27,8 @@ Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of
 Known to work with
 
 * Python 3.10.6, protobuf 4.21.5, qrcode 7.3.1, and pillow 9.2
+
+For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secret_keys version 1.4.0.
 
 ### Optional
 
