@@ -101,6 +101,19 @@ def test_extract_printqr(capsys):
     assert captured.err == ''
 
 
+def test_extract_verbose(capsys):
+    # Act
+    extract_otp_secret_keys.main(['-v', 'example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout = read_file_to_str('test/print_verbose_output.txt')
+
+    assert captured.out == expected_stdout
+    assert captured.err == ''
+
+
 def cleanup():
     remove_file('test_example_output.csv')
     remove_file('test_example_output.json')

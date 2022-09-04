@@ -108,6 +108,16 @@ Type:   OTP_TOTP
 
         self.assertEqual(actual_output, expected_output)
 
+    def test_extract_verbose(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            extract_otp_secret_keys.main(['-v', 'example_export.txt'])
+        actual_output = out.getvalue()
+
+        expected_output = read_file_to_str('test/print_verbose_output.txt')
+
+        self.assertEqual(actual_output, expected_output)
+
     def setUp(self):
         self.cleanup()
 
