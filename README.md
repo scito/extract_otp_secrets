@@ -64,13 +64,26 @@ pipenv shell
 python extract_otp_secret_keys.py example_export.txt
 ```
 
+### Visual Studio Code Remote - Containers / VSCode devcontainer
+
+You can you use [VSCode devcontainer](https://code.visualstudio.com/docs/remote/containers-tutorial) for running extract_otp_secret_keys.
+
+Requirement: Docker
+
+1. Start VSCode
+2. Open extract_otp_secret_keys.code-workspace
+3. Open VSCode command palette (Ctrl-Shift-P)
+4. Type command "Remote-Containers: Reopen in Container"
+5. Open integrated bash terminal in VSCode
+6. Execute: python extract_otp_secret_keys.py example_export.txt
+
 ### venv
 
 Alternatively, you can use a python virtual env for the dependencies:
 
     python -m venv venv
     . venv/bin/activate
-    pip install -r requirements-buildenv.txt
+    pip install -r requirements-dev.txt
     pip install -r requirements.txt
 
 The requirements\*.txt files contain all the dependencies (also the optional ones).

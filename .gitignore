@@ -1,12 +1,15 @@
-generated_python/__pycache__/
+__pycache__/
 qr/
 venv/
 
-*.csv
-*.json
+/*.csv
+/*.json
 !devbox.json
 !example_output.json
 !example_output.csv
 !.github/
 !.flake8
+.vscode
 !.vscode/settings.json
+!.devcontainer/
+!.devcontainer/*.json

@@ -1,0 +1,22 @@
+// Docu: https://containers.dev/implementors/json_reference/
+{
+    "name": "Python 3",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "..",
+        //Update 'VARIANT' to pick a Python version: 3, 3.10, ...
+        "args": {
+            "VARIANT": "3.10"
+        }
+    },
+    // Add the IDs of extensions you want installed when the container is created.
+    "extensions": [
+        "ms-python.python"
+    ],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postCreateCommand":
+        "python -m pip install --upgrade pip; pip install -r requirements-dev.txt; pip install -r requirements.txt",
+    "postStartCommand": "echo 'Happy coding'"
+    // Comment out to connect as root instead.
+    // "remoteUser": "vscode"
+}
