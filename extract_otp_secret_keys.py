@@ -53,31 +53,19 @@ from re import compile as rcompile
 import protobuf_generated_python.google_auth_pb2
 
 
-# https://stackoverflow.com/questions/40226049/find-enums-listed-in-python-descriptor-for-protobuf
-def get_enum_name_by_number(parent, field_name):
-    field_value = getattr(parent, field_name)
-    return parent.DESCRIPTOR.fields_by_name[field_name].enum_type.values_by_number.get(field_value).name
+def sys_main():
+    main(sys.argv[1:])
 
 
-def convert_secret_from_bytes_to_base32_str(bytes):
-    return str(base64.b32encode(bytes), 'utf-8').replace('=', '')
+def main(sys_args):
+    global verbose, quiet
+    args = parse_args(sys_args)
+    verbose = args.verbose
+    quiet = args.quiet
 
-
-def save_qr(args, data, name):
-    from qrcode import QRCode
-    global verbose
-    qr = QRCode()
-    qr.add_data(data)
-    img = qr.make_image(fill_color='black', back_color='white')
-    if verbose: print('Saving to {}'.format(name))
-    img.save(name)
-
-
-def print_qr(args, data):
-    from qrcode import QRCode
-    qr = QRCode()
-    qr.add_data(data)
-    qr.print_ascii()
+    otps = extract_otps(args)
+    write_csv(args, otps)
+    write_json(args, otps)
 
 
 def parse_args(sys_args):
@@ -96,21 +84,6 @@ def parse_args(sys_args):
     return args
 
 
-def sys_main():
-    main(sys.argv[1:])
-
-
-def main(sys_args):
-    global verbose, quiet
-    args = parse_args(sys_args)
-    verbose = args.verbose
-    quiet = args.quiet
-
-    otps = extract_otps(args)
-    write_csv(args, otps)
-    write_json(args, otps)
-
-
 def extract_otps(args):
     global verbose, quiet
     quiet = args.quiet
@@ -121,52 +94,105 @@ def extract_otps(args):
     for line in (line.strip() for line in fileinput.input(args.infile)):
         if verbose: print(line)
         if line.startswith('#') or line == '': continue
-        if not line.startswith('otpauth-migration://'): print('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
-        parsed_url = urlparse(line)
-        params = parse_qs(parsed_url.query)
-        if 'data' not in params:
-            print('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
-            sys.exit(1)
-        data_encoded = params['data'][0]
-        data = base64.b64decode(data_encoded)
-        payload = protobuf_generated_python.google_auth_pb2.MigrationPayload()
-        payload.ParseFromString(data)
         i += 1
-        if verbose: print('\n{}. Payload Line'.format(i), payload, sep='\n')
+        payload = get_payload_from_line(line, i, args)
 
         # pylint: disable=no-member
-        for otp in payload.otp_parameters:
+        for raw_otp in payload.otp_parameters:
             j += 1
             if verbose: print('\n{}. Secret Key'.format(j))
-            if not quiet: print('Name:   {}'.format(otp.name))
-            secret = convert_secret_from_bytes_to_base32_str(otp.secret)
-            if not quiet: print('Secret: {}'.format(secret))
-            if otp.issuer and not quiet: print('Issuer: {}'.format(otp.issuer))
-            otp_type = get_enum_name_by_number(otp, 'type')
-            if not quiet: print('Type:   {}'.format(otp_type))
-            url_params = {'secret': secret}
-            if otp.type == 1: url_params['counter'] = otp.counter
-            if otp.issuer: url_params['issuer'] = otp.issuer
-            otp_url = 'otpauth://{}/{}?'.format('totp' if otp.type == 2 else 'hotp', quote(otp.name)) + urlencode(url_params)
-            if verbose: print(otp_url)
+            secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
+            otp_type = get_enum_name_by_number(raw_otp, 'type')
+            otp_url = build_otp_url(secret, raw_otp)
+            otp = {
+                "name": raw_otp.name,
+                "secret": secret,
+                "issuer": raw_otp.issuer,
+                "type": otp_type,
+                "url": otp_url
+            }
+            if not quiet:
+                print_otp(otp)
             if args.printqr:
                 print_qr(args, otp_url)
             if args.saveqr:
-                if not (path.exists('qr')): mkdir('qr')
-                pattern = rcompile(r'[\W_]+')
-                file_otp_name = pattern.sub('', otp.name)
-                file_otp_issuer = pattern.sub('', otp.issuer)
-                save_qr(args, otp_url, 'qr/{}-{}{}.png'.format(j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
-            if not quiet: print()
+                save_qr(otp, args, j)
+            if not quiet:
+                print()
 
-            otps.append({
-                "name": otp.name,
-                "secret": secret,
-                "issuer": otp.issuer,
-                "type": otp_type,
-                "url": otp_url
-            })
+            otps.append(otp)
     return otps
+
+
+def get_payload_from_line(line, i, args):
+    if not line.startswith('otpauth-migration://'):
+        print('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
+    parsed_url = urlparse(line)
+    params = parse_qs(parsed_url.query)
+    if 'data' not in params:
+        print('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
+        sys.exit(1)
+    data_encoded = params['data'][0]
+    data = base64.b64decode(data_encoded)
+    payload = protobuf_generated_python.google_auth_pb2.MigrationPayload()
+    payload.ParseFromString(data)
+    if verbose:
+        print('\n{}. Payload Line'.format(i), payload, sep='\n')
+
+    return payload
+
+
+# https://stackoverflow.com/questions/40226049/find-enums-listed-in-python-descriptor-for-protobuf
+def get_enum_name_by_number(parent, field_name):
+    field_value = getattr(parent, field_name)
+    return parent.DESCRIPTOR.fields_by_name[field_name].enum_type.values_by_number.get(field_value).name
+
+
+def convert_secret_from_bytes_to_base32_str(bytes):
+    return str(base64.b32encode(bytes), 'utf-8').replace('=', '')
+
+
+def build_otp_url(secret, raw_otp):
+    url_params = {'secret': secret}
+    if raw_otp.type == 1: url_params['counter'] = raw_otp.counter
+    if raw_otp.issuer: url_params['issuer'] = raw_otp.issuer
+    otp_url = 'otpauth://{}/{}?'.format('totp' if raw_otp.type == 2 else 'hotp', quote(raw_otp.name)) + urlencode(url_params)
+    return otp_url
+
+
+def print_otp(otp):
+    print('Name:   {}'.format(otp['name']))
+    print('Secret: {}'.format(otp['secret']))
+    if otp['issuer']: print('Issuer: {}'.format(otp['issuer']))
+    print('Type:   {}'.format(otp['type']))
+    if verbose:
+        print(otp['url'])
+
+
+def save_qr(otp, args, j):
+    if not (path.exists('qr')): mkdir('qr')
+    pattern = rcompile(r'[\W_]+')
+    file_otp_name = pattern.sub('', otp.name)
+    file_otp_issuer = pattern.sub('', otp.issuer)
+    save_qr_file(args, otp.url, 'qr/{}-{}{}.png'.format(j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
+    return file_otp_issuer
+
+
+def save_qr_file(args, data, name):
+    from qrcode import QRCode
+    global verbose
+    qr = QRCode()
+    qr.add_data(data)
+    img = qr.make_image(fill_color='black', back_color='white')
+    if verbose: print('Saving to {}'.format(name))
+    img.save(name)
+
+
+def print_qr(args, data):
+    from qrcode import QRCode
+    qr = QRCode()
+    qr.add_data(data)
+    qr.print_ascii()
 
 
 def write_csv(args, otps):
