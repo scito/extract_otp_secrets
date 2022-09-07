@@ -60,7 +60,7 @@ def sys_main():
 def main(sys_args):
     global verbose, quiet
     args = parse_args(sys_args)
-    verbose = args.verbose
+    verbose = args.verbose if args.verbose else 0
     quiet = args.quiet
 
     otps = extract_otps(args)
@@ -70,7 +70,7 @@ def main(sys_args):
 
 def parse_args(sys_args):
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--verbose', '-v', help='verbose output', action='store_true')
+    arg_parser.add_argument('--verbose', '-v', help='verbose output', action='count')
     arg_parser.add_argument('--quiet', '-q', help='no stdout output', action='store_true')
     arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the "qr" subfolder', action='store_true')
     arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal', action='store_true')
@@ -125,15 +125,21 @@ def extract_otps(args):
 
 
 def get_payload_from_line(line, i, args):
+    global verbose
     if not line.startswith('otpauth-migration://'):
         print('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
     parsed_url = urlparse(line)
-    params = parse_qs(parsed_url.query)
+    if verbose > 1: print('\nDEBUG: parsed_url={}'.format(parsed_url))
+    params = parse_qs(parsed_url.query, strict_parsing=True)
+    if verbose > 1: print('\nDEBUG: querystring params={}'.format(params))
     if 'data' not in params:
         print('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
         sys.exit(1)
-    data_encoded = params['data'][0]
-    data = base64.b64decode(data_encoded, validate=True)
+    data_base64 = params['data'][0]
+    if verbose > 1: print('\nDEBUG: data_base64={}'.format(data_base64))
+    data_base64_fixed = data_base64.replace(' ', '+')
+    if verbose > 1: print('\nDEBUG: data_base64_fixed={}'.format(data_base64))
+    data = base64.b64decode(data_base64_fixed, validate=True)
     payload = protobuf_generated_python.google_auth_pb2.MigrationPayload()
     payload.ParseFromString(data)
     if verbose:

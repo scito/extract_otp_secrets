@@ -98,6 +98,35 @@ Type:   OTP_TOTP
 '''
         self.assertEqual(actual_output, expected_output)
 
+    def test_extract_not_encoded_plus(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            extract_otp_secret_keys.main(['test/test_plus_problem_export.txt'])
+        actual_output = out.getvalue()
+
+        expected_output = '''Name:   SerenityLabs:test1@serenitylabs.co.uk
+Secret: A4RFDYMF4GSLUIBQV4ZP67OJEZ2XUQVM
+Issuer: SerenityLabs
+Type:   OTP_TOTP
+
+Name:   SerenityLabs:test2@serenitylabs.co.uk
+Secret: SCDDZ7PW5MOZLE3PQCAZM7L4S35K3UDX
+Issuer: SerenityLabs
+Type:   OTP_TOTP
+
+Name:   SerenityLabs:test3@serenitylabs.co.uk
+Secret: TR76272RVYO6EAEY2FX7W7R7KUDEGPJ4
+Issuer: SerenityLabs
+Type:   OTP_TOTP
+
+Name:   SerenityLabs:test4@serenitylabs.co.uk
+Secret: N2ILWSXSJUQUB7S6NONPJSC62NPG7EXN
+Issuer: SerenityLabs
+Type:   OTP_TOTP
+
+'''
+        self.assertEqual(actual_output, expected_output)
+
     def test_extract_printqr(self):
         out = io.StringIO()
         with redirect_stdout(out):
