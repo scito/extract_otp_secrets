@@ -133,7 +133,7 @@ def get_payload_from_line(line, i, args):
         print('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
         sys.exit(1)
     data_encoded = params['data'][0]
-    data = base64.b64decode(data_encoded)
+    data = base64.b64decode(data_encoded, validate=True)
     payload = protobuf_generated_python.google_auth_pb2.MigrationPayload()
     payload.ParseFromString(data)
     if verbose:
