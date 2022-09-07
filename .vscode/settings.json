@@ -3,5 +3,18 @@
         "."
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "cSpell.words": [
+        "devbox",
+        "HOTP",
+        "otpauth",
+        "pipenv",
+        "proto",
+        "protobuf",
+        "protoc",
+        "pytest",
+        "qrcode",
+        "TOTP",
+        "venv"
+    ]
 }
