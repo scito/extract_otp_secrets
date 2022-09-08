@@ -19,7 +19,25 @@ The secret and otp values can be printed and exported to json or csv. The QR cod
 3. Save the captured QR codes in a text file. Save each QR code on a new line. (The captured QR codes look like `otpauth-migration://offline?data=...`)
 4. Call this script with the file as input:
 
-        python extract_otp_secret_keys.py -p example_export.txt
+        python extract_otp_secret_keys.py example_export.txt
+
+## Program help: arguments and options
+
+<pre>
+usage: extract_otp_secret_keys.py [-h] [--verbose] [--quiet] [--saveqr] [--printqr] [--json JSON] [--csv CSV] infile
+
+positional arguments:
+  infile                file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored
+
+options:
+  -h, --help            show this help message and exit
+  --verbose, -v         verbose output
+  --quiet, -q           no stdout output
+  --saveqr, -s          save QR code(s) as images to the "qr" subfolder (requires qrcode module)
+  --printqr, -p         print QR code(s) as text to the terminal (requires qrcode module)
+  --json JSON, -j JSON  export to json file
+  --csv CSV, -c CSV     export to csv file
+</pre>
 
 ## Dependencies
 

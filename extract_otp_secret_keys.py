@@ -5,7 +5,7 @@
 # 2. Read QR codes with QR code reader (e.g. with a second device)
 # 3. Save the captured QR codes in a text file. Save each QR code on a new line. (The captured QR codes look like "otpauth-migration://offline?data=...")
 # 4. Call this script with the file as input:
-#    python extract_otp_secret_keys.py -p example_export.txt
+#    python extract_otp_secret_keys.py example_export.txt
 #
 # Requirement:
 # The protobuf package of Google for proto3 is required for running this script.
@@ -72,8 +72,8 @@ def parse_args(sys_args):
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--verbose', '-v', help='verbose output', action='count')
     arg_parser.add_argument('--quiet', '-q', help='no stdout output', action='store_true')
-    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the "qr" subfolder', action='store_true')
-    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal', action='store_true')
+    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the "qr" subfolder (requires qrcode module)', action='store_true')
+    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
     arg_parser.add_argument('--json', '-j', help='export to json file')
     arg_parser.add_argument('--csv', '-c', help='export to csv file')
     arg_parser.add_argument('infile', help='file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
