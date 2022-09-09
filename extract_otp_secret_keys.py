@@ -178,9 +178,9 @@ def print_otp(otp):
 def save_qr(otp, args, j):
     if not (path.exists('qr')): mkdir('qr')
     pattern = rcompile(r'[\W_]+')
-    file_otp_name = pattern.sub('', otp.name)
-    file_otp_issuer = pattern.sub('', otp.issuer)
-    save_qr_file(args, otp.url, 'qr/{}-{}{}.png'.format(j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
+    file_otp_name = pattern.sub('', otp['name'])
+    file_otp_issuer = pattern.sub('', otp['issuer'])
+    save_qr_file(args, otp['url'], '{}/{}-{}{}.png'.format(dir, j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
     return file_otp_issuer
 
 
