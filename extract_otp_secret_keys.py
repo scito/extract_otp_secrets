@@ -48,7 +48,7 @@ import sys
 import csv
 import json
 from urllib.parse import parse_qs, urlencode, urlparse, quote
-from os import path, mkdir
+from os import path, makedirs
 from re import compile as rcompile
 import protobuf_generated_python.google_auth_pb2
 
@@ -70,13 +70,13 @@ def main(sys_args):
 
 def parse_args(sys_args):
     arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('infile', help='file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
+    arg_parser.add_argument('--json', '-j', help='export to json file', metavar=('FILE'))
+    arg_parser.add_argument('--csv', '-c', help='export to csv file', metavar=('FILE'))
+    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
+    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
     arg_parser.add_argument('--verbose', '-v', help='verbose output', action='count')
     arg_parser.add_argument('--quiet', '-q', help='no stdout output', action='store_true')
-    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the "qr" subfolder (requires qrcode module)', action='store_true')
-    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
-    arg_parser.add_argument('--json', '-j', help='export to json file')
-    arg_parser.add_argument('--csv', '-c', help='export to csv file')
-    arg_parser.add_argument('infile', help='file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
     args = arg_parser.parse_args(sys_args)
     if args.verbose and args.quiet:
         print("The arguments --verbose and --quite are mutual exclusive.")
@@ -176,7 +176,8 @@ def print_otp(otp):
 
 
 def save_qr(otp, args, j):
-    if not (path.exists('qr')): mkdir('qr')
+    dir = args.saveqr
+    if not (path.exists(dir)): makedirs(dir, exist_ok=True)
     pattern = rcompile(r'[\W_]+')
     file_otp_name = pattern.sub('', otp['name'])
     file_otp_issuer = pattern.sub('', otp['issuer'])

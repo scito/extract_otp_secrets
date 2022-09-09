@@ -18,12 +18,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from utils import read_csv, read_json, remove_file, read_file_to_str
+from utils import read_csv, read_json, remove_file, remove_dir_with_files, read_file_to_str
+from os import path
+from pytest import raises
 
 import extract_otp_secret_keys
 
 
-def test_extract_csv():
+def test_extract_csv(capsys):
     # Arrange
     cleanup()
 
@@ -36,11 +38,16 @@ def test_extract_csv():
 
     assert actual_csv == expected_csv
 
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == ''
+
     # Clean up
     cleanup()
 
 
-def test_extract_json():
+def test_extract_json(capsys):
     # Arrange
     cleanup()
 
@@ -52,6 +59,11 @@ def test_extract_json():
     actual_json = read_json('test_example_output.json')
 
     assert actual_json == expected_json
+
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == ''
 
     # Clean up
     cleanup()
@@ -134,6 +146,28 @@ def test_extract_printqr(capsys):
     assert captured.err == ''
 
 
+def test_extract_saveqr(capsys):
+    # Arrange
+    cleanup()
+
+    # Act
+    extract_otp_secret_keys.main(['-q', '-s', 'testout/qr/', 'example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == ''
+
+    assert path.isfile('testout/qr/1-piraspberrypi-raspberrypi.png')
+    assert path.isfile('testout/qr/2-piraspberrypi.png')
+    assert path.isfile('testout/qr/3-piraspberrypi.png')
+    assert path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png')
+
+    # Clean up
+    cleanup()
+
+
 def test_extract_verbose(capsys):
     # Act
     extract_otp_secret_keys.main(['-v', 'example_export.txt'])
@@ -147,6 +181,36 @@ def test_extract_verbose(capsys):
     assert captured.err == ''
 
 
+def test_extract_debug(capsys):
+    # Act
+    extract_otp_secret_keys.main(['-vv', 'example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout = read_file_to_str('test/print_verbose_output.txt')
+
+    assert len(captured.out) > len(expected_stdout)
+    assert "DEBUG: " in captured.out
+    assert captured.err == ''
+
+
+def test_extract_help(capsys):
+    with raises(SystemExit) as pytest_wrapped_e:
+        # Act
+        extract_otp_secret_keys.main(['-h'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert len(captured.out) > 0
+    assert "-h, --help" in captured.out and "--verbose, -v" in captured.out
+    assert captured.err == ''
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+
 def cleanup():
     remove_file('test_example_output.csv')
     remove_file('test_example_output.json')
+    remove_dir_with_files('testout/')

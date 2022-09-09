@@ -21,7 +21,8 @@
 import unittest
 import io
 from contextlib import redirect_stdout
-from utils import read_csv, read_json, remove_file, Capturing, read_file_to_str
+from utils import read_csv, read_json, remove_file, remove_dir_with_files, Capturing, read_file_to_str
+from os import path
 
 import extract_otp_secret_keys
 
@@ -137,6 +138,14 @@ Type:   OTP_TOTP
 
         self.assertEqual(actual_output, expected_output)
 
+    def test_extract_saveqr(self):
+        extract_otp_secret_keys.main(['-q', '-s', 'testout/qr/', 'example_export.txt'])
+
+        self.assertTrue(path.isfile('testout/qr/1-piraspberrypi-raspberrypi.png'))
+        self.assertTrue(path.isfile('testout/qr/2-piraspberrypi.png'))
+        self.assertTrue(path.isfile('testout/qr/3-piraspberrypi.png'))
+        self.assertTrue(path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png'))
+
     def test_extract_verbose(self):
         out = io.StringIO()
         with redirect_stdout(out):
@@ -147,6 +156,30 @@ Type:   OTP_TOTP
 
         self.assertEqual(actual_output, expected_output)
 
+    def test_extract_debug(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            extract_otp_secret_keys.main(['-vv', 'example_export.txt'])
+        actual_output = out.getvalue()
+
+        expected_stdout = read_file_to_str('test/print_verbose_output.txt')
+
+        self.assertGreater(len(actual_output), len(expected_stdout))
+        self.assertTrue("DEBUG: " in actual_output)
+
+    def test_extract_help(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            try:
+                extract_otp_secret_keys.main(['-h'])
+            except SystemExit:
+                pass
+
+        actual_output = out.getvalue()
+
+        self.assertGreater(len(actual_output), 0)
+        self.assertTrue("-h, --help" in actual_output and "--verbose, -v" in actual_output)
+
     def setUp(self):
         self.cleanup()
 
@@ -156,6 +189,7 @@ Type:   OTP_TOTP
     def cleanup(self):
         remove_file('test_example_output.csv')
         remove_file('test_example_output.json')
+        remove_dir_with_files('testout/')
 
 
 if __name__ == '__main__':

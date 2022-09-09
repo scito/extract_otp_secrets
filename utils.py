@@ -16,6 +16,7 @@
 import csv
 import json
 import os
+import shutil
 from io import StringIO
 import sys
 
@@ -38,8 +39,12 @@ with Capturing() as output:
         sys.stdout = self._stdout
 
 
-def remove_file(filename):
-    if os.path.exists(filename): os.remove(filename)
+def remove_file(file):
+    if os.path.isfile(file): os.remove(file)
+
+
+def remove_dir_with_files(dir):
+    if os.path.exists(dir): shutil.rmtree(dir)
 
 
 def read_csv(filename):

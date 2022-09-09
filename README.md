@@ -23,21 +23,19 @@ The secret and otp values can be printed and exported to json or csv. The QR cod
 
 ## Program help: arguments and options
 
-<pre>
-usage: extract_otp_secret_keys.py [-h] [--verbose] [--quiet] [--saveqr] [--printqr] [--json JSON] [--csv CSV] infile
+<pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--printqr] [--saveqr DIR] [--verbose] [--quiet] infile
 
 positional arguments:
   infile                file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored
 
 options:
   -h, --help            show this help message and exit
-  --verbose, -v         verbose output
-  --quiet, -q           no stdout output
-  --saveqr, -s          save QR code(s) as images to the "qr" subfolder (requires qrcode module)
+  --json FILE, -j FILE  export to json file
+  --csv FILE, -c FILE   export to csv file
   --printqr, -p         print QR code(s) as text to the terminal (requires qrcode module)
-  --json JSON, -j JSON  export to json file
-  --csv CSV, -c CSV     export to csv file
-</pre>
+  --saveqr DIR, -s DIR  save QR code(s) as images to the given folder (requires qrcode module)
+  --verbose, -v         verbose output
+  --quiet, -q           no stdout output</pre>
 
 ## Dependencies
 
