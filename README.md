@@ -6,6 +6,7 @@
 ![protobuf version](https://img.shields.io/badge/protobuf-4.21.5-informational)
 [![License](https://img.shields.io/github/license/scito/extract_otp_secret_keys)](https://github.com/scito/extract_otp_secret_keys/blob/master/LICENSE)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/scito/extract_otp_secret_keys?sort=semver&label=version)](https://github.com/scito/extract_otp_secret_keys/tags)
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
 ---
 
@@ -148,3 +149,11 @@ Setup for running the tests in VSCode.
 2. Type command "Python: Configure Tests"
 3. Choose unittest or pytest. (pytest is recommended, both are supported)
 4. Set ". Root" directory
+
+***
+
+# #StandWithUkraine 🇺🇦
+
+I have Ukrainian relatives and friends.
+
+#RussiaInvadedUkraine on 24 of February 2022, at 05:00 the armed forces of the Russian Federation attacked Ukraine. Please, stand with Ukraine, stay tuned for updates on Ukraine's official sources and channels in English and support Ukraine in its fight for freedom and democracy in Europe.
