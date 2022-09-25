@@ -13,3 +13,4 @@ venv/
 !.vscode/settings.json
 !.devcontainer/
 !.devcontainer/*.json
+*.whl
