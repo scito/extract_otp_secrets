@@ -107,67 +107,88 @@ done
 
 BIN="$HOME/bin"
 DOWNLOADS="$HOME/downloads"
+
+PIP="pip3.11"
+
+# Upgrade protoc
+
 DEST="protoc"
 
 OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
-echo -e "\nUpgrade Protoc $VERSION\n"
-echo -e "Current version: $OLDVERSION\n"
+echo -e "\nProtoc remote version $VERSION\n"
+echo -e "Protoc local version: $OLDVERSION\n"
 
-if [ "$OLDVERSION" = "$VERSION" ] && $check_version; then
+if [ "$OLDVERSION" != "$VERSION" ]; then
+    echo "Upgrade protoc from $OLDVERSION to $VERSION"
+
+    NAME="protoc-$VERSION"
+    ARCHIVE="$NAME.zip"
+
+    mkdir -p $DOWNLOADS
+    # https://github.com/protocolbuffers/protobuf/releases/download/v21.6/protoc-21.6-linux-x86_64.zip
+    cmd="wget --trust-server-names https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-linux-x86_64.zip -O $DOWNLOADS/$ARCHIVE"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    cmd="echo -e '\nSize [Byte]'; stat --printf='%s\n' $DOWNLOADS/$ARCHIVE; echo -e '\nMD5'; md5sum $DOWNLOADS/$ARCHIVE; echo -e '\nSHA256'; sha256sum $DOWNLOADS/$ARCHIVE;"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    cmd="mkdir -p $BIN/$NAME; unzip $DOWNLOADS/$ARCHIVE -d $BIN/$NAME"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    cmd="echo $VERSION > $BIN/$NAME/.VERSION.txt; echo $VERSION > $BIN/$NAME/.VERSION_$VERSION.txt"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    cmd="[ -d $BIN/$DEST.old ] && rm -rf $BIN/$DEST.old || echo 'No old dir to delete'"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    cmd="[ -d $BIN/$DEST ] && mv -iT $BIN/$DEST $BIN/$DEST.old || echo 'No previous dir to keep'"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    cmd="mv -iT $BIN/$NAME $BIN/$DEST"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    cmd="rm $DOWNLOADS/$ARCHIVE"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    cmd="$BIN/$DEST/bin/protoc --python_out=protobuf_generated_python google_auth.proto"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+
+    # Update README.md
+
+    cmd="perl -i -pe 's%proto(buf|c)([- ])(\d\.)?$OLDVERSION%proto\$1\$2\${3}$VERSION%g' README.md && perl -i -pe 's%(protobuf/releases/tag/v)$OLDVERSION%\${1}$VERSION%g' README.md"
+    if $interactive ; then askContinueYn "$cmd"; fi
+    eval "$cmd"
+else
     echo -e "\nVersion has not changed. Quit"
-    quit
 fi
 
-NAME="protoc-$VERSION"
-ARCHIVE="$NAME.zip"
 
-mkdir -p $DOWNLOADS
-# https://github.com/protocolbuffers/protobuf/releases/download/v21.6/protoc-21.6-linux-x86_64.zip
-cmd="wget --trust-server-names https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-linux-x86_64.zip -O $DOWNLOADS/$ARCHIVE"
+# Upgrade pip requirements
+
+cmd="$PIP install -U -r requirements.txt"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
-cmd="echo -e '\nSize [Byte]'; stat --printf='%s\n' $DOWNLOADS/$ARCHIVE; echo -e '\nMD5'; md5sum $DOWNLOADS/$ARCHIVE; echo -e '\nSHA256'; sha256sum $DOWNLOADS/$ARCHIVE;"
+cmd="$PIP install -U -r requirements-dev.txt"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
-cmd="mkdir -p $BIN/$NAME; unzip $DOWNLOADS/$ARCHIVE -d $BIN/$NAME"
+cmd="pipenv lock"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
-cmd="echo $VERSION > $BIN/$NAME/.VERSION.txt; echo $VERSION > $BIN/$NAME/.VERSION_$VERSION.txt"
-if $interactive ; then askContinueYn "$cmd"; fi
-eval "$cmd"
-
-cmd="[ -d $BIN/$DEST.old ] && rm -rf $BIN/$DEST.old || echo 'No old dir to delete'"
-if $interactive ; then askContinueYn "$cmd"; fi
-eval "$cmd"
-
-cmd="[ -d $BIN/$DEST ] && mv -iT $BIN/$DEST $BIN/$DEST.old || echo 'No previous dir to keep'"
-if $interactive ; then askContinueYn "$cmd"; fi
-eval "$cmd"
-
-cmd="mv -iT $BIN/$NAME $BIN/$DEST"
-if $interactive ; then askContinueYn "$cmd"; fi
-eval "$cmd"
-
-cmd="rm $DOWNLOADS/$ARCHIVE"
-if $interactive ; then askContinueYn "$cmd"; fi
-eval "$cmd"
-
-cmd="$BIN/$DEST/bin/protoc --python_out=protobuf_generated_python google_auth.proto"
-if $interactive ; then askContinueYn "$cmd"; fi
-eval "$cmd"
-
-cmd="pip install -U -r requirements.txt"
-if $interactive ; then askContinueYn "$cmd"; fi
-eval "$cmd"
+# Test
 
 cmd="pytest"
-if $interactive ; then askContinueYn "$cmd"; fi
-eval "$cmd"
-
-cmd="perl -i -pe 's%proto(buf|c)([- ])(\d\.)?$OLDVERSION%proto\$1\$2\${3}$VERSION%g' README.md && perl -i -pe 's%(protobuf/releases/tag/v)$OLDVERSION%\${1}$VERSION%g' README.md"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
