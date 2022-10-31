@@ -6,7 +6,7 @@
         "context": "..",
         //Update 'VARIANT' to pick a Python version: 3, 3.10, ...
         "args": {
-            "VARIANT": "3.10"
+            "VARIANT": "3.11"
         }
     },
     // Add the IDs of extensions you want installed when the container is created.
