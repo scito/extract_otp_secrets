@@ -126,7 +126,7 @@ Build and run the app within the container:
 
 ```bash
 docker build . -t extract_otp
-docker run --rm -v "$(pwd)":/files:ro otp -p example_export.txt
+docker run --rm -v "$(pwd)":/files:ro extract_otp -p example_export.txt
 ```
 
 ## Tests
