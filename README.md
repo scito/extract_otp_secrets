@@ -118,7 +118,7 @@ Install [devbox](https://github.com/jetpack-io/devbox), which is a wrapper for n
 devbox shell
 ```
 
-### docker
+### Docker
 
 Install [Docker](https://docs.docker.com/get-docker/).
 
