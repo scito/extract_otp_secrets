@@ -10,6 +10,9 @@ pillow = "*"
 
 [dev-packages]
 pytest = "*"
+wheel = "*"
+flake8 = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.10"

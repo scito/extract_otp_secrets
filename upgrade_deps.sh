@@ -109,6 +109,7 @@ BIN="$HOME/bin"
 DOWNLOADS="$HOME/downloads"
 
 PIP="pip3.11"
+PIPENV="python3.11 -m pipenv"
 
 # Upgrade protoc
 
@@ -174,6 +175,12 @@ fi
 
 # Upgrade pip requirements
 
+cmd="sudo pip install --upgrade pip"
+if $interactive ; then askContinueYn "$cmd"; fi
+eval "$cmd"
+
+$PIP --version
+
 cmd="$PIP install -U -r requirements.txt"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
@@ -182,7 +189,9 @@ cmd="$PIP install -U -r requirements-dev.txt"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
-cmd="pipenv lock"
+$PIPENV --version
+
+cmd="$PIPENV update"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
