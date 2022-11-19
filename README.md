@@ -118,6 +118,17 @@ Install [devbox](https://github.com/jetpack-io/devbox), which is a wrapper for n
 devbox shell
 ```
 
+### Docker
+
+Install [Docker](https://docs.docker.com/get-docker/).
+
+Build and run the app within the container:
+
+```bash
+docker build . -t extract_otp
+docker run --rm -v "$(pwd)":/files:ro extract_otp -p example_export.txt
+```
+
 ## Tests
 
 ### PyTest
