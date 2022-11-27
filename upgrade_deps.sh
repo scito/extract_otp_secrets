@@ -189,15 +189,25 @@ cmd="$PIP install -U -r requirements-dev.txt"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
-$PIPENV --version
-
-cmd="$PIPENV update"
+cmd="$PIP install -U pipenv"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
+
+$PIPENV --version
+
+cmd="$PIPENV update && $PIPENV --rm && $PIPENV install"
+if $interactive ; then askContinueYn "$cmd"; fi
+eval "$cmd"
+
+$PIPENV run python --version
 
 # Test
 
 cmd="pytest"
+if $interactive ; then askContinueYn "$cmd"; fi
+eval "$cmd"
+
+cmd="$PIPENV run pytest"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
