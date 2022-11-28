@@ -79,7 +79,7 @@ def parse_args(sys_args):
     arg_parser.add_argument('--quiet', '-q', help='no stdout output', action='store_true')
     args = arg_parser.parse_args(sys_args)
     if args.verbose and args.quiet:
-        print("The arguments --verbose and --quite are mutual exclusive.")
+        print("The arguments --verbose and --quiet are mutually exclusive.")
         sys.exit(1)
     return args
 

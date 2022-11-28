@@ -209,6 +209,16 @@ def test_extract_help(capsys):
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 0
 
+def test_verbose_and_quiet(capsys):
+    with raises(SystemExit) as pytest_wrapped_e:
+        # Act
+        extract_otp_secret_keys.main(['-v', '-q', 'example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert len(captured.out) > 0
+    assert 'The arguments --verbose and --quiet are mutually exclusive.' in captured.out
 
 def cleanup():
     remove_file('test_example_output.csv')
