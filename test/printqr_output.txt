@@ -1,7 +1,7 @@
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Issuer: raspberrypi
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
                                              
                                              
     █▀▀▀▀▀█  ▄▀▄▄█ █▀  ▀▀▀▀▀█  ▄▄ █▀▀▀▀▀█    
@@ -26,9 +26,9 @@ Type:   OTP_TOTP
                                              
                                              
 
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
                                          
                                          
     █▀▀▀▀▀█ ▀▀██ █▄▀█ ▀▄▄▀█▀▄ █▀▀▀▀▀█    
@@ -51,9 +51,9 @@ Type:   OTP_TOTP
                                          
                                          
 
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
                                          
                                          
     █▀▀▀▀▀█ ▀▀██ █▄▀█ ▀▄▄▀█▀▄ █▀▀▀▀▀█    
@@ -76,10 +76,10 @@ Type:   OTP_TOTP
                                          
                                          
 
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Issuer: raspberrypi
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
                                              
                                              
     █▀▀▀▀▀█  ▄▀▄▄█ █▀  ▀▀▀▀▀█  ▄▄ █▀▀▀▀▀█    
@@ -101,6 +101,34 @@ Type:   OTP_TOTP
     █ ███ █ █▄█▄▄▀█▄▀ ▄▄▄ █▄ ▀█▀███▀█ ▀▀     
     █ ▀▀▀ █ ▀█▄▄▄█▀█▀ ▄  █▄▄▄   █  ▀ ██ █    
     ▀▀▀▀▀▀▀ ▀  ▀ ▀▀▀▀▀▀ ▀ ▀  ▀▀ ▀ ▀▀ ▀ ▀▀    
+                                             
+                                             
+
+Name:    hotp demo
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    hotp
+Counter: 4
+                                             
+                                             
+    █▀▀▀▀▀█ ▄█▀▄▄ ▄▄▄██  █▄▄██ █▄ █▀▀▀▀▀█    
+    █ ███ █  ▀▄   ▄▄▄  ▀▄ ▄▄▀ █▀  █ ███ █    
+    █ ▀▀▀ █ ▀█ ▄▄█▄  ▄▀█▀▀██▄▄██▄ █ ▀▀▀ █    
+    ▀▀▀▀▀▀▀ ▀▄▀ █▄▀▄█▄█▄█ ▀▄█▄█ █ ▀▀▀▀▀▀▀    
+    █▄█ █ ▀▄▄ ▀ ▄▄███▄█▄   ▄█▀ ▀█  ▄█▄▄▀▄    
+    ▄██▄▀▄▀██▄▀▄▀ ▀▀█ ▀▄ █▄▀██▄  ▀▄▀▀▀▄█▀    
+    ▄ ▄█▄▀▀▀▀█▄▄▄▀▄█▄ ▄ ▄██▀█▀▄ ▀▄█▄ █▀▀█    
+    ▄▀▄▀██▀█▀  ██▀▄ ▀▀ ▄▄▄█▄██ ▄▀█▄▄▄ ▀▄▀    
+    █▄▀▀▀█▀█▄ ▄ ▀ ▀█ ▄ ▄█ █▄▀█▄ █▄█    ▀▄    
+    ▀▀██▄█▀  ▄█▄▀▀█▄ ▄█▀██▄▄█▄  █▀▄█ ▀▀▀█    
+    █████▄▀▀█▀▀█▀▀▄  ▄ ▀█▀▄ ██▄ ▄███ ▄▀█     
+     ▄▄█▀▀▀█▀█▄█  ▄█▄▄█ ▀▀ ▄▀▄ ▄█▀▄▄█▀▀▄▄    
+     ██▄ █▀▄▀▀ █  ▀██ █▄ ▄   █  ▀▄█▀▄█▄██    
+    ▀▄▀ █ ▀▄▀▄██▄█ ▀█▀▄▄ ██▄▄▄▀ ▀▄ ▄█ ███    
+    ▀  ▀▀ ▀▀▄ ▄▄▄█▄██▀▀ ▄█ ▀ █▀▀█▀▀▀█▀  █    
+    █▀▀▀▀▀█  █▄█▀█▀▀█▀   ▄█ ▀▄▄▀█ ▀ █▀▀ ▀    
+    █ ███ █ ▀█▀▀ ▀ █ ▄ ▄█▄█  █▄ █▀▀██▀ ██    
+    █ ▀▀▀ █ ▀▄▀▄█▀▀▄  ▀▀█▄▄ ▀▄▄█   █▀▀▀▄▀    
+    ▀▀▀▀▀▀▀ ▀▀▀▀  ▀ ▀  ▀▀▀   ▀▀ ▀ ▀▀▀▀ ▀▀    
                                              
                                              
 

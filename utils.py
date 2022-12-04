@@ -19,6 +19,7 @@ import os
 import shutil
 from io import StringIO
 import sys
+import glob
 
 
 # Ref. https://stackoverflow.com/a/16571630
@@ -39,8 +40,17 @@ with Capturing() as output:
         sys.stdout = self._stdout
 
 
+def file_exits(file):
+    return os.path.isfile(file)
+
+
 def remove_file(file):
-    if os.path.isfile(file): os.remove(file)
+    if file_exits(file): os.remove(file)
+
+
+def remove_files(glob_pattern):
+    for f in glob.glob(glob_pattern):
+        os.remove(f)
 
 
 def remove_dir_with_files(dir):

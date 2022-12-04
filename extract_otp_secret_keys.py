@@ -65,14 +65,17 @@ def main(sys_args):
 
     otps = extract_otps(args)
     write_csv(args, otps)
+    write_keepass_csv(args, otps)
     write_json(args, otps)
 
 
 def parse_args(sys_args):
-    arg_parser = argparse.ArgumentParser()
+    formatter = lambda prog: argparse.HelpFormatter(prog,max_help_position=52)
+    arg_parser = argparse.ArgumentParser(formatter_class=formatter)
     arg_parser.add_argument('infile', help='file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
-    arg_parser.add_argument('--json', '-j', help='export to json file', metavar=('FILE'))
-    arg_parser.add_argument('--csv', '-c', help='export to csv file', metavar=('FILE'))
+    arg_parser.add_argument('--json', '-j', help='export json file', metavar=('FILE'))
+    arg_parser.add_argument('--csv', '-c', help='export csv file', metavar=('FILE'))
+    arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass', metavar=('FILE'))
     arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
     arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
     arg_parser.add_argument('--verbose', '-v', help='verbose output', action='count')
@@ -102,13 +105,15 @@ def extract_otps(args):
             j += 1
             if verbose: print('\n{}. Secret Key'.format(j))
             secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
-            otp_type = get_enum_name_by_number(raw_otp, 'type')
+            otp_type_enum = get_enum_name_by_number(raw_otp, 'type')
+            otp_type = get_otp_type_str_from_code(raw_otp.type)
             otp_url = build_otp_url(secret, raw_otp)
             otp = {
                 "name": raw_otp.name,
                 "secret": secret,
                 "issuer": raw_otp.issuer,
                 "type": otp_type,
+                "counter": raw_otp.counter if raw_otp.type == 1 else None,
                 "url": otp_url
             }
             if not quiet:
@@ -154,6 +159,10 @@ def get_enum_name_by_number(parent, field_name):
     return parent.DESCRIPTOR.fields_by_name[field_name].enum_type.values_by_number.get(field_value).name
 
 
+def get_otp_type_str_from_code(otp_type):
+    return 'totp' if otp_type == 2 else 'hotp'
+
+
 def convert_secret_from_bytes_to_base32_str(bytes):
     return str(base64.b32encode(bytes), 'utf-8').replace('=', '')
 
@@ -162,15 +171,17 @@ def build_otp_url(secret, raw_otp):
     url_params = {'secret': secret}
     if raw_otp.type == 1: url_params['counter'] = raw_otp.counter
     if raw_otp.issuer: url_params['issuer'] = raw_otp.issuer
-    otp_url = 'otpauth://{}/{}?'.format('totp' if raw_otp.type == 2 else 'hotp', quote(raw_otp.name)) + urlencode(url_params)
+    otp_url = 'otpauth://{}/{}?'.format(get_otp_type_str_from_code(raw_otp.type), quote(raw_otp.name)) + urlencode(url_params)
     return otp_url
 
 
 def print_otp(otp):
-    print('Name:   {}'.format(otp['name']))
-    print('Secret: {}'.format(otp['secret']))
-    if otp['issuer']: print('Issuer: {}'.format(otp['issuer']))
-    print('Type:   {}'.format(otp['type']))
+    print('Name:    {}'.format(otp['name']))
+    print('Secret:  {}'.format(otp['secret']))
+    if otp['issuer']: print('Issuer:  {}'.format(otp['issuer']))
+    print('Type:    {}'.format(otp['type']))
+    if otp['type'] == 'hotp':
+        print('Counter: {}'.format(otp['counter']))
     if verbose:
         print(otp['url'])
 
@@ -209,7 +220,48 @@ def write_csv(args, otps):
             writer = csv.DictWriter(outfile, otps[0].keys())
             writer.writeheader()
             writer.writerows(otps)
-        if not quiet: print("Exported {} otps to csv".format(len(otps)))
+        if not quiet: print("Exported {} otps to csv {}".format(len(otps), args.csv))
+
+
+def write_keepass_csv(args, otps):
+    global verbose, quiet
+    if args.keepass and len(otps) > 0:
+        has_totp = has_otp_type(otps, 'totp')
+        has_hotp = has_otp_type(otps, 'hotp')
+        otp_filename_totp = args.keepass if has_totp != has_hotp else add_pre_suffix(args.keepass, "totp")
+        otp_filename_hotp = args.keepass if has_totp != has_hotp else add_pre_suffix(args.keepass, "hotp")
+        count_totp_entries = 0
+        count_hotp_entries = 0
+        if has_totp:
+            with open(otp_filename_totp, "w") as outfile:
+                writer = csv.DictWriter(outfile, ["Title", "User Name", "TimeOtp-Secret-Base32", "Group"])
+                writer.writeheader()
+                for otp in otps:
+                    if otp['type'] == 'totp':
+                        writer.writerow({
+                            'Title': otp['issuer'],
+                            'User Name': otp['name'],
+                            'TimeOtp-Secret-Base32': otp['secret'] if otp['type'] == 'totp' else None,
+                            'Group': "OTP/{}".format(otp['type'].upper())
+                        })
+                        count_totp_entries += 1
+        if has_hotp:
+            with open(otp_filename_hotp, "w") as outfile:
+                writer = csv.DictWriter(outfile, ["Title", "User Name", "HmacOtp-Secret-Base32", "HmacOtp-Counter", "Group"])
+                writer.writeheader()
+                for otp in otps:
+                    if otp['type'] == 'hotp':
+                        writer.writerow({
+                            'Title': otp['issuer'],
+                            'User Name': otp['name'],
+                            'HmacOtp-Secret-Base32': otp['secret'] if otp['type'] == 'hotp' else None,
+                            'HmacOtp-Counter': otp['counter'] if otp['type'] == 'hotp' else None,
+                            'Group': "OTP/{}".format(otp['type'].upper())
+                        })
+                        count_hotp_entries += 1
+        if not quiet:
+            if count_totp_entries > 0: print("Exported {} totp entries to keepass csv file {}".format(count_totp_entries, otp_filename_totp))
+            if count_hotp_entries > 0: print("Exported {} hotp entries to keepass csv file {}".format(count_hotp_entries, otp_filename_hotp))
 
 
 def write_json(args, otps):
@@ -217,7 +269,20 @@ def write_json(args, otps):
     if args.json:
         with open(args.json, "w") as outfile:
             json.dump(otps, outfile, indent=4)
-        if not quiet: print("Exported {} otp entries to json".format(len(otps)))
+        if not quiet: print("Exported {} otp entries to json {}".format(len(otps), args.json))
+
+
+def has_otp_type(otps, otp_type):
+    for otp in otps:
+        if otp['type'] == otp_type:
+            return True
+    return False
+
+
+def add_pre_suffix(file, pre_suffix):
+    '''filename.ext, pre -> filename.pre.ext'''
+    name, ext = path.splitext(file)
+    return name + "." + pre_suffix + (ext if ext else "")
 
 
 if __name__ == '__main__':

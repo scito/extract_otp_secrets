@@ -3,28 +3,40 @@
         "name": "pi@raspberrypi",
         "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
         "issuer": "raspberrypi",
-        "type": "OTP_TOTP",
+        "type": "totp",
+        "counter": null,
         "url": "otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi"
     },
     {
         "name": "pi@raspberrypi",
         "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
         "issuer": "",
-        "type": "OTP_TOTP",
+        "type": "totp",
+        "counter": null,
         "url": "otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY"
     },
     {
         "name": "pi@raspberrypi",
         "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
         "issuer": "",
-        "type": "OTP_TOTP",
+        "type": "totp",
+        "counter": null,
         "url": "otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY"
     },
     {
         "name": "pi@raspberrypi",
         "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
         "issuer": "raspberrypi",
-        "type": "OTP_TOTP",
+        "type": "totp",
+        "counter": null,
         "url": "otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi"
+    },
+    {
+        "name": "hotp demo",
+        "secret": "7KSQL2JTUDIS5EF65KLMRQIIGY",
+        "issuer": "",
+        "type": "hotp",
+        "counter": 4,
+        "url": "otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4"
     }
 ]

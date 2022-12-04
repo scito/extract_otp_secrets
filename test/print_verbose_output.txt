@@ -18,10 +18,10 @@ batch_id: -1320898453
 
 
 1. Secret Key
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Issuer: raspberrypi
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
 otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
 
 
@@ -42,9 +42,9 @@ batch_id: -2094403140
 
 
 2. Secret Key
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
 otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
 
 
@@ -74,16 +74,41 @@ batch_id: -1822886384
 
 
 3. Secret Key
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
 otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
 
 
 4. Secret Key
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Issuer: raspberrypi
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
 otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+
+
+# otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4
+otpauth-migration://offline?data=CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAEwATgEEAEYASAAKNuv15j6%2F%2F%2F%2F%2FwE%3D
+
+4. Payload Line
+otp_parameters {
+  secret: "\372\245\005\3513\240\321.\220\276\352\226\310\301\0106"
+  name: "hotp demo"
+  algorithm: ALGO_SHA1
+  digits: 1
+  type: OTP_HOTP
+  counter: 4
+}
+version: 1
+batch_size: 1
+batch_id: -1558849573
+
+
+5. Secret Key
+Name:    hotp demo
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    hotp
+Counter: 4
+otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4
 

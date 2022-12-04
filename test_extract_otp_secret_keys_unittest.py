@@ -50,23 +50,28 @@ class TestExtract(unittest.TestCase):
             extract_otp_secret_keys.main(['example_export.txt'])
 
         expected_output = [
-            'Name:   pi@raspberrypi',
-            'Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY',
-            'Issuer: raspberrypi',
-            'Type:   OTP_TOTP',
+            'Name:    pi@raspberrypi',
+            'Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Issuer:  raspberrypi',
+            'Type:    totp',
             '',
-            'Name:   pi@raspberrypi',
-            'Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY',
-            'Type:   OTP_TOTP',
+            'Name:    pi@raspberrypi',
+            'Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Type:    totp',
             '',
-            'Name:   pi@raspberrypi',
-            'Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY',
-            'Type:   OTP_TOTP',
+            'Name:    pi@raspberrypi',
+            'Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Type:    totp',
             '',
-            'Name:   pi@raspberrypi',
-            'Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY',
-            'Issuer: raspberrypi',
-            'Type:   OTP_TOTP',
+            'Name:    pi@raspberrypi',
+            'Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Issuer:  raspberrypi',
+            'Type:    totp',
+            '',
+            'Name:    hotp demo',
+            'Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Type:    hotp',
+            'Counter: 4',
             ''
         ]
         self.assertEqual(output, expected_output)
@@ -78,23 +83,28 @@ class TestExtract(unittest.TestCase):
             extract_otp_secret_keys.main(['example_export.txt'])
         actual_output = out.getvalue()
 
-        expected_output = '''Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Issuer: raspberrypi
-Type:   OTP_TOTP
+        expected_output = '''Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
 
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
 
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
 
-Name:   pi@raspberrypi
-Secret: 7KSQL2JTUDIS5EF65KLMRQIIGY
-Issuer: raspberrypi
-Type:   OTP_TOTP
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
+
+Name:    hotp demo
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    hotp
+Counter: 4
 
 '''
         self.assertEqual(actual_output, expected_output)
@@ -105,25 +115,25 @@ Type:   OTP_TOTP
             extract_otp_secret_keys.main(['test/test_plus_problem_export.txt'])
         actual_output = out.getvalue()
 
-        expected_output = '''Name:   SerenityLabs:test1@serenitylabs.co.uk
-Secret: A4RFDYMF4GSLUIBQV4ZP67OJEZ2XUQVM
-Issuer: SerenityLabs
-Type:   OTP_TOTP
+        expected_output = '''Name:    SerenityLabs:test1@serenitylabs.co.uk
+Secret:  A4RFDYMF4GSLUIBQV4ZP67OJEZ2XUQVM
+Issuer:  SerenityLabs
+Type:    totp
 
-Name:   SerenityLabs:test2@serenitylabs.co.uk
-Secret: SCDDZ7PW5MOZLE3PQCAZM7L4S35K3UDX
-Issuer: SerenityLabs
-Type:   OTP_TOTP
+Name:    SerenityLabs:test2@serenitylabs.co.uk
+Secret:  SCDDZ7PW5MOZLE3PQCAZM7L4S35K3UDX
+Issuer:  SerenityLabs
+Type:    totp
 
-Name:   SerenityLabs:test3@serenitylabs.co.uk
-Secret: TR76272RVYO6EAEY2FX7W7R7KUDEGPJ4
-Issuer: SerenityLabs
-Type:   OTP_TOTP
+Name:    SerenityLabs:test3@serenitylabs.co.uk
+Secret:  TR76272RVYO6EAEY2FX7W7R7KUDEGPJ4
+Issuer:  SerenityLabs
+Type:    totp
 
-Name:   SerenityLabs:test4@serenitylabs.co.uk
-Secret: N2ILWSXSJUQUB7S6NONPJSC62NPG7EXN
-Issuer: SerenityLabs
-Type:   OTP_TOTP
+Name:    SerenityLabs:test4@serenitylabs.co.uk
+Secret:  N2ILWSXSJUQUB7S6NONPJSC62NPG7EXN
+Issuer:  SerenityLabs
+Type:    totp
 
 '''
         self.assertEqual(actual_output, expected_output)

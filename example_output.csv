@@ -1,5 +1,6 @@
-name,secret,issuer,type,url
-pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,raspberrypi,OTP_TOTP,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
-pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,,OTP_TOTP,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
-pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,,OTP_TOTP,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
-pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,raspberrypi,OTP_TOTP,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+name,secret,issuer,type,counter,url
+pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,raspberrypi,totp,,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,,totp,,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,,totp,,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+pi@raspberrypi,7KSQL2JTUDIS5EF65KLMRQIIGY,raspberrypi,totp,,otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+hotp demo,7KSQL2JTUDIS5EF65KLMRQIIGY,,hotp,4,otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4

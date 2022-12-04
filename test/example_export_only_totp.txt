@@ -9,6 +9,3 @@ otpauth-migration://offline?data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXB
 # otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
 # otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
 otpauth-migration://offline?data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACCjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACiQ7OOa%2Bf%2F%2F%2F%2F8B
-
-# otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4
-otpauth-migration://offline?data=CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAEwATgEEAEYASAAKNuv15j6%2F%2F%2F%2F%2FwE%3D
