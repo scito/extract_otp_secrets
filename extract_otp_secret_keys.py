@@ -139,7 +139,10 @@ def get_payload_from_line(line, i, args):
         print('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
     parsed_url = urlparse(line)
     if verbose > 1: print('\nDEBUG: parsed_url={}'.format(parsed_url))
-    params = parse_qs(parsed_url.query, strict_parsing=True)
+    try:
+        params = parse_qs(parsed_url.query, strict_parsing=True)
+    except: # Not necessary for Python >= 3.11
+        params = []
     if verbose > 1: print('\nDEBUG: querystring params={}'.format(params))
     if 'data' not in params:
         print('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
