@@ -1,0 +1,1 @@
+otpauth-migration://offline?data=XXXX

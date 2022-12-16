@@ -94,38 +94,42 @@ def extract_otps(args):
     otps = []
 
     i = j = 0
-    for line in (line.strip() for line in fileinput.input(args.infile)):
-        if verbose: print(line)
-        if line.startswith('#') or line == '': continue
-        i += 1
-        payload = get_payload_from_line(line, i, args)
+    finput = fileinput.input(args.infile)
+    try:
+        for line in (line.strip() for line in finput):
+            if verbose: print(line)
+            if line.startswith('#') or line == '': continue
+            i += 1
+            payload = get_payload_from_line(line, i, args)
 
-        # pylint: disable=no-member
-        for raw_otp in payload.otp_parameters:
-            j += 1
-            if verbose: print('\n{}. Secret Key'.format(j))
-            secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
-            otp_type_enum = get_enum_name_by_number(raw_otp, 'type')
-            otp_type = get_otp_type_str_from_code(raw_otp.type)
-            otp_url = build_otp_url(secret, raw_otp)
-            otp = {
-                "name": raw_otp.name,
-                "secret": secret,
-                "issuer": raw_otp.issuer,
-                "type": otp_type,
-                "counter": raw_otp.counter if raw_otp.type == 1 else None,
-                "url": otp_url
-            }
-            if not quiet:
-                print_otp(otp)
-            if args.printqr:
-                print_qr(args, otp_url)
-            if args.saveqr:
-                save_qr(otp, args, j)
-            if not quiet:
-                print()
+            # pylint: disable=no-member
+            for raw_otp in payload.otp_parameters:
+                j += 1
+                if verbose: print('\n{}. Secret Key'.format(j))
+                secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
+                otp_type_enum = get_enum_name_by_number(raw_otp, 'type')
+                otp_type = get_otp_type_str_from_code(raw_otp.type)
+                otp_url = build_otp_url(secret, raw_otp)
+                otp = {
+                    "name": raw_otp.name,
+                    "secret": secret,
+                    "issuer": raw_otp.issuer,
+                    "type": otp_type,
+                    "counter": raw_otp.counter if raw_otp.type == 1 else None,
+                    "url": otp_url
+                }
+                if not quiet:
+                    print_otp(otp)
+                if args.printqr:
+                    print_qr(args, otp_url)
+                if args.saveqr:
+                    save_qr(otp, args, j)
+                if not quiet:
+                    print()
 
-            otps.append(otp)
+                otps.append(otp)
+    finally:
+        finput.close()
     return otps
 
 
@@ -146,7 +150,12 @@ def get_payload_from_line(line, i, args):
     if verbose > 1: print('\nDEBUG: data_base64_fixed={}'.format(data_base64))
     data = base64.b64decode(data_base64_fixed, validate=True)
     payload = protobuf_generated_python.google_auth_pb2.MigrationPayload()
-    payload.ParseFromString(data)
+    try:
+        payload.ParseFromString(data)
+    except:
+        print('\nERROR: Cannot decode otpauth-migration migration payload.')
+        print('data={}'.format(data_base64))
+        exit(1);
     if verbose:
         print('\n{}. Payload Line'.format(i), payload, sep='\n')
 

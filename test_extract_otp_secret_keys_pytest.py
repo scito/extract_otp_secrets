@@ -279,6 +279,70 @@ def test_verbose_and_quiet(capsys):
     assert 'The arguments --verbose and --quiet are mutually exclusive.' in captured.out
 
 
+def test_wrong_data(capsys):
+    with raises(SystemExit) as pytest_wrapped_e:
+        # Act
+        extract_otp_secret_keys.main(['test/test_export_wrong_data.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout = '''
+ERROR: Cannot decode otpauth-migration migration payload.
+data=XXXX
+'''
+
+    assert captured.out == expected_stdout
+    assert captured.err == ''
+
+
+def test_wrong_content(capsys):
+    with raises(SystemExit) as pytest_wrapped_e:
+        # Act
+        extract_otp_secret_keys.main(['test/test_export_wrong_content.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout = '''
+WARN: line is not a otpauth-migration:// URL
+input file: test/test_export_wrong_content.txt
+line "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua."
+Probably a wrong file was given
+
+ERROR: no data query parameter in input URL
+input file: test/test_export_wrong_content.txt
+line "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua."
+Probably a wrong file was given
+'''
+
+    assert captured.out == expected_stdout
+    assert captured.err == ''
+
+
+def test_wrong_prefix(capsys):
+    # Act
+    extract_otp_secret_keys.main(['test/test_export_wrong_prefix.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout = '''
+WARN: line is not a otpauth-migration:// URL
+input file: test/test_export_wrong_prefix.txt
+line "QR-Code:otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B"
+Probably a wrong file was given
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
+
+'''
+
+    assert captured.out == expected_stdout
+    assert captured.err == ''
+
+
 def test_add_pre_suffix(capsys):
     assert extract_otp_secret_keys.add_pre_suffix("name.csv", "totp") == "name.totp.csv"
     assert extract_otp_secret_keys.add_pre_suffix("name.csv", "") == "name..csv"
