@@ -23,6 +23,7 @@ import io
 from contextlib import redirect_stdout
 from utils import read_csv, read_json, remove_file, remove_dir_with_files, Capturing, read_file_to_str
 from os import path
+from sys import platform
 
 import extract_otp_secret_keys
 
@@ -139,6 +140,7 @@ Type:    totp
         self.assertEqual(actual_output, expected_output)
 
     def test_extract_printqr(self):
+        if platform.startswith("win"): self.skipTest("This test is not supported on Windows.")
         out = io.StringIO()
         with redirect_stdout(out):
             extract_otp_secret_keys.main(['-p', 'example_export.txt'])
