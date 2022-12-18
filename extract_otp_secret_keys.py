@@ -59,6 +59,10 @@ def sys_main():
 
 def main(sys_args):
     global verbose, quiet
+
+    # allow to use sys.stdout with with (avoid closing)
+    sys.stdout.close = lambda: None
+
     args = parse_args(sys_args)
     verbose = args.verbose if args.verbose else 0
     quiet = args.quiet
@@ -73,16 +77,16 @@ def parse_args(sys_args):
     formatter = lambda prog: argparse.HelpFormatter(prog,max_help_position=52)
     arg_parser = argparse.ArgumentParser(formatter_class=formatter)
     arg_parser.add_argument('infile', help='file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
-    arg_parser.add_argument('--json', '-j', help='export json file', metavar=('FILE'))
-    arg_parser.add_argument('--csv', '-c', help='export csv file', metavar=('FILE'))
-    arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass', metavar=('FILE'))
+    arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
+    arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
+    arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
     arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
     arg_parser.add_argument('--verbose', '-v', help='verbose output', action='count')
     arg_parser.add_argument('--quiet', '-q', help='no stdout output', action='store_true')
     args = arg_parser.parse_args(sys_args)
     if args.verbose and args.quiet:
-        print("The arguments --verbose and --quiet are mutually exclusive.")
+        eprint("The arguments --verbose and --quiet are mutually exclusive.")
         sys.exit(1)
     return args
 
@@ -136,7 +140,7 @@ def extract_otps(args):
 def get_payload_from_line(line, i, args):
     global verbose
     if not line.startswith('otpauth-migration://'):
-        print('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
+        eprint('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
     parsed_url = urlparse(line)
     if verbose > 1: print('\nDEBUG: parsed_url={}'.format(parsed_url))
     try:
@@ -145,7 +149,7 @@ def get_payload_from_line(line, i, args):
         params = []
     if verbose > 1: print('\nDEBUG: querystring params={}'.format(params))
     if 'data' not in params:
-        print('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
+        eprint('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
         sys.exit(1)
     data_base64 = params['data'][0]
     if verbose > 1: print('\nDEBUG: data_base64={}'.format(data_base64))
@@ -156,8 +160,8 @@ def get_payload_from_line(line, i, args):
     try:
         payload.ParseFromString(data)
     except:
-        print('\nERROR: Cannot decode otpauth-migration migration payload.')
-        print('data={}'.format(data_base64))
+        eprint('\nERROR: Cannot decode otpauth-migration migration payload.')
+        eprint('data={}'.format(data_base64))
         exit(1);
     if verbose:
         print('\n{}. Payload Line'.format(i), payload, sep='\n')
@@ -228,7 +232,7 @@ def print_qr(args, data):
 def write_csv(args, otps):
     global verbose, quiet
     if args.csv and len(otps) > 0:
-        with open(args.csv, "w") as outfile:
+        with open_file_or_stdout_for_csv(args.csv) as outfile:
             writer = csv.DictWriter(outfile, otps[0].keys())
             writer.writeheader()
             writer.writerows(otps)
@@ -245,7 +249,7 @@ def write_keepass_csv(args, otps):
         count_totp_entries = 0
         count_hotp_entries = 0
         if has_totp:
-            with open(otp_filename_totp, "w") as outfile:
+            with open_file_or_stdout_for_csv(otp_filename_totp) as outfile:
                 writer = csv.DictWriter(outfile, ["Title", "User Name", "TimeOtp-Secret-Base32", "Group"])
                 writer.writeheader()
                 for otp in otps:
@@ -258,7 +262,7 @@ def write_keepass_csv(args, otps):
                         })
                         count_totp_entries += 1
         if has_hotp:
-            with open(otp_filename_hotp, "w") as outfile:
+            with open_file_or_stdout_for_csv(otp_filename_hotp) as outfile:
                 writer = csv.DictWriter(outfile, ["Title", "User Name", "HmacOtp-Secret-Base32", "HmacOtp-Counter", "Group"])
                 writer.writeheader()
                 for otp in otps:
@@ -279,7 +283,7 @@ def write_keepass_csv(args, otps):
 def write_json(args, otps):
     global verbose, quiet
     if args.json:
-        with open(args.json, "w") as outfile:
+        with open_file_or_stdout(args.json) as outfile:
             json.dump(otps, outfile, indent=4)
         if not quiet: print("Exported {} otp entries to json {}".format(len(otps), args.json))
 
@@ -295,6 +299,26 @@ def add_pre_suffix(file, pre_suffix):
     '''filename.ext, pre -> filename.pre.ext'''
     name, ext = path.splitext(file)
     return name + "." + pre_suffix + (ext if ext else "")
+
+
+def open_file_or_stdout(filename):
+    '''stdout is denoted as "-".
+    Note: Set before the following line:
+    sys.stdout.close = lambda: None'''
+    return open(filename, "w") if filename != '-' else sys.stdout
+
+
+def open_file_or_stdout_for_csv(filename):
+    '''stdout is denoted as "-".
+    newline=''
+    Note: Set before the following line:
+    sys.stdout.close = lambda: None'''
+    return open(filename, "w", newline='') if filename != '-' else sys.stdout
+
+
+def eprint(*args, **kwargs):
+    '''Print to stderr.'''
+    print(*args, file=sys.stderr, **kwargs)
 
 
 if __name__ == '__main__':

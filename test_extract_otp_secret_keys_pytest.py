@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from utils import read_csv, read_json, remove_files, remove_dir_with_files, read_file_to_str, file_exits
+from utils import read_csv, read_csv_str, read_json, read_json_str, remove_files, remove_dir_with_files, read_file_to_str, file_exits
 from os import path
 from pytest import raises
 from io import StringIO
@@ -73,6 +73,28 @@ def test_extract_csv(capsys):
     cleanup()
 
 
+def test_extract_csv_stdout(capsys):
+    # Arrange
+    cleanup()
+
+    # Act
+    extract_otp_secret_keys.main(['-q', '-c', '-', 'example_export.txt'])
+
+    # Assert
+    assert not file_exits('test_example_output.csv')
+
+    captured = capsys.readouterr()
+
+    expected_csv = read_csv('example_output.csv')
+    actual_csv = read_csv_str(captured.out)
+
+    assert actual_csv == expected_csv
+    assert captured.err == ''
+
+    # Clean up
+    cleanup()
+
+
 def test_keepass_csv(capsys):
     '''Two csv files .totp and .htop are generated.'''
     # Arrange
@@ -94,6 +116,31 @@ def test_keepass_csv(capsys):
     captured = capsys.readouterr()
 
     assert captured.out == ''
+    assert captured.err == ''
+
+    # Clean up
+    cleanup()
+
+
+def test_keepass_csv_stdout(capsys):
+    '''Two csv files .totp and .htop are generated.'''
+    # Arrange
+    cleanup()
+
+    # Act
+    extract_otp_secret_keys.main(['-q', '-k', '-', 'test/example_export_only_totp.txt'])
+
+    # Assert
+    expected_totp_csv = read_csv('example_keepass_output.totp.csv')
+    expected_hotp_csv = read_csv('example_keepass_output.hotp.csv')
+    assert not file_exits('test_example_keepass_output.totp.csv')
+    assert not file_exits('test_example_keepass_output.hotp.csv')
+    assert not file_exits('test_example_keepass_output.csv')
+
+    captured = capsys.readouterr()
+    actual_totp_csv = read_csv_str(captured.out)
+
+    assert actual_totp_csv == expected_totp_csv
     assert captured.err == ''
 
     # Clean up
@@ -141,6 +188,26 @@ def test_extract_json(capsys):
     captured = capsys.readouterr()
 
     assert captured.out == ''
+    assert captured.err == ''
+
+    # Clean up
+    cleanup()
+
+
+def test_extract_json_stdout(capsys):
+    # Arrange
+    cleanup()
+
+    # Act
+    extract_otp_secret_keys.main(['-q', '-j', '-', 'example_export.txt'])
+
+    # Assert
+    expected_json = read_json('example_output.json')
+    assert not file_exits('test_example_output.json')
+    captured = capsys.readouterr()
+    actual_json = read_json_str(captured.out)
+
+    assert actual_json == expected_json
     assert captured.err == ''
 
     # Clean up
@@ -265,8 +332,9 @@ def test_verbose_and_quiet(capsys):
     # Assert
     captured = capsys.readouterr()
 
-    assert len(captured.out) > 0
-    assert 'The arguments --verbose and --quiet are mutually exclusive.' in captured.out
+    assert len(captured.err) > 0
+    assert 'The arguments --verbose and --quiet are mutually exclusive.' in captured.err
+    assert captured.out == ''
 
 
 def test_wrong_data(capsys):
@@ -277,13 +345,13 @@ def test_wrong_data(capsys):
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = '''
+    expected_stderr = '''
 ERROR: Cannot decode otpauth-migration migration payload.
 data=XXXX
 '''
 
-    assert captured.out == expected_stdout
-    assert captured.err == ''
+    assert captured.err == expected_stderr
+    assert captured.out == ''
 
 
 def test_wrong_content(capsys):
@@ -294,7 +362,7 @@ def test_wrong_content(capsys):
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = '''
+    expected_stderr = '''
 WARN: line is not a otpauth-migration:// URL
 input file: test/test_export_wrong_content.txt
 line "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua."
@@ -306,8 +374,8 @@ line "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy e
 Probably a wrong file was given
 '''
 
-    assert captured.out == expected_stdout
-    assert captured.err == ''
+    assert captured.out == ''
+    assert captured.err == expected_stderr
 
 
 def test_wrong_prefix(capsys):
@@ -317,12 +385,14 @@ def test_wrong_prefix(capsys):
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = '''
+    expected_stderr = '''
 WARN: line is not a otpauth-migration:// URL
 input file: test/test_export_wrong_prefix.txt
 line "QR-Code:otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B"
 Probably a wrong file was given
-Name:    pi@raspberrypi
+'''
+
+    expected_stdout = '''Name:    pi@raspberrypi
 Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Issuer:  raspberrypi
 Type:    totp
@@ -330,7 +400,7 @@ Type:    totp
 '''
 
     assert captured.out == expected_stdout
-    assert captured.err == ''
+    assert captured.err == expected_stderr
 
 
 def test_add_pre_suffix(capsys):

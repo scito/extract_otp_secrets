@@ -59,7 +59,7 @@ def remove_dir_with_files(dir):
 
 def read_csv(filename):
     """Returns a list of lines."""
-    with open(filename, "r") as infile:
+    with open(filename, "r", newline='') as infile:
         lines = []
         reader = csv.reader(infile)
         for line in reader:
@@ -67,10 +67,24 @@ def read_csv(filename):
         return lines
 
 
+def read_csv_str(str):
+    """Returns a list of lines."""
+    lines = []
+    reader = csv.reader(str.splitlines())
+    for line in reader:
+        lines.append(line)
+    return lines
+
+
 def read_json(filename):
     """Returns a list or a dictionary."""
     with open(filename, "r") as infile:
         return json.load(infile)
+
+
+def read_json_str(str):
+    """Returns a list or a dictionary."""
+    return json.loads(str)
 
 
 def read_file_to_list(filename):

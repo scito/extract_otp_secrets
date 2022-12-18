@@ -38,9 +38,9 @@ positional arguments:
 
 options:
   -h, --help               show this help message and exit
-  --json FILE, -j FILE     export json file
-  --csv FILE, -c FILE      export csv file
-  --keepass FILE, -k FILE  export totp/hotp csv file(s) for KeePass
+  --json FILE, -j FILE     export json file or - for stdout
+  --csv FILE, -c FILE      export csv file or - for stdout
+  --keepass FILE, -k FILE  export totp/hotp csv file(s) for KeePass, - for stdout
   --printqr, -p            print QR code(s) as text to the terminal (requires qrcode module)
   --saveqr DIR, -s DIR     save QR code(s) as images to the given folder (requires qrcode module)
   --verbose, -v            verbose output
@@ -75,6 +75,8 @@ For printing QR codes, the qrcode module is required, otherwise it can be omitte
     * JSON
     * Dedicated CSV for KeePass
     * QR code images
+* Supports reading from stdin and writing to stdout by specifying '-'
+* Errors and warnings are written to stderr
 * Many ways to run the script:
     * Native Python
     * pipenv
