@@ -20,8 +20,9 @@
 
 from utils import read_csv, read_csv_str, read_json, read_json_str, remove_files, remove_dir_with_files, read_file_to_str, file_exits
 from os import path
-from pytest import raises
+from pytest import raises, mark
 from io import StringIO
+from sys import platform
 
 import extract_otp_secret_keys
 
@@ -38,7 +39,7 @@ def test_extract_stdout(capsys):
 
 
 def test_extract_stdin_stdout(capsys, monkeypatch):
-    # Prepare
+    # Arrange
     monkeypatch.setattr('sys.stdin', StringIO(read_file_to_str('example_export.txt')))
 
     # Act
@@ -78,7 +79,30 @@ def test_extract_csv_stdout(capsys):
     cleanup()
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-c', '-', 'example_export.txt'])
+    extract_otp_secret_keys.main(['-c', '-', 'example_export.txt'])
+
+    # Assert
+    assert not file_exits('test_example_output.csv')
+
+    captured = capsys.readouterr()
+
+    expected_csv = read_csv('example_output.csv')
+    actual_csv = read_csv_str(captured.out)
+
+    assert actual_csv == expected_csv
+    assert captured.err == ''
+
+    # Clean up
+    cleanup()
+
+
+def test_extract_stdin_and_csv_stdout(capsys, monkeypatch):
+    # Arrange
+    cleanup()
+    monkeypatch.setattr('sys.stdin', StringIO(read_file_to_str('example_export.txt')))
+
+    # Act
+    extract_otp_secret_keys.main(['-c', '-', '-'])
 
     # Assert
     assert not file_exits('test_example_output.csv')
@@ -128,7 +152,7 @@ def test_keepass_csv_stdout(capsys):
     cleanup()
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-k', '-', 'test/example_export_only_totp.txt'])
+    extract_otp_secret_keys.main(['-k', '-', 'test/example_export_only_totp.txt'])
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
@@ -199,7 +223,7 @@ def test_extract_json_stdout(capsys):
     cleanup()
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-j', '-', 'example_export.txt'])
+    extract_otp_secret_keys.main(['-j', '-', 'example_export.txt'])
 
     # Assert
     expected_json = read_json('example_output.json')
@@ -246,7 +270,7 @@ Type:    totp
     assert captured.out == expected_stdout
     assert captured.err == ''
 
-
+@mark.skipif(platform.startswith("win"), reason="This test is not supported on Windows.")
 def test_extract_printqr(capsys):
     # Act
     extract_otp_secret_keys.main(['-p', 'example_export.txt'])
@@ -324,6 +348,20 @@ def test_extract_help(capsys):
     assert pytest_wrapped_e.value.code == 0
 
 
+def test_extract_no_arguments(capsys):
+    # Act
+    with raises(SystemExit) as pytest_wrapped_e:
+        extract_otp_secret_keys.main([])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_err_msg = 'error: the following arguments are required: infile'
+
+    assert expected_err_msg in captured.err
+    assert captured.out == ''
+
+
 def test_verbose_and_quiet(capsys):
     with raises(SystemExit) as pytest_wrapped_e:
         # Act
@@ -333,7 +371,7 @@ def test_verbose_and_quiet(capsys):
     captured = capsys.readouterr()
 
     assert len(captured.err) > 0
-    assert 'The arguments --verbose and --quiet are mutually exclusive.' in captured.err
+    assert 'error: argument --quiet/-q: not allowed with argument --verbose/-v' in captured.err
     assert captured.out == ''
 
 

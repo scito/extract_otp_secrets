@@ -181,11 +181,11 @@ eval "$cmd"
 
 $PIP --version
 
-cmd="$PIP install -U -r requirements.txt"
+cmd="$PIP install --use-pep517 -U -r requirements.txt"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
-cmd="$PIP install -U -r requirements-dev.txt"
+cmd="$PIP install --use-pep517 -U -r requirements-dev.txt"
 if $interactive ; then askContinueYn "$cmd"; fi
 eval "$cmd"
 
