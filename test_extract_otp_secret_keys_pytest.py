@@ -21,8 +21,34 @@
 from utils import read_csv, read_json, remove_files, remove_dir_with_files, read_file_to_str, file_exits
 from os import path
 from pytest import raises
+from io import StringIO
 
 import extract_otp_secret_keys
+
+
+def test_extract_stdout(capsys):
+    # Act
+    extract_otp_secret_keys.main(['example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
+    assert captured.err == ''
+
+
+def test_extract_stdin_stdout(capsys, monkeypatch):
+    # Prepare
+    monkeypatch.setattr('sys.stdin', StringIO(read_file_to_str('example_export.txt')))
+
+    # Act
+    extract_otp_secret_keys.main(['-'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
+    assert captured.err == ''
 
 
 def test_extract_csv(capsys):
@@ -119,42 +145,6 @@ def test_extract_json(capsys):
 
     # Clean up
     cleanup()
-
-
-def test_extract_stdout(capsys):
-    # Act
-    extract_otp_secret_keys.main(['example_export.txt'])
-
-    # Assert
-    captured = capsys.readouterr()
-
-    expected_stdout = '''Name:    pi@raspberrypi
-Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
-Issuer:  raspberrypi
-Type:    totp
-
-Name:    pi@raspberrypi
-Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:    totp
-
-Name:    pi@raspberrypi
-Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:    totp
-
-Name:    pi@raspberrypi
-Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
-Issuer:  raspberrypi
-Type:    totp
-
-Name:    hotp demo
-Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
-Type:    hotp
-Counter: 4
-
-'''
-
-    assert captured.out == expected_stdout
-    assert captured.err == ''
 
 
 def test_extract_not_encoded_plus(capsys):
@@ -353,3 +343,29 @@ def cleanup():
     remove_files('test_example_*.csv')
     remove_files('test_example_*.json')
     remove_dir_with_files('testout/')
+
+
+EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT = '''Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
+
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
+
+Name:    hotp demo
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    hotp
+Counter: 4
+
+'''
