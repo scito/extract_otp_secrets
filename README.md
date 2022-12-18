@@ -31,10 +31,10 @@ cd extract_otp_secret_keys
 
 ## Program help: arguments and options
 
-<pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose] [--quiet] infile
+<pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] infile
 
 positional arguments:
-  infile                   file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored
+  infile                   file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored
 
 options:
   -h, --help               show this help message and exit
@@ -44,7 +44,7 @@ options:
   --printqr, -p            print QR code(s) as text to the terminal (requires qrcode module)
   --saveqr DIR, -s DIR     save QR code(s) as images to the given folder (requires qrcode module)
   --verbose, -v            verbose output
-  --quiet, -q              no stdout output</pre>
+  --quiet, -q              no stdout output, except output set by -</pre>
 
 ## Dependencies
 

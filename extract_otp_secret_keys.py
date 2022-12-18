@@ -74,20 +74,20 @@ def main(sys_args):
 
 
 def parse_args(sys_args):
-    formatter = lambda prog: argparse.HelpFormatter(prog,max_help_position=52)
+    formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=52)
     arg_parser = argparse.ArgumentParser(formatter_class=formatter)
-    arg_parser.add_argument('infile', help='file or - for stdin (default: -) with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
+    arg_parser.add_argument('infile', help='file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
     arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
-    arg_parser.add_argument('--verbose', '-v', help='verbose output', action='count')
-    arg_parser.add_argument('--quiet', '-q', help='no stdout output', action='store_true')
+    output_group = arg_parser.add_mutually_exclusive_group()
+    output_group.add_argument('--verbose', '-v', help='verbose output', action='count')
+    output_group.add_argument('--quiet', '-q', help='no stdout output, except output set by -', action='store_true')
     args = arg_parser.parse_args(sys_args)
-    if args.verbose and args.quiet:
-        eprint("The arguments --verbose and --quiet are mutually exclusive.")
-        sys.exit(1)
+    if args.csv == '-' or args.json == '-' or args.keepass == '-':
+        args.quiet = args.q = True
     return args
 
 
