@@ -73,6 +73,10 @@ class TestExtract(unittest.TestCase):
             'Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY',
             'Type:    hotp',
             'Counter: 4',
+            '',
+            'Name:    encoding: ¿äÄéÉ? (demo)',
+            'Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY',
+            'Type:    totp',
             ''
         ]
         self.assertEqual(output, expected_output)
@@ -106,6 +110,10 @@ Name:    hotp demo
 Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Type:    hotp
 Counter: 4
+
+Name:    encoding: ¿äÄéÉ? (demo)
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
 
 '''
         self.assertEqual(actual_output, expected_output)

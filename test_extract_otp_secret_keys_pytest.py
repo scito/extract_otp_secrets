@@ -476,4 +476,8 @@ Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Type:    hotp
 Counter: 4
 
+Name:    encoding: ¿äÄéÉ? (demo)
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+
 '''
