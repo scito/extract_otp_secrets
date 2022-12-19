@@ -140,7 +140,6 @@ Type:    totp
         self.assertEqual(actual_output, expected_output)
 
     def test_extract_printqr(self):
-        if platform.startswith("win"): self.skipTest("This test is not supported on Windows.")
         out = io.StringIO()
         with redirect_stdout(out):
             extract_otp_secret_keys.main(['-p', 'example_export.txt'])
