@@ -23,7 +23,7 @@ import io
 from contextlib import redirect_stdout
 from utils import read_csv, read_json, remove_file, remove_dir_with_files, Capturing, read_file_to_str
 from os import path
-from sys import platform
+from sys import implementation
 
 import extract_otp_secret_keys
 
@@ -166,6 +166,7 @@ Type:    totp
         self.assertTrue(path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png'))
 
     def test_extract_verbose(self):
+        if implementation.name == 'pypy': self.skipTest("Encoding problems in verbose mode in pypy.")
         out = io.StringIO()
         with redirect_stdout(out):
             extract_otp_secret_keys.main(['-v', 'example_export.txt'])
