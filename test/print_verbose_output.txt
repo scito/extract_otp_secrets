@@ -112,3 +112,27 @@ Type:    hotp
 Counter: 4
 otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4
 
+
+# otpauth://totp/encoding%3A%20%C2%BF%C3%A4%C3%84%C3%A9%C3%89%3F%20%28demo%29?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+# Name: "encoding: ¿äÄéÉ? (demo)"
+otpauth-migration://offline?data=CjYKEPqlBekzoNEukL7qlsjBCDYSHGVuY29kaW5nOiDCv8Okw4TDqcOJPyAoZGVtbykgASgBMAIQARgBIAAorfCurv%2F%2F%2F%2F%2F%2FAQ%3D%3D
+
+5. Payload Line
+otp_parameters {
+  secret: "\372\245\005\3513\240\321.\220\276\352\226\310\301\0106"
+  name: "encoding: ¿äÄéÉ? (demo)"
+  algorithm: ALGO_SHA1
+  digits: 1
+  type: OTP_TOTP
+}
+version: 1
+batch_size: 1
+batch_id: -171198419
+
+
+6. Secret Key
+Name:    encoding: ¿äÄéÉ? (demo)
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+otpauth://totp/encoding%3A%20%C2%BF%C3%A4%C3%84%C3%A9%C3%89%3F%20%28demo%29?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+
