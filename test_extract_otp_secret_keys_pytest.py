@@ -270,7 +270,7 @@ Type:    totp
     assert captured.out == expected_stdout
     assert captured.err == ''
 
-@mark.skipif(platform.startswith("win"), reason="This test is not supported on Windows.")
+
 def test_extract_printqr(capsys):
     # Act
     extract_otp_secret_keys.main(['-p', 'example_export.txt'])

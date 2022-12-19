@@ -305,7 +305,7 @@ def open_file_or_stdout(filename):
     '''stdout is denoted as "-".
     Note: Set before the following line:
     sys.stdout.close = lambda: None'''
-    return open(filename, "w") if filename != '-' else sys.stdout
+    return open(filename, "w", encoding='utf-8') if filename != '-' else sys.stdout
 
 
 def open_file_or_stdout_for_csv(filename):
@@ -313,7 +313,7 @@ def open_file_or_stdout_for_csv(filename):
     newline=''
     Note: Set before the following line:
     sys.stdout.close = lambda: None'''
-    return open(filename, "w", newline='') if filename != '-' else sys.stdout
+    return open(filename, "w", encoding='utf-8', newline='') if filename != '-' else sys.stdout
 
 
 def eprint(*args, **kwargs):
