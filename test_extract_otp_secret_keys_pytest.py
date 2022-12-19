@@ -22,7 +22,7 @@ from utils import read_csv, read_csv_str, read_json, read_json_str, remove_files
 from os import path
 from pytest import raises, mark
 from io import StringIO
-from sys import platform
+from sys import implementation
 
 import extract_otp_secret_keys
 
@@ -306,6 +306,7 @@ def test_extract_saveqr(capsys):
     cleanup()
 
 
+@mark.skipif(implementation.name == 'pypy', reason="Encoding problems in verbose mode in pypy.")
 def test_extract_verbose(capsys):
     # Act
     extract_otp_secret_keys.main(['-v', 'example_export.txt'])
