@@ -2,3 +2,5 @@ wheel
 pytest
 flake8
 pylint
+qreader
+opencv-python

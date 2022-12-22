@@ -31,13 +31,19 @@ with Capturing() as output:
 '''
     def __enter__(self):
         self._stdout = sys.stdout
-        sys.stdout = self._stringio = StringIO()
+        sys.stdout = self._stringio_std = StringIO()
+        self._stderr = sys.stderr
+        sys.stderr = self._stringio_err = StringIO()
         return self
 
     def __exit__(self, *args):
-        self.extend(self._stringio.getvalue().splitlines())
-        del self._stringio    # free up some memory
+        self.extend(self._stringio_std.getvalue().splitlines())
+        del self._stringio_std    # free up some memory
         sys.stdout = self._stdout
+
+        self.extend(self._stringio_err.getvalue().splitlines())
+        del self._stringio_err    # free up some memory
+        sys.stderr = self._stderr
 
 
 def file_exits(file):
