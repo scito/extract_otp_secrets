@@ -4,9 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-protobuf = "*"
+protobuf = "==4.21.12"
 qrcode = "*"
 pillow = "*"
+wheel = "==0.38.4"
+pytest = "==7.2.0"
+flake8 = "==6.0.0"
+pylint = "==2.15.9"
+qreader = "==1.3.1"
+opencv-python = "==4.6.0.66"
 
 [dev-packages]
 pytest = "*"

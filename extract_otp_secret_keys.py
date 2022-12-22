@@ -47,10 +47,16 @@ import fileinput
 import sys
 import csv
 import json
+import cv2
+from qreader import QReader
 from urllib.parse import parse_qs, urlencode, urlparse, quote
 from os import path, makedirs
 from re import compile as rcompile
 import protobuf_generated_python.google_auth_pb2
+
+
+verbose = False
+quiet = True
 
 
 def sys_main():
@@ -76,12 +82,19 @@ def main(sys_args):
 def parse_args(sys_args):
     formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=52)
     arg_parser = argparse.ArgumentParser(formatter_class=formatter)
-    arg_parser.add_argument('infile', help='file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored')
+    arg_parser.add_argument('infile',
+                            help="image file containing a QR code from a Google Authenticator export or a text file "
+                                 "or - for stdin with \"otpauth-migration://...\" URLs separated by newlines. Lines "
+                                 "starting with # are ignored.")
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
-    arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
-    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
-    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
+    arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout',
+                            metavar=('FILE'))
+    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)',
+                            action='store_true')
+    arg_parser.add_argument('--saveqr', '-s',
+                            help='save QR code(s) as images to the given folder (requires qrcode module)',
+                            metavar=('DIR'))
     output_group = arg_parser.add_mutually_exclusive_group()
     output_group.add_argument('--verbose', '-v', help='verbose output', action='count')
     output_group.add_argument('--quiet', '-q', help='no stdout output, except output set by -', action='store_true')
@@ -97,59 +110,111 @@ def extract_otps(args):
 
     otps = []
 
+    lines = get_lines_from_file(args.infile)
+
     i = j = 0
-    finput = fileinput.input(args.infile)
-    try:
-        for line in (line.strip() for line in finput):
-            if verbose: print(line)
-            if line.startswith('#') or line == '': continue
-            i += 1
-            payload = get_payload_from_line(line, i, args)
 
-            # pylint: disable=no-member
-            for raw_otp in payload.otp_parameters:
-                j += 1
-                if verbose: print('\n{}. Secret Key'.format(j))
-                secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
-                otp_type_enum = get_enum_name_by_number(raw_otp, 'type')
-                otp_type = get_otp_type_str_from_code(raw_otp.type)
-                otp_url = build_otp_url(secret, raw_otp)
-                otp = {
-                    "name": raw_otp.name,
-                    "secret": secret,
-                    "issuer": raw_otp.issuer,
-                    "type": otp_type,
-                    "counter": raw_otp.counter if raw_otp.type == 1 else None,
-                    "url": otp_url
-                }
-                if not quiet:
-                    print_otp(otp)
-                if args.printqr:
-                    print_qr(args, otp_url)
-                if args.saveqr:
-                    save_qr(otp, args, j)
-                if not quiet:
-                    print()
+    for line in lines:
+        if verbose:
+            print(line)
+        if line.startswith('#') or line == '':
+            continue
+        i += 1
+        payload = get_payload_from_line(line, i, args)
 
-                otps.append(otp)
-    finally:
-        finput.close()
+        # pylint: disable=no-member
+        for raw_otp in payload.otp_parameters:
+            j += 1
+            if verbose:
+                print('\n{}. Secret Key'.format(j))
+            secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
+            otp_type_enum = get_enum_name_by_number(raw_otp, 'type')
+            otp_type = get_otp_type_str_from_code(raw_otp.type)
+            otp_url = build_otp_url(secret, raw_otp)
+            otp = {
+                "name": raw_otp.name,
+                "secret": secret,
+                "issuer": raw_otp.issuer,
+                "type": otp_type,
+                "counter": raw_otp.counter if raw_otp.type == 1 else None,
+                "url": otp_url
+            }
+            if not quiet:
+                print_otp(otp)
+            if args.printqr:
+                print_qr(args, otp_url)
+            if args.saveqr:
+                save_qr(otp, args, j)
+            if not quiet:
+                print()
+
+            otps.append(otp)
+
     return otps
+
+
+def get_lines_from_file(filepath):
+    global verbose
+
+    # Check if this is an image file
+    if(path.splitext(filepath)[1][1:].lower() in ('bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff')):
+        # It's an image file, so try to read it as a QR Code
+        try:
+            decoder = QReader()
+
+            if not path.isfile(filepath):
+                eprint('\nERROR: Input file provided is non-existent or not a file.'
+                       '\ninput file: {}'.format(filepath))
+                return []
+
+            image = cv2.imread(filepath)
+            if image is None:
+                eprint('\nERROR: Unable to open file for reading. Please ensure that you have read access to the '
+                       'file and that the file is a valid image file.\ninput file: {}'.format(filepath))
+                return []
+
+            decoded_text = decoder.detect_and_decode(image=image)
+            if decoded_text is None:
+                eprint('\nERROR: Unable to read QR Code from file.\ninput file: {}'.format(filepath))
+                return []
+
+            return [decoded_text]
+        except Exception as e:
+            eprint('\nERROR: Encountered exception "{}".\ninput file: {}'.format(str(e), filepath))
+            return []
+    else:
+        # Not an image file, so assume it's a text file and proceed as usual
+        lines = []
+        finput = fileinput.input(filepath)
+        try:
+            for line in (line.strip() for line in finput):
+                if verbose:
+                    print(line)
+                if line.startswith('#') or line == '':
+                    continue
+                lines.append(line)
+        finally:
+            finput.close()
+        return lines
 
 
 def get_payload_from_line(line, i, args):
     global verbose
     if not line.startswith('otpauth-migration://'):
-        eprint('\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
+        eprint(
+            '\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(
+                args.infile, line))
     parsed_url = urlparse(line)
     if verbose > 1: print('\nDEBUG: parsed_url={}'.format(parsed_url))
     try:
         params = parse_qs(parsed_url.query, strict_parsing=True)
-    except: # Not necessary for Python >= 3.11
+    except:  # Not necessary for Python >= 3.11
         params = []
     if verbose > 1: print('\nDEBUG: querystring params={}'.format(params))
     if 'data' not in params:
-        eprint('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(args.infile, line))
+        eprint(
+            '\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(
+                args.infile, line))
         sys.exit(1)
     data_base64 = params['data'][0]
     if verbose > 1: print('\nDEBUG: data_base64={}'.format(data_base64))
@@ -162,7 +227,7 @@ def get_payload_from_line(line, i, args):
     except:
         eprint('\nERROR: Cannot decode otpauth-migration migration payload.')
         eprint('data={}'.format(data_base64))
-        exit(1);
+        exit(1)
     if verbose:
         print('\n{}. Payload Line'.format(i), payload, sep='\n')
 
@@ -187,7 +252,8 @@ def build_otp_url(secret, raw_otp):
     url_params = {'secret': secret}
     if raw_otp.type == 1: url_params['counter'] = raw_otp.counter
     if raw_otp.issuer: url_params['issuer'] = raw_otp.issuer
-    otp_url = 'otpauth://{}/{}?'.format(get_otp_type_str_from_code(raw_otp.type), quote(raw_otp.name)) + urlencode(url_params)
+    otp_url = 'otpauth://{}/{}?'.format(get_otp_type_str_from_code(raw_otp.type), quote(raw_otp.name)) + urlencode(
+        url_params)
     return otp_url
 
 
@@ -208,7 +274,8 @@ def save_qr(otp, args, j):
     pattern = rcompile(r'[\W_]+')
     file_otp_name = pattern.sub('', otp['name'])
     file_otp_issuer = pattern.sub('', otp['issuer'])
-    save_qr_file(args, otp['url'], '{}/{}-{}{}.png'.format(dir, j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
+    save_qr_file(args, otp['url'],
+                 '{}/{}-{}{}.png'.format(dir, j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
     return file_otp_issuer
 
 
@@ -263,7 +330,8 @@ def write_keepass_csv(args, otps):
                         count_totp_entries += 1
         if has_hotp:
             with open_file_or_stdout_for_csv(otp_filename_hotp) as outfile:
-                writer = csv.DictWriter(outfile, ["Title", "User Name", "HmacOtp-Secret-Base32", "HmacOtp-Counter", "Group"])
+                writer = csv.DictWriter(outfile,
+                                        ["Title", "User Name", "HmacOtp-Secret-Base32", "HmacOtp-Counter", "Group"])
                 writer.writeheader()
                 for otp in otps:
                     if otp['type'] == 'hotp':
@@ -276,8 +344,10 @@ def write_keepass_csv(args, otps):
                         })
                         count_hotp_entries += 1
         if not quiet:
-            if count_totp_entries > 0: print("Exported {} totp entries to keepass csv file {}".format(count_totp_entries, otp_filename_totp))
-            if count_hotp_entries > 0: print("Exported {} hotp entries to keepass csv file {}".format(count_hotp_entries, otp_filename_hotp))
+            if count_totp_entries > 0: print(
+                "Exported {} totp entries to keepass csv file {}".format(count_totp_entries, otp_filename_totp))
+            if count_hotp_entries > 0: print(
+                "Exported {} hotp entries to keepass csv file {}".format(count_hotp_entries, otp_filename_hotp))
 
 
 def write_json(args, otps):

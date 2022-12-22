@@ -1,3 +1,5 @@
 protobuf
 qrcode
 Pillow
+qreader
+opencv-python
