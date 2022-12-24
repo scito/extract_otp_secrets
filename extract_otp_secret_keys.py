@@ -49,7 +49,6 @@ import sys
 import csv
 import json
 from cv2 import imread, imdecode, IMREAD_UNCHANGED
-from qreader import QReader
 from urllib.parse import parse_qs, urlencode, urlparse, quote
 from os import path, makedirs
 from re import compile as rcompile
@@ -179,6 +178,9 @@ def get_lines_from_file(filename):
 
             if image is None:
                 abort('\nERROR: Unable to open file for reading.\ninput file: {}'.format(filename))
+
+            # dynamic import of QReader since this module has a dependency to zbar lib
+            from qreader import QReader
 
             decoder = QReader()
             decoded_text = decoder.detect_and_decode(image=image)
