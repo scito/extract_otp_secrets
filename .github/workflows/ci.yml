@@ -28,7 +28,7 @@ jobs:
       - name: Install zbar shared lib for QReader (Linux)
         if: runner.os == 'Linux'
         run: |
-          # FIXME sudo apt-get install -y libzbar0
+          sudo apt-get install -y libzbar0
       - name: Install zbar shared lib for QReader (macOS)
         if: runner.os == 'macOS'
         run: |
