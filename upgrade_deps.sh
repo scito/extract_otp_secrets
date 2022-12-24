@@ -128,45 +128,45 @@ if [ "$OLDVERSION" != "$VERSION" ]; then
     mkdir -p $DOWNLOADS
     # https://github.com/protocolbuffers/protobuf/releases/download/v21.6/protoc-21.6-linux-x86_64.zip
     cmd="wget --trust-server-names https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-linux-x86_64.zip -O $DOWNLOADS/$ARCHIVE"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     cmd="echo -e '\nSize [Byte]'; stat --printf='%s\n' $DOWNLOADS/$ARCHIVE; echo -e '\nMD5'; md5sum $DOWNLOADS/$ARCHIVE; echo -e '\nSHA256'; sha256sum $DOWNLOADS/$ARCHIVE;"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     cmd="mkdir -p $BIN/$NAME; unzip $DOWNLOADS/$ARCHIVE -d $BIN/$NAME"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     cmd="echo $VERSION > $BIN/$NAME/.VERSION.txt; echo $VERSION > $BIN/$NAME/.VERSION_$VERSION.txt"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     cmd="[ -d $BIN/$DEST.old ] && rm -rf $BIN/$DEST.old || echo 'No old dir to delete'"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     cmd="[ -d $BIN/$DEST ] && mv -iT $BIN/$DEST $BIN/$DEST.old || echo 'No previous dir to keep'"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     cmd="mv -iT $BIN/$NAME $BIN/$DEST"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     cmd="rm $DOWNLOADS/$ARCHIVE"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     cmd="$BIN/$DEST/bin/protoc --python_out=protobuf_generated_python google_auth.proto"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     # Update README.md
 
     cmd="perl -i -pe 's%proto(buf|c)([- ])(\d\.)?$OLDVERSION%proto\$1\$2\${3}$VERSION%g' README.md && perl -i -pe 's%(protobuf/releases/tag/v)$OLDVERSION%\${1}$VERSION%g' README.md"
-    if $interactive ; then askContinueYn "$cmd"; fi
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 else
     echo -e "\nVersion has not changed. Quit"
@@ -176,27 +176,27 @@ fi
 # Upgrade pip requirements
 
 cmd="sudo pip install --upgrade pip"
-if $interactive ; then askContinueYn "$cmd"; fi
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 $PIP --version
 
 cmd="$PIP install --use-pep517 -U -r requirements.txt"
-if $interactive ; then askContinueYn "$cmd"; fi
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 cmd="$PIP install --use-pep517 -U -r requirements-dev.txt"
-if $interactive ; then askContinueYn "$cmd"; fi
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 cmd="$PIP install -U pipenv"
-if $interactive ; then askContinueYn "$cmd"; fi
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 $PIPENV --version
 
 cmd="$PIPENV update && $PIPENV --rm && $PIPENV install"
-if $interactive ; then askContinueYn "$cmd"; fi
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 $PIPENV run python --version
@@ -204,11 +204,33 @@ $PIPENV run python --version
 # Test
 
 cmd="pytest"
-if $interactive ; then askContinueYn "$cmd"; fi
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 cmd="$PIPENV run pytest"
-if $interactive ; then askContinueYn "$cmd"; fi
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+# Build docker
+
+cmd="docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k 'not qreader' -vvv --relaxed"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="docker build . -t extract_otp_secret_keys --pull"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="docker image prune"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 quit
