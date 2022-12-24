@@ -50,6 +50,22 @@ options:
 
     pip install -r requirements.txt
 
+### Linux and macOS
+
+For reading QR codes the zbar lib must be installed
+
+#### Windows
+
+The zbar DLLs are included with the Windows Python wheels. On other operating systems, you will need to install the zbar shared library.
+
+#### Mac OS X
+
+    brew install zbar
+
+#### Linux
+
+    sudo apt-get install libzbar0
+
 Known to work with
 
 * Python 3.10.8, protobuf 4.21.9, qrcode 7.3.1, and pillow 9.2
