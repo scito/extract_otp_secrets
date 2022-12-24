@@ -187,7 +187,10 @@ def convert_img_to_line(filename):
                 abort('\nERROR: Unable to open file for reading.\ninput file: {}'.format(filename))
 
             # dynamic import of QReader since this module has a dependency to zbar lib
-            from qreader import QReader
+            try:
+                from qreader import QReader
+            except ImportError as e:
+                abort('\nERROR: Cannot import QReader module probably due to missing zbar shared library. Exception:\n{}'.format(str(e)))
 
             decoder = QReader()
             decoded_text = decoder.detect_and_decode(image=image)
