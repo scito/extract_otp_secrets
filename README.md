@@ -125,6 +125,14 @@ The zbar DLLs are included with the Windows Python wheels. On other operating sy
 
     python extract_otp_secret_keys.py --csv - example_export.txt
 
+### Printing otp secrets csv to stdout without header line
+
+    python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
+
+### Reading from stdin and printing to stdout
+
+    cat example_*.txt | python extract_otp_secret_keys.py --csv - - | tail -n+2
+
 ## Features
 
 * Free and open source
@@ -133,13 +141,13 @@ The zbar DLLs are included with the Windows Python wheels. On other operating sy
 * Supports TOTP and HOTP
 * Generates QR codes
 * Reads QR Code images
-* Various export formats:
+* Exports to various formats:
     * CSV
     * JSON
     * Dedicated CSV for KeePass
     * QR code images
-* Supports reading from stdin and writing to stdout by specifying '-'
-* Various import image formats: (See [OpenCV docu](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
+* Supports reading from stdin and writing to stdout
+* Reads from various import image formats containing export QR codes: (See [OpenCV docu](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
     * Portable Network Graphics - *.png
     * WebP - *.webp
     * JPEG files - *.jpeg, *.jpg, *.jpe
