@@ -68,6 +68,25 @@ def test_extract_stdin_stdout(capsys, monkeypatch):
     assert captured.err == ''
 
 
+def test_extract_stdin_stdout_wrong_symbol(capsys, monkeypatch):
+    # Arrange
+    monkeypatch.setattr('sys.stdin', StringIO(read_file_to_str('example_export.txt')))
+
+    # Act
+    with raises(SystemExit) as e:
+        extract_otp_secret_keys.main(['='])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = "\nERROR: Cannot read binary stdin buffer. Exception: a bytes-like object is required, not 'str'\n"
+
+    assert captured.err == expected_stderr
+    assert captured.out == ''
+    assert e.value.code == 1
+    assert e.type == SystemExit
+
+
 def test_extract_csv(capsys):
     # Arrange
     cleanup()
@@ -532,6 +551,26 @@ Type:    totp
 
     assert captured.out == expected_stdout
     assert captured.err == ''
+
+
+def test_img_qr_reader_from_stdin_wrong_symbol(capsys, monkeypatch):
+    # Arrange
+    # sys.stdin.buffer should be monkey patched, but it does not work
+    monkeypatch.setattr('sys.stdin', read_binary_file_as_stream('test/test_googleauth_export.png'))
+
+    # Act
+    with raises(SystemExit) as e:
+        extract_otp_secret_keys.main(['-'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = '\nBinary input was given in stdin, please use = instead of -.\n'
+
+    assert captured.err == expected_stderr
+    assert captured.out == ''
+    assert e.value.code == 1
+    assert e.type == SystemExit
 
 
 def test_img_qr_reader_no_qr_code_in_image(capsys):

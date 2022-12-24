@@ -140,11 +140,14 @@ def extract_otps(args):
 
 def get_lines_from_file(filename):
     lines = read_lines_from_text_file(filename)
-    if lines != None:
+    if are_bytes(lines):
+        abort('\nBinary input was given in stdin, please use = instead of -.')
+    elif lines:
         return lines
 
     # could not process text file, try reading as image
     return convert_img_to_line(filename)
+
 
 def read_lines_from_text_file(filename):
     if filename != '=':
@@ -169,6 +172,7 @@ def read_lines_from_text_file(filename):
         finally:
             finput.close()
 
+
 def convert_img_to_line(filename):
     if filename != '-':
         try:
@@ -180,7 +184,10 @@ def convert_img_to_line(filename):
                 except AttributeError:
                     # Workaround for pytest, since pytest cannot monkeypatch sys.stdin.buffer
                     stdin = sys.stdin.read()
-                array = frombuffer(stdin, dtype='uint8')
+                try:
+                    array = frombuffer(stdin, dtype='uint8')
+                except TypeError as e:
+                    abort('\nERROR: Cannot read binary stdin buffer. Exception: {}'.format(str(e)))
                 image = imdecode(array, IMREAD_UNCHANGED)
 
             if image is None:
@@ -383,6 +390,16 @@ def check_file_exists(filename):
     if filename != '-' and not path.isfile(filename):
         abort('\nERROR: Input file provided is non-existent or not a file.'
         '\ninput file: {}'.format(filename))
+
+
+def are_bytes(lines):
+    if lines and len(lines) > 0:
+        try:
+            lines[0].startswith('#')
+            return False
+        except (UnicodeDecodeError, AttributeError, TypeError):
+            return True
+
 
 def eprint(*args, **kwargs):
     '''Print to stderr.'''
