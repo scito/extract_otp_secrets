@@ -139,8 +139,14 @@ def extract_otps(args):
 
 
 def get_lines_from_file(filename):
-    global verbose
+    lines = read_lines_from_text_file(filename)
+    if lines != None:
+        return lines
 
+    # could not process text file, try reading as image
+    return convert_img_to_line(filename)
+
+def read_lines_from_text_file(filename):
     if filename != '=':
         check_file_exists(filename)
         finput = fileinput.input(filename)
@@ -158,11 +164,12 @@ def get_lines_from_file(filename):
             if filename == '-':
                 abort('\nERROR: Unable to open text file form stdin. '
                 'In case you want read an image file from stdin, you must use "=" instead of "-".')
-            # else: The file is probably an image, process below
+            else: # The file is probably an image, process below
+                return None
         finally:
             finput.close()
 
-    # could not process text file, try reading as image
+def convert_img_to_line(filename):
     if filename != '-':
         try:
             if filename != '=':
