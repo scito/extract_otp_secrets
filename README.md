@@ -20,6 +20,18 @@ cd extract_otp_secret_keys
 
 ## Usage
 
+### With builtin QR decoder
+
+1. Open "Google Authenticator" app on the mobile phone
+2. Export the QR codes from "Google Authenticator" app
+4. Save the captured QR codes as image files, e.g. example_export.png
+5. Transfer the images files to the computer where his script is installed.
+6. Call this script with the file as input:
+
+    python extract_otp_secret_keys.py example_export.png
+
+### With external QR decoder app
+
 1. Open "Google Authenticator" app on the mobile phone
 2. Export the QR codes from "Google Authenticator" app
 3. Read QR codes with a QR code reader (e.g. from another phone)
@@ -79,17 +91,24 @@ For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secre
 
     python extract_otp_secret_keys.py example_export.txt
 
-### Printing otp secrets from stdin
+### Printing otp secrets from image file
+
+    python extract_otp_secret_keys.py example_export.png
+
+### Printing otp secrets multiple files
+
+    python extract_otp_secret_keys.py example_*.txt
+    python extract_otp_secret_keys.py example_*.png
+    python extract_otp_secret_keys.py example_export.*
+    python extract_otp_secret_keys.py example_*.txt example_*.png
+
+### Printing otp secrets from stdin (text)
 
     python extract_otp_secret_keys.py - < example_export.txt
 
-### Printing otp secrets from image
-
-    python extract_otp_secret_keys.py test/test_googleauth_export.png
-
 ### Printing otp secrets from stdin (image)
 
-    python extract_otp_secret_keys.py = < test/test_googleauth_export.png
+    python extract_otp_secret_keys.py = < example_export.png
 
 ### Printing otp secrets csv to stdout
 
@@ -98,16 +117,29 @@ For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secre
 ## Features
 
 * Free and open source
-* Supports Google Authenticator export
+* Supports Google Authenticator exports (and compatible apps like Aegis Authenticator)
 * All functionality in one Python script: extract_otp_secret_keys.py (except protobuf generated code in protobuf_generated_python)
 * Supports TOTP and HOTP
 * Generates QR codes
+* Reads QR Code images
 * Various export formats:
     * CSV
     * JSON
     * Dedicated CSV for KeePass
     * QR code images
 * Supports reading from stdin and writing to stdout by specifying '-'
+* Various import image formats: (See [OpenCV docu](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
+    * Portable Network Graphics - *.png
+    * WebP - *.webp
+    * JPEG files - *.jpeg, *.jpg, *.jpe
+    * TIFF files - *.tiff, *.tif
+    * Windows bitmaps - *.bmp, *.dib
+    * JPEG 2000 files - *.jp2
+    * Portable image format - *.pbm, *.pgm, *.ppm *.pxm, *.pnm
+    * Sun rasters - *.sr, *.ras
+    * OpenEXR Image files - *.exr
+    * Radiance HDR - *.hdr, *.pic
+    * Raster and Vector geospatial data supported by GDAL
 * Errors and warnings are written to stderr
 * Many ways to run the script:
     * Native Python
@@ -117,6 +149,10 @@ For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secre
     * VSCode devcontainer
     * devbox
     * pip
+* Compatible with multiple platforms (tested by CI):
+    * Linux
+    * macOS
+    * Windows
 
 ## KeePass
 
