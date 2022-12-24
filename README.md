@@ -284,6 +284,8 @@ pip install -U -r requirements.txt
 * [ZBar](https://github.com/mchehab/zbar) is an open source software suite for reading bar codes from various sources, including webcams.
 * [Aegis Authenticator](https://github.com/beemdevelopment/Aegis) is a free, secure and open source 2FA app for Android.
 * [Android OTP Extractor](https://github.com/puddly/android-otp-extractor) can extract your tokens from popular Android OTP apps and export them in a standard format or just display them as QR codes for easy importing. [Requires a _rooted_ Android phone.]
+* [Python QReader](https://github.com/Eric-Canas/QReader)
+* [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar)
 
 ***
 
