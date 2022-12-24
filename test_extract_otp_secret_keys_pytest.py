@@ -18,11 +18,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from utils import read_csv, read_csv_str, read_json, read_json_str, remove_files, remove_dir_with_files, read_file_to_str, file_exits
+from utils import read_csv, read_csv_str, read_json, read_json_str, remove_files, remove_dir_with_files, read_file_to_str, read_binary_file_as_stream, file_exits
 from os import path
 from pytest import raises, mark
-from io import StringIO
-from sys import implementation
+from io import StringIO, BytesIO
+from sys import implementation, stdin
 
 import extract_otp_secret_keys
 
@@ -36,6 +36,22 @@ def test_extract_stdout(capsys):
 
     assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
     assert captured.err == ''
+
+
+def test_extract_non_existent_file(capsys):
+    # Act
+    with raises(SystemExit) as e:
+        extract_otp_secret_keys.main(['test/non_existent_file.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = '\nERROR: Input file provided is non-existent or not a file.\ninput file: test/non_existent_file.txt\n'
+
+    assert captured.err == expected_stderr
+    assert captured.out == ''
+    assert e.value.code == 1
+    assert e.type == SystemExit
 
 
 def test_extract_stdin_stdout(capsys, monkeypatch):
@@ -335,7 +351,7 @@ def test_extract_debug(capsys):
 
 
 def test_extract_help(capsys):
-    with raises(SystemExit) as pytest_wrapped_e:
+    with raises(SystemExit) as e:
         # Act
         extract_otp_secret_keys.main(['-h'])
 
@@ -345,13 +361,13 @@ def test_extract_help(capsys):
     assert len(captured.out) > 0
     assert "-h, --help" in captured.out and "--verbose, -v" in captured.out
     assert captured.err == ''
-    assert pytest_wrapped_e.type == SystemExit
-    assert pytest_wrapped_e.value.code == 0
+    assert e.type == SystemExit
+    assert e.value.code == 0
 
 
 def test_extract_no_arguments(capsys):
     # Act
-    with raises(SystemExit) as pytest_wrapped_e:
+    with raises(SystemExit) as e:
         extract_otp_secret_keys.main([])
 
     # Assert
@@ -361,10 +377,12 @@ def test_extract_no_arguments(capsys):
 
     assert expected_err_msg in captured.err
     assert captured.out == ''
+    assert e.value.code == 2
+    assert e.type == SystemExit
 
 
 def test_verbose_and_quiet(capsys):
-    with raises(SystemExit) as pytest_wrapped_e:
+    with raises(SystemExit) as e:
         # Act
         extract_otp_secret_keys.main(['-v', '-q', 'example_export.txt'])
 
@@ -374,10 +392,12 @@ def test_verbose_and_quiet(capsys):
     assert len(captured.err) > 0
     assert 'error: argument --quiet/-q: not allowed with argument --verbose/-v' in captured.err
     assert captured.out == ''
+    assert e.value.code == 2
+    assert e.type == SystemExit
 
 
 def test_wrong_data(capsys):
-    with raises(SystemExit) as pytest_wrapped_e:
+    with raises(SystemExit) as e:
         # Act
         extract_otp_secret_keys.main(['test/test_export_wrong_data.txt'])
 
@@ -391,10 +411,12 @@ data=XXXX
 
     assert captured.err == expected_stderr
     assert captured.out == ''
+    assert e.value.code == 1
+    assert e.type == SystemExit
 
 
 def test_wrong_content(capsys):
-    with raises(SystemExit) as pytest_wrapped_e:
+    with raises(SystemExit) as e:
         # Act
         extract_otp_secret_keys.main(['test/test_export_wrong_content.txt'])
 
@@ -415,6 +437,8 @@ Probably a wrong file was given
 
     assert captured.out == ''
     assert captured.err == expected_stderr
+    assert e.value.code == 1
+    assert e.type == SystemExit
 
 
 def test_wrong_prefix(capsys):
@@ -446,6 +470,125 @@ def test_add_pre_suffix(capsys):
     assert extract_otp_secret_keys.add_pre_suffix("name.csv", "totp") == "name.totp.csv"
     assert extract_otp_secret_keys.add_pre_suffix("name.csv", "") == "name..csv"
     assert extract_otp_secret_keys.add_pre_suffix("name", "totp") == "name.totp"
+
+
+def test_img_qr_reader_from_file_happy_path(capsys):
+    # Act
+    extract_otp_secret_keys.main(['test/test_googleauth_export.png'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout =\
+'''Name:    Test1:test1@example1.com
+Secret:  JBSWY3DPEHPK3PXP
+Issuer:  Test1
+Type:    totp
+
+Name:    Test2:test2@example2.com
+Secret:  JBSWY3DPEHPK3PXQ
+Issuer:  Test2
+Type:    totp
+
+Name:    Test3:test3@example3.com
+Secret:  JBSWY3DPEHPK3PXR
+Issuer:  Test3
+Type:    totp
+
+'''
+
+    assert captured.out == expected_stdout
+    assert captured.err == ''
+
+
+def test_img_qr_reader_from_stdin(capsys, monkeypatch):
+    # Arrange
+    # sys.stdin.buffer should be monkey patched, but it does not work
+    monkeypatch.setattr('sys.stdin', read_binary_file_as_stream('test/test_googleauth_export.png'))
+
+    # Act
+    extract_otp_secret_keys.main(['='])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout =\
+'''Name:    Test1:test1@example1.com
+Secret:  JBSWY3DPEHPK3PXP
+Issuer:  Test1
+Type:    totp
+
+Name:    Test2:test2@example2.com
+Secret:  JBSWY3DPEHPK3PXQ
+Issuer:  Test2
+Type:    totp
+
+Name:    Test3:test3@example3.com
+Secret:  JBSWY3DPEHPK3PXR
+Issuer:  Test3
+Type:    totp
+
+'''
+
+    assert captured.out == expected_stdout
+    assert captured.err == ''
+
+
+def test_img_qr_reader_no_qr_code_in_image(capsys):
+    # Act
+    with raises(SystemExit) as e:
+        extract_otp_secret_keys.main(['test/lena_std.tif'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = '\nERROR: Unable to read QR Code from file.\ninput file: test/lena_std.tif\n'
+
+    assert captured.err == expected_stderr
+    assert captured.out == ''
+    assert e.value.code == 1
+    assert e.type == SystemExit
+
+
+def test_img_qr_reader_nonexistent_file(capsys):
+    # Act
+    with raises(SystemExit) as e:
+        extract_otp_secret_keys.main(['test/nonexistent.bmp'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = '\nERROR: Input file provided is non-existent or not a file.\ninput file: test/nonexistent.bmp\n'
+
+    assert captured.err == expected_stderr
+    assert captured.out == ''
+    assert e.value.code == 1
+    assert e.type == SystemExit
+
+
+def test_non_image_file(capsys):
+    # Act
+    with raises(SystemExit) as e:
+        extract_otp_secret_keys.main(['test/text_masquerading_as_image.jpeg'])
+
+    # Assert
+    captured = capsys.readouterr()
+    expected_stderr = '''
+WARN: line is not a otpauth-migration:// URL
+input file: test/text_masquerading_as_image.jpeg
+line "This is just a text file masquerading as an image file."
+Probably a wrong file was given
+
+ERROR: no data query parameter in input URL
+input file: test/text_masquerading_as_image.jpeg
+line "This is just a text file masquerading as an image file."
+Probably a wrong file was given
+'''
+
+    assert captured.err == expected_stderr
+    assert captured.out == ''
+    assert e.value.code == 1
+    assert e.type == SystemExit
 
 
 def cleanup():

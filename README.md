@@ -34,7 +34,7 @@ cd extract_otp_secret_keys
 <pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] infile
 
 positional arguments:
-  infile                   file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored
+  infile                   1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; 2) image file containing a QR code or = for stdin for an image containing a QR code
 
 options:
   -h, --help               show this help message and exit
@@ -57,11 +57,27 @@ Known to work with
 
 For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secret_keys version 1.4.0.
 
-### Optional
+## Examples
 
-For printing QR codes, the qrcode module is required, otherwise it can be omitted.
+### Printing otp secrets form text file
 
-    pip install qrcode[pil]
+    python extract_otp_secret_keys.py example_export.txt
+
+### Printing otp secrets from stdin
+
+    python extract_otp_secret_keys.py - < example_export.txt
+
+### Printing otp secrets from image
+
+    python extract_otp_secret_keys.py test/test_googleauth_export.png
+
+### Printing otp secrets from stdin (image)
+
+    python extract_otp_secret_keys.py = < test/test_googleauth_export.png
+
+### Printing otp secrets csv to stdout
+
+    python extract_otp_secret_keys.py --csv - example_export.txt
 
 ## Features
 

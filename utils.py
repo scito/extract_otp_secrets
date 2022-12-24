@@ -17,7 +17,7 @@ import csv
 import json
 import os
 import shutil
-from io import StringIO
+from io import StringIO, BytesIO
 import sys
 import glob
 
@@ -102,3 +102,8 @@ def read_file_to_list(filename):
 def read_file_to_str(filename):
     """Returns a str."""
     return "".join(read_file_to_list(filename))
+
+def read_binary_file_as_stream(filename):
+    """Returns binary file content."""
+    with open(filename, "rb",) as infile:
+        return BytesIO(infile.read())

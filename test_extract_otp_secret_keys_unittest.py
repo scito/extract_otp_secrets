@@ -187,18 +187,40 @@ Type:    totp
         self.assertGreater(len(actual_output), len(expected_stdout))
         self.assertTrue("DEBUG: " in actual_output)
 
-    def test_extract_help(self):
+    def test_extract_help_1(self):
         out = io.StringIO()
         with redirect_stdout(out):
             try:
                 extract_otp_secret_keys.main(['-h'])
-            except SystemExit:
-                pass
+                self.fail("Must abort")
+            except SystemExit as e:
+                self.assertEqual(e.code, 0)
 
         actual_output = out.getvalue()
 
         self.assertGreater(len(actual_output), 0)
         self.assertTrue("-h, --help" in actual_output and "--verbose, -v" in actual_output)
+
+    def test_extract_help_2(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            with self.assertRaises(SystemExit) as context:
+                extract_otp_secret_keys.main(['-h'])
+
+        actual_output = out.getvalue()
+
+        self.assertGreater(len(actual_output), 0)
+        self.assertTrue("-h, --help" in actual_output and "--verbose, -v" in actual_output)
+        self.assertEqual(context.exception.code, 0)
+
+    def test_extract_help_3(self):
+        with Capturing() as actual_output:
+            with self.assertRaises(SystemExit) as context:
+                extract_otp_secret_keys.main(['-h'])
+
+        self.assertGreater(len(actual_output), 0)
+        self.assertTrue("-h, --help" in "\n".join(actual_output) and "--verbose, -v" in "\n".join(actual_output))
+        self.assertEqual(context.exception.code, 0)
 
     def setUp(self):
         self.cleanup()
