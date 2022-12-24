@@ -48,7 +48,9 @@ setup(
     install_requires=[
         'protobuf',
         'qrcode',
-        'Pillow'
+        'Pillow',
+        'qreader',
+        'opencv-python'
     ],
 
     project_urls={

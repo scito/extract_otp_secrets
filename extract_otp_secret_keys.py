@@ -100,8 +100,11 @@ def extract_otps(args):
 
     otps = []
 
-    i = j = 0
+    i = j = k = 0
+    if verbose: print('Input files: {}'.format(args.infile))
     for infile in args.infile:
+        if verbose: print('Processing infile {}'.format(infile))
+        k += 1
         for line in get_lines_from_file(infile):
             if verbose: print(line)
             if line.startswith('#') or line == '': continue
@@ -134,79 +137,83 @@ def extract_otps(args):
                     print()
 
                 otps.append(otp)
-
+    if verbose: print('{} infile(s) processed'.format(k))
     return otps
 
 
 def get_lines_from_file(filename):
-    lines = read_lines_from_text_file(filename)
-    if are_bytes(lines):
-        abort('\nBinary input was given in stdin, please use = instead of -.')
-    elif lines:
-        return lines
+    # stdin stream cannot be rewinded, thus distinguish, use - for utf-8 stdin and = for binary image stdin
+    if filename != '=':
+        check_file_exists(filename)
+        lines = read_lines_from_text_file(filename)
+        if lines:
+            return lines
 
     # could not process text file, try reading as image
-    return convert_img_to_line(filename)
+    if filename != '-':
+        return convert_img_to_line(filename)
 
 
 def read_lines_from_text_file(filename):
-    if filename != '=':
-        check_file_exists(filename)
-        finput = fileinput.input(filename)
-        try:
-            lines = []
-            for line in (line.strip() for line in finput):
-                # TODO improve
-                # if verbose: print(line)
-                # if line.startswith('#') or line == '':
-                #     continue
-                # unfortunately yield line leads to random test fails
-                lines.append(line)
-            return lines
-        except UnicodeDecodeError:
-            if filename == '-':
-                abort('\nERROR: Unable to open text file form stdin. '
-                'In case you want read an image file from stdin, you must use "=" instead of "-".')
-            else: # The file is probably an image, process below
-                return None
-        finally:
-            finput.close()
+    if verbose: print('Reading lines of {}'.format(filename))
+    finput = fileinput.input(filename)
+    try:
+        lines = []
+        for line in (line.strip() for line in finput):
+            if verbose: print(line)
+            if is_binary(line):
+                abort('\nBinary input was given in stdin, please use = instead of - as infile argument for images.')
+            # unfortunately yield line leads to random test fails
+            lines.append(line)
+        return lines
+    except UnicodeDecodeError:
+        if filename == '-':
+            abort('\nERROR: Unable to open text file form stdin. '
+            'In case you want read an image file from stdin, you must use "=" instead of "-".')
+        else: # The file is probably an image, process below
+            return None
+    finally:
+        finput.close()
 
 
 def convert_img_to_line(filename):
-    if filename != '-':
-        try:
-            if filename != '=':
-                image = imread(filename)
-            else:
-                try:
-                    stdin = sys.stdin.buffer.read()
-                except AttributeError:
-                    # Workaround for pytest, since pytest cannot monkeypatch sys.stdin.buffer
-                    stdin = sys.stdin.read()
-                try:
-                    array = frombuffer(stdin, dtype='uint8')
-                except TypeError as e:
-                    abort('\nERROR: Cannot read binary stdin buffer. Exception: {}'.format(str(e)))
-                image = imdecode(array, IMREAD_UNCHANGED)
-
-            if image is None:
-                abort('\nERROR: Unable to open file for reading.\ninput file: {}'.format(filename))
-
-            # dynamic import of QReader since this module has a dependency to zbar lib
+    if verbose: print('Reading image {}'.format(filename))
+    try:
+        if filename != '=':
+            image = imread(filename)
+        else:
             try:
-                from qreader import QReader
-            except ImportError as e:
-                abort('\nERROR: Cannot import QReader module probably due to missing zbar shared library. Exception:\n{}'.format(str(e)))
+                stdin = sys.stdin.buffer.read()
+            except AttributeError:
+                # Workaround for pytest, since pytest cannot monkeypatch sys.stdin.buffer
+                stdin = sys.stdin.read()
+            try:
+                array = frombuffer(stdin, dtype='uint8')
+            except TypeError as e:
+                abort('\nERROR: Cannot read binary stdin buffer. Exception: {}'.format(str(e)))
+            image = imdecode(array, IMREAD_UNCHANGED)
 
-            decoder = QReader()
-            decoded_text = decoder.detect_and_decode(image=image)
-            if decoded_text is None:
-                abort('\nERROR: Unable to read QR Code from file.\ninput file: {}'.format(filename))
+        if image is None:
+            abort('\nERROR: Unable to open file for reading.\ninput file: {}'.format(filename))
 
-            return [decoded_text]
-        except Exception as e:
-            abort('\nERROR: Encountered exception "{}".\ninput file: {}'.format(str(e), filename))
+        # dynamic import of QReader since this module has a dependency to zbar lib and import it only when necessary
+        try:
+            from qreader import QReader
+        except ImportError as e:
+            abort('''
+ERROR: Cannot import QReader module. This problem is probably due to the missing zbar shared library.
+On Linux and macOS libzbar0 must be installed.
+See in README.md for the installation of the libzbar0.
+Exception: {}'''.format(str(e)))
+
+        decoder = QReader()
+        decoded_text = decoder.detect_and_decode(image=image)
+        if decoded_text is None:
+            abort('\nERROR: Unable to read QR Code from file.\ninput file: {}'.format(filename))
+
+        return [decoded_text]
+    except Exception as e:
+        abort('\nERROR: Encountered exception "{}".\ninput file: {}'.format(str(e), filename))
 
 
 def get_payload_from_line(line, i, infile):
@@ -392,13 +399,12 @@ def check_file_exists(filename):
         '\ninput file: {}'.format(filename))
 
 
-def are_bytes(lines):
-    if lines and len(lines) > 0:
-        try:
-            lines[0].startswith('#')
-            return False
-        except (UnicodeDecodeError, AttributeError, TypeError):
-            return True
+def is_binary(line):
+    try:
+        line.startswith('#')
+        return False
+    except (UnicodeDecodeError, AttributeError, TypeError):
+        return True
 
 
 def eprint(*args, **kwargs):

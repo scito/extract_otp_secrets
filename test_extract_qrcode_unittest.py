@@ -23,7 +23,7 @@ from utils import Capturing
 
 import extract_otp_secret_keys
 
-class TestExtract(unittest.TestCase):
+class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_happy_path(self):
         with Capturing() as actual_output:
             extract_otp_secret_keys.main(['test/test_googleauth_export.png'])

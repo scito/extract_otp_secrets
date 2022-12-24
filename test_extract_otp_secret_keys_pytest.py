@@ -562,7 +562,7 @@ def test_img_qr_reader_from_stdin_wrong_symbol(capsys, monkeypatch):
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = '\nBinary input was given in stdin, please use = instead of -.\n'
+    expected_stderr = '\nBinary input was given in stdin, please use = instead of - as infile argument for images.\n'
 
     assert captured.err == expected_stderr
     assert captured.out == ''

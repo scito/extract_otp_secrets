@@ -69,19 +69,16 @@ Known to work with
 
 For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secret_keys version 1.4.0.
 
-### Linux and macOS
+### Shared libs installation for reading QR code images
 
-For reading QR code images the zbar lib must be installed.
+For reading QR code images the zbar library must be installed.
+If you do not extract directly from images, you do not need to install the zbar shared library.
 
-Detailed [installation documentation for pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar#installation).
+For a detailed installation documentation of [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar#installation).
 
 #### Windows
 
 The zbar DLLs are included with the Windows Python wheels. On other operating systems, you will need to install the zbar shared library.
-
-#### Mac OS X
-
-    brew install zbar
 
 #### Linux (Debian, Ubuntu, ...)
 
@@ -89,11 +86,15 @@ The zbar DLLs are included with the Windows Python wheels. On other operating sy
 
 #### Linux (OpenSUSE)
 
-    sudo zyper install libzbar0
+    sudo zypper install libzbar0
 
 #### Linux (Fedora)
 
     sudo dnf install libzbar0
+
+#### Mac OS X
+
+    brew install zbar
 
 ## Examples
 
