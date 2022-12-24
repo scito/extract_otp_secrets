@@ -31,7 +31,7 @@ cd extract_otp_secret_keys
 
 ## Program help: arguments and options
 
-<pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] infile
+<pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] infile [infile ...]
 
 positional arguments:
   infile                   1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; 2) image file containing a QR code or = for stdin for an image containing a QR code

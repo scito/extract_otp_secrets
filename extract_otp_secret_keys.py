@@ -79,7 +79,7 @@ def main(sys_args):
 def parse_args(sys_args):
     formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=52)
     arg_parser = argparse.ArgumentParser(formatter_class=formatter)
-    arg_parser.add_argument('infile', help='1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; 2) image file containing a QR code or = for stdin for an image containing a QR code')
+    arg_parser.add_argument('infile', help='1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; 2) image file containing a QR code or = for stdin for an image containing a QR code', nargs='+')
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
@@ -101,39 +101,39 @@ def extract_otps(args):
     otps = []
 
     i = j = 0
+    for infile in args.infile:
+        for line in get_lines_from_file(infile):
+            if verbose: print(line)
+            if line.startswith('#') or line == '': continue
+            i += 1
+            payload = get_payload_from_line(line, i, infile)
 
-    for line in get_lines_from_file(args.infile):
-        if verbose: print(line)
-        if line.startswith('#') or line == '': continue
-        i += 1
-        payload = get_payload_from_line(line, i, args)
+            # pylint: disable=no-member
+            for raw_otp in payload.otp_parameters:
+                j += 1
+                if verbose: print('\n{}. Secret Key'.format(j))
+                secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
+                otp_type_enum = get_enum_name_by_number(raw_otp, 'type')
+                otp_type = get_otp_type_str_from_code(raw_otp.type)
+                otp_url = build_otp_url(secret, raw_otp)
+                otp = {
+                    "name": raw_otp.name,
+                    "secret": secret,
+                    "issuer": raw_otp.issuer,
+                    "type": otp_type,
+                    "counter": raw_otp.counter if raw_otp.type == 1 else None,
+                    "url": otp_url
+                }
+                if not quiet:
+                    print_otp(otp)
+                if args.printqr:
+                    print_qr(args, otp_url)
+                if args.saveqr:
+                    save_qr(otp, args, j)
+                if not quiet:
+                    print()
 
-        # pylint: disable=no-member
-        for raw_otp in payload.otp_parameters:
-            j += 1
-            if verbose: print('\n{}. Secret Key'.format(j))
-            secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
-            otp_type_enum = get_enum_name_by_number(raw_otp, 'type')
-            otp_type = get_otp_type_str_from_code(raw_otp.type)
-            otp_url = build_otp_url(secret, raw_otp)
-            otp = {
-                "name": raw_otp.name,
-                "secret": secret,
-                "issuer": raw_otp.issuer,
-                "type": otp_type,
-                "counter": raw_otp.counter if raw_otp.type == 1 else None,
-                "url": otp_url
-            }
-            if not quiet:
-                print_otp(otp)
-            if args.printqr:
-                print_qr(args, otp_url)
-            if args.saveqr:
-                save_qr(otp, args, j)
-            if not quiet:
-                print()
-
-            otps.append(otp)
+                otps.append(otp)
 
     return otps
 
@@ -209,10 +209,10 @@ def convert_img_to_line(filename):
             abort('\nERROR: Encountered exception "{}".\ninput file: {}'.format(str(e), filename))
 
 
-def get_payload_from_line(line, i, args):
+def get_payload_from_line(line, i, infile):
     global verbose
     if not line.startswith('otpauth-migration://'):
-        eprint( '\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format( args.infile, line))
+        eprint( '\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(infile, line))
     parsed_url = urlparse(line)
     if verbose > 1: print('\nDEBUG: parsed_url={}'.format(parsed_url))
     try:
@@ -221,7 +221,7 @@ def get_payload_from_line(line, i, args):
         params = []
     if verbose > 1: print('\nDEBUG: querystring params={}'.format(params))
     if 'data' not in params:
-        abort('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format( args.infile, line))
+        abort('\nERROR: no data query parameter in input URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(infile, line))
     data_base64 = params['data'][0]
     if verbose > 1: print('\nDEBUG: data_base64={}'.format(data_base64))
     data_base64_fixed = data_base64.replace(' ', '+')
