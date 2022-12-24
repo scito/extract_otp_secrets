@@ -62,9 +62,18 @@ options:
 
     pip install -r requirements.txt
 
+Known to work with
+
+* Python 3.10.8, protobuf 4.21.9, qrcode 7.3.1, and pillow 9.2
+* Python 3.11.1, protobuf 4.21.12, qrcode 7.3.1, and pillow 9.2
+
+For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secret_keys version 1.4.0.
+
 ### Linux and macOS
 
-For reading QR codes the zbar lib must be installed
+For reading QR code images the zbar lib must be installed.
+
+Detailed [installation documentation for pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar#installation).
 
 #### Windows
 
@@ -74,16 +83,17 @@ The zbar DLLs are included with the Windows Python wheels. On other operating sy
 
     brew install zbar
 
-#### Linux
+#### Linux (Debian, Ubuntu, ...)
 
     sudo apt-get install libzbar0
 
-Known to work with
+#### Linux (OpenSUSE)
 
-* Python 3.10.8, protobuf 4.21.9, qrcode 7.3.1, and pillow 9.2
-* Python 3.11.1, protobuf 4.21.12, qrcode 7.3.1, and pillow 9.2
+    sudo zyper install libzbar0
 
-For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secret_keys version 1.4.0.
+#### Linux (Fedora)
+
+    sudo dnf install libzbar0
 
 ## Examples
 
