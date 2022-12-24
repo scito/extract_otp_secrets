@@ -1,0 +1,16 @@
+FROM python:3.11-alpine
+
+WORKDIR /extract
+
+COPY . .
+
+ARG run_tests=true
+
+RUN pip install protobuf qrcode Pillow \
+    && if [[ "$run_tests" == "true" ]] ; then /extract/run_pytest.sh test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed ; else echo "Not running tests..." ; fi
+
+WORKDIR /files
+
+ENTRYPOINT ["python", "/extract/extract_otp_secret_keys.py"]
+
+LABEL org.opencontainers.image.source https://github.com/scito/extract_otp_secret_keys

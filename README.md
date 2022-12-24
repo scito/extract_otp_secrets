@@ -20,6 +20,18 @@ cd extract_otp_secret_keys
 
 ## Usage
 
+### With builtin QR decoder
+
+1. Open "Google Authenticator" app on the mobile phone
+2. Export the QR codes from "Google Authenticator" app
+4. Save the captured QR codes as image files, e.g. example_export.png
+5. Transfer the images files to the computer where his script is installed.
+6. Call this script with the file as input:
+
+    python extract_otp_secret_keys.py example_export.png
+
+### With external QR decoder app
+
 1. Open "Google Authenticator" app on the mobile phone
 2. Export the QR codes from "Google Authenticator" app
 3. Read QR codes with a QR code reader (e.g. from another phone)
@@ -31,10 +43,10 @@ cd extract_otp_secret_keys
 
 ## Program help: arguments and options
 
-<pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] infile
+<pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] infile [infile ...]
 
 positional arguments:
-  infile                   file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored
+  infile                   1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; or 2) image file containing a QR code or = for stdin for an image containing a QR code
 
 options:
   -h, --help               show this help message and exit
@@ -44,7 +56,13 @@ options:
   --printqr, -p            print QR code(s) as text to the terminal (requires qrcode module)
   --saveqr DIR, -s DIR     save QR code(s) as images to the given folder (requires qrcode module)
   --verbose, -v            verbose output
-  --quiet, -q              no stdout output, except output set by -</pre>
+  --quiet, -q              no stdout output, except output set by -
+
+examples:
+python extract_otp_secret_keys.py example_*.txt
+python extract_otp_secret_keys.py - < example_export.txt
+python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
+python extract_otp_secret_keys.py = < example_export.png</pre>
 
 ## Dependencies
 
@@ -57,25 +75,96 @@ Known to work with
 
 For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secret_keys version 1.4.0.
 
-### Optional
+### Shared libs installation for reading QR code images
 
-For printing QR codes, the qrcode module is required, otherwise it can be omitted.
+For reading QR code images the zbar library must be installed.
+If you do not extract directly from images, you do not need to install the zbar shared library.
 
-    pip install qrcode[pil]
+For a detailed installation documentation of [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar#installation).
+
+#### Windows
+
+The zbar DLLs are included with the Windows Python wheels. On other operating systems, you will need to install the zbar shared library.
+
+#### Linux (Debian, Ubuntu, ...)
+
+    sudo apt-get install libzbar0
+
+#### Linux (OpenSUSE)
+
+    sudo zypper install libzbar0
+
+#### Linux (Fedora)
+
+    sudo dnf install libzbar0
+
+#### Mac OS X
+
+    brew install zbar
+
+## Examples
+
+### Printing otp secrets form text file
+
+    python extract_otp_secret_keys.py example_export.txt
+
+### Printing otp secrets from image file
+
+    python extract_otp_secret_keys.py example_export.png
+
+### Printing otp secrets multiple files
+
+    python extract_otp_secret_keys.py example_*.txt
+    python extract_otp_secret_keys.py example_*.png
+    python extract_otp_secret_keys.py example_export.*
+    python extract_otp_secret_keys.py example_*.txt example_*.png
+
+### Printing otp secrets from stdin (text)
+
+    python extract_otp_secret_keys.py - < example_export.txt
+
+### Printing otp secrets from stdin (image)
+
+    python extract_otp_secret_keys.py = < example_export.png
+
+### Printing otp secrets csv to stdout
+
+    python extract_otp_secret_keys.py --csv - example_export.txt
+
+### Printing otp secrets csv to stdout without header line
+
+    python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
+
+### Reading from stdin and printing to stdout
+
+    cat example_*.txt | python extract_otp_secret_keys.py --csv - - | tail -n+2
 
 ## Features
 
 * Free and open source
-* Supports Google Authenticator export
+* Supports Google Authenticator exports (and compatible apps like Aegis Authenticator)
 * All functionality in one Python script: extract_otp_secret_keys.py (except protobuf generated code in protobuf_generated_python)
 * Supports TOTP and HOTP
 * Generates QR codes
-* Various export formats:
+* Reads QR Code images
+* Exports to various formats:
     * CSV
     * JSON
     * Dedicated CSV for KeePass
     * QR code images
-* Supports reading from stdin and writing to stdout by specifying '-'
+* Supports reading from stdin and writing to stdout
+* Reads from various import image formats containing export QR codes: (See [OpenCV docu](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
+    * Portable Network Graphics - *.png
+    * WebP - *.webp
+    * JPEG files - *.jpeg, *.jpg, *.jpe
+    * TIFF files - *.tiff, *.tif
+    * Windows bitmaps - *.bmp, *.dib
+    * JPEG 2000 files - *.jp2
+    * Portable image format - *.pbm, *.pgm, *.ppm *.pxm, *.pnm
+    * Sun rasters - *.sr, *.ras
+    * OpenEXR Image files - *.exr
+    * Radiance HDR - *.hdr, *.pic
+    * Raster and Vector geospatial data supported by GDAL
 * Errors and warnings are written to stderr
 * Many ways to run the script:
     * Native Python
@@ -85,6 +174,10 @@ For printing QR codes, the qrcode module is required, otherwise it can be omitte
     * VSCode devcontainer
     * devbox
     * pip
+* Compatible with multiple platforms (tested by CI):
+    * Linux
+    * macOS
+    * Windows
 
 ## KeePass
 
@@ -216,9 +309,28 @@ Install [Docker](https://docs.docker.com/get-docker/).
 Build and run the app within the container:
 
 ```bash
-docker build . -t extract_otp
-docker run --rm -v "$(pwd)":/files:ro extract_otp -p example_export.txt
+docker build . -t extract_otp_secret_keys --pull
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys example_export.txt
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys example_export.png
 ```
+
+docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys = < example_export.png
+docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
+docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
+
+docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull
+docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull --build-arg run_tests=false
+docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader
+docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader"
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader example_export.txt
+docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys_no_qr_reader - < example_export.txt
+docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull && docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader" -vvv --relaxed -s
+
+docker pull scit0/extract_otp_secret_keys
+docker pull scit0/extract_otp_secret_keys_no_qr_reader
+
+docker pull ghcr.io/scito/extract_otp_secret_keys
+docker pull ghcr.io/scito/extract_otp_secret_keys_no_qr_reader
 
 ## Tests
 
@@ -268,6 +380,8 @@ pip install -U -r requirements.txt
 * [ZBar](https://github.com/mchehab/zbar) is an open source software suite for reading bar codes from various sources, including webcams.
 * [Aegis Authenticator](https://github.com/beemdevelopment/Aegis) is a free, secure and open source 2FA app for Android.
 * [Android OTP Extractor](https://github.com/puddly/android-otp-extractor) can extract your tokens from popular Android OTP apps and export them in a standard format or just display them as QR codes for easy importing. [Requires a _rooted_ Android phone.]
+* [Python QReader](https://github.com/Eric-Canas/QReader)
+* [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar)
 
 ***
 
