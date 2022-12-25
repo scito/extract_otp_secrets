@@ -41,18 +41,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# TODO optimze imports
 import argparse
 import base64
-import fileinput
-import sys
 import csv
+import fileinput
 import json
-from cv2 import imread, imdecode, IMREAD_UNCHANGED
-from urllib.parse import parse_qs, urlencode, urlparse, quote
-from os import path, makedirs
-from re import compile as rcompile
-from numpy import frombuffer
+import os
+import re
+import sys
+import urllib.parse as urlparse
+
+import cv2
+import numpy
+
 import protobuf_generated_python.google_auth_pb2
 
 
@@ -79,7 +80,7 @@ def main(sys_args):
 def parse_args(sys_args):
     formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=52)
     arg_parser = argparse.ArgumentParser(formatter_class=formatter)
-    arg_parser.add_argument('infile', help='1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; 2) image file containing a QR code or = for stdin for an image containing a QR code', nargs='+')
+    arg_parser.add_argument('infile', help='1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; or 2) image file containing a QR code or = for stdin for an image containing a QR code', nargs='+')
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
@@ -180,7 +181,7 @@ def convert_img_to_line(filename):
     if verbose: print('Reading image {}'.format(filename))
     try:
         if filename != '=':
-            image = imread(filename)
+            image = cv2.imread(filename)
         else:
             try:
                 stdin = sys.stdin.buffer.read()
@@ -188,10 +189,10 @@ def convert_img_to_line(filename):
                 # Workaround for pytest, since pytest cannot monkeypatch sys.stdin.buffer
                 stdin = sys.stdin.read()
             try:
-                array = frombuffer(stdin, dtype='uint8')
+                array = numpy.frombuffer(stdin, dtype='uint8')
             except TypeError as e:
                 abort('\nERROR: Cannot read binary stdin buffer. Exception: {}'.format(str(e)))
-            image = imdecode(array, IMREAD_UNCHANGED)
+            image = cv2.imdecode(array, cv2.IMREAD_UNCHANGED)
 
         if image is None:
             abort('\nERROR: Unable to open file for reading.\ninput file: {}'.format(filename))
@@ -220,10 +221,10 @@ def get_payload_from_line(line, i, infile):
     global verbose
     if not line.startswith('otpauth-migration://'):
         eprint( '\nWARN: line is not a otpauth-migration:// URL\ninput file: {}\nline "{}"\nProbably a wrong file was given'.format(infile, line))
-    parsed_url = urlparse(line)
+    parsed_url = urlparse.urlparse(line)
     if verbose > 1: print('\nDEBUG: parsed_url={}'.format(parsed_url))
     try:
-        params = parse_qs(parsed_url.query, strict_parsing=True)
+        params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
     except:  # Not necessary for Python >= 3.11
         params = []
     if verbose > 1: print('\nDEBUG: querystring params={}'.format(params))
@@ -264,7 +265,7 @@ def build_otp_url(secret, raw_otp):
     url_params = {'secret': secret}
     if raw_otp.type == 1: url_params['counter'] = raw_otp.counter
     if raw_otp.issuer: url_params['issuer'] = raw_otp.issuer
-    otp_url = 'otpauth://{}/{}?'.format(get_otp_type_str_from_code(raw_otp.type), quote(raw_otp.name)) + urlencode( url_params)
+    otp_url = 'otpauth://{}/{}?'.format(get_otp_type_str_from_code(raw_otp.type), urlparse.quote(raw_otp.name)) + urlparse.urlencode( url_params)
     return otp_url
 
 
@@ -281,8 +282,8 @@ def print_otp(otp):
 
 def save_qr(otp, args, j):
     dir = args.saveqr
-    if not (path.exists(dir)): makedirs(dir, exist_ok=True)
-    pattern = rcompile(r'[\W_]+')
+    if not (os.path.exists(dir)): os.makedirs(dir, exist_ok=True)
+    pattern = re.compile(r'[\W_]+')
     file_otp_name = pattern.sub('', otp['name'])
     file_otp_issuer = pattern.sub('', otp['issuer'])
     save_qr_file(args, otp['url'], '{}/{}-{}{}.png'.format(dir, j, file_otp_name, '-' + file_otp_issuer if file_otp_issuer else ''))
@@ -374,7 +375,7 @@ def has_otp_type(otps, otp_type):
 
 def add_pre_suffix(file, pre_suffix):
     '''filename.ext, pre -> filename.pre.ext'''
-    name, ext = path.splitext(file)
+    name, ext = os.path.splitext(file)
     return name + "." + pre_suffix + (ext if ext else "")
 
 
@@ -394,7 +395,7 @@ def open_file_or_stdout_for_csv(filename):
 
 
 def check_file_exists(filename):
-    if filename != '-' and not path.isfile(filename):
+    if filename != '-' and not os.path.isfile(filename):
         abort('\nERROR: Input file provided is non-existent or not a file.'
         '\ninput file: {}'.format(filename))
 

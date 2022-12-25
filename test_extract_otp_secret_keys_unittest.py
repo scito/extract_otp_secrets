@@ -22,8 +22,8 @@ import unittest
 import io
 from contextlib import redirect_stdout
 from utils import read_csv, read_json, remove_file, remove_dir_with_files, Capturing, read_file_to_str
-from os import path
-from sys import implementation
+import os
+import sys
 
 import extract_otp_secret_keys
 
@@ -160,13 +160,13 @@ Type:    totp
     def test_extract_saveqr(self):
         extract_otp_secret_keys.main(['-q', '-s', 'testout/qr/', 'example_export.txt'])
 
-        self.assertTrue(path.isfile('testout/qr/1-piraspberrypi-raspberrypi.png'))
-        self.assertTrue(path.isfile('testout/qr/2-piraspberrypi.png'))
-        self.assertTrue(path.isfile('testout/qr/3-piraspberrypi.png'))
-        self.assertTrue(path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png'))
+        self.assertTrue(os.path.isfile('testout/qr/1-piraspberrypi-raspberrypi.png'))
+        self.assertTrue(os.path.isfile('testout/qr/2-piraspberrypi.png'))
+        self.assertTrue(os.path.isfile('testout/qr/3-piraspberrypi.png'))
+        self.assertTrue(os.path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png'))
 
     def test_extract_verbose(self):
-        if implementation.name == 'pypy': self.skipTest("Encoding problems in verbose mode in pypy.")
+        if sys.implementation.name == 'pypy': self.skipTest("Encoding problems in verbose mode in pypy.")
         out = io.StringIO()
         with redirect_stdout(out):
             extract_otp_secret_keys.main(['-v', 'example_export.txt'])

@@ -18,13 +18,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from utils import read_csv, read_csv_str, read_json, read_json_str, remove_files, remove_dir_with_files, read_file_to_str, read_binary_file_as_stream, file_exits
-from os import path
-from pytest import raises, mark
-from io import StringIO, BytesIO
-from sys import implementation, stdin
+import io
+import os
+import sys
+
+from pytest import mark, raises
 
 import extract_otp_secret_keys
+from utils import (file_exits, read_binary_file_as_stream, read_csv,
+                   read_csv_str, read_file_to_str, read_json, read_json_str,
+                   remove_dir_with_files, remove_files)
 
 
 def test_extract_stdout(capsys):
@@ -71,7 +74,7 @@ def test_extract_non_existent_file(capsys):
 
 def test_extract_stdin_stdout(capsys, monkeypatch):
     # Arrange
-    monkeypatch.setattr('sys.stdin', StringIO(read_file_to_str('example_export.txt')))
+    monkeypatch.setattr('sys.stdin', io.StringIO(read_file_to_str('example_export.txt')))
 
     # Act
     extract_otp_secret_keys.main(['-'])
@@ -85,7 +88,7 @@ def test_extract_stdin_stdout(capsys, monkeypatch):
 
 def test_extract_stdin_stdout_wrong_symbol(capsys, monkeypatch):
     # Arrange
-    monkeypatch.setattr('sys.stdin', StringIO(read_file_to_str('example_export.txt')))
+    monkeypatch.setattr('sys.stdin', io.StringIO(read_file_to_str('example_export.txt')))
 
     # Act
     with raises(SystemExit) as e:
@@ -149,7 +152,7 @@ def test_extract_csv_stdout(capsys):
 def test_extract_stdin_and_csv_stdout(capsys, monkeypatch):
     # Arrange
     cleanup()
-    monkeypatch.setattr('sys.stdin', StringIO(read_file_to_str('example_export.txt')))
+    monkeypatch.setattr('sys.stdin', io.StringIO(read_file_to_str('example_export.txt')))
 
     # Act
     extract_otp_secret_keys.main(['-c', '-', '-'])
@@ -347,16 +350,16 @@ def test_extract_saveqr(capsys):
     assert captured.out == ''
     assert captured.err == ''
 
-    assert path.isfile('testout/qr/1-piraspberrypi-raspberrypi.png')
-    assert path.isfile('testout/qr/2-piraspberrypi.png')
-    assert path.isfile('testout/qr/3-piraspberrypi.png')
-    assert path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png')
+    assert os.path.isfile('testout/qr/1-piraspberrypi-raspberrypi.png')
+    assert os.path.isfile('testout/qr/2-piraspberrypi.png')
+    assert os.path.isfile('testout/qr/3-piraspberrypi.png')
+    assert os.path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png')
 
     # Clean up
     cleanup()
 
 
-@mark.skipif(implementation.name == 'pypy', reason="Encoding problems in verbose mode in pypy.")
+@mark.skipif(sys.implementation.name == 'pypy', reason="Encoding problems in verbose mode in pypy.")
 def test_extract_verbose(capsys):
     # Act
     extract_otp_secret_keys.main(['-v', 'example_export.txt'])

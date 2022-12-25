@@ -17,7 +17,7 @@ import csv
 import json
 import os
 import shutil
-from io import StringIO, BytesIO
+import io
 import sys
 import glob
 
@@ -31,9 +31,9 @@ with Capturing() as output:
 '''
     def __enter__(self):
         self._stdout = sys.stdout
-        sys.stdout = self._stringio_std = StringIO()
+        sys.stdout = self._stringio_std = io.StringIO()
         self._stderr = sys.stderr
-        sys.stderr = self._stringio_err = StringIO()
+        sys.stderr = self._stringio_err = io.StringIO()
         return self
 
     def __exit__(self, *args):
@@ -106,4 +106,4 @@ def read_file_to_str(filename):
 def read_binary_file_as_stream(filename):
     """Returns binary file content."""
     with open(filename, "rb",) as infile:
-        return BytesIO(infile.read())
+        return io.BytesIO(infile.read())
