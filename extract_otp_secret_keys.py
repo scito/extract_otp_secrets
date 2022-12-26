@@ -45,6 +45,7 @@ import argparse
 import base64
 import csv
 import fileinput
+import importlib
 import json
 import os
 import re
@@ -63,11 +64,12 @@ def sys_main():
 
 
 def main(sys_args):
-    global verbose, quiet
+    global verbose, quiet, qreader_available
 
     # allow to use sys.stdout with with (avoid closing)
     sys.stdout.close = lambda: None
     # sys.stdout.reconfigure(encoding='utf-8')
+
 
     args = parse_args(sys_args)
     verbose = args.verbose if args.verbose else 0
@@ -80,8 +82,15 @@ def main(sys_args):
 
 
 def parse_args(sys_args):
-    formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=52)
-    arg_parser = argparse.ArgumentParser(formatter_class=formatter)
+    formatter = lambda prog: argparse.RawDescriptionHelpFormatter(prog, max_help_position=52)
+    example_text = '''examples:
+python extract_otp_secret_keys.py example_*.txt
+python extract_otp_secret_keys.py - < example_export.txt
+python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
+python extract_otp_secret_keys.py = < example_export.png'''
+
+    arg_parser = argparse.ArgumentParser(formatter_class=formatter,
+                                         epilog=example_text)
     arg_parser.add_argument('infile', help='1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; or 2) image file containing a QR code or = for stdin for an image containing a QR code', nargs='+')
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
@@ -145,6 +154,7 @@ def extract_otps(args):
 
 
 def get_lines_from_file(filename):
+    global qreader_available
     # stdin stream cannot be rewinded, thus distinguish, use - for utf-8 stdin and = for binary image stdin
     if filename != '=':
         check_file_exists(filename)
@@ -420,6 +430,11 @@ def is_binary(line):
         return False
     except (UnicodeDecodeError, AttributeError, TypeError):
         return True
+
+
+def check_module_available(module_name):
+    module_spec = importlib.util.find_spec(module_name)
+    return module_spec is not None
 
 
 def eprint(*args, **kwargs):

@@ -4,9 +4,10 @@ WORKDIR /extract
 
 COPY . .
 
-RUN apt-get update && apt-get install -y libzbar0 python3-opencv \
-    && pip install -r requirements.txt
+RUN apt-get update && apt-get install -y libzbar0 python3-opencv nano \
+    && pip install -r requirements.txt \
+    && /extract/run_pytest.sh
 
 WORKDIR /files
 
-ENTRYPOINT [ "python", "/extract/extract_otp_secret_keys.py" ]
+ENTRYPOINT ["python", "/extract/extract_otp_secret_keys.py"]

@@ -28,6 +28,8 @@ import pytest
 import extract_otp_secret_keys
 from utils import *
 
+qreader_available = extract_otp_secret_keys.check_module_available('cv2')
+
 
 def test_extract_stdout(capsys):
     # Act
@@ -100,20 +102,31 @@ def test_extract_stdin_empty(capsys, monkeypatch):
     assert captured.err == 'WARN: stdin is empty\n'
 
 
-def test_extract_empty_file(capsys):
-    # Act
-    with pytest.raises(SystemExit) as e:
+# @pytest.mark.skipif(not qreader_available, reason='Test if cv2 and qreader are not available.')
+def test_extract_empty_file_no_qreader(capsys):
+    if qreader_available:
+        # Act
+        with pytest.raises(SystemExit) as e:
+            extract_otp_secret_keys.main(['test/empty_file.txt'])
+
+        # Assert
+        captured = capsys.readouterr()
+
+        expected_stderr = 'WARN: test/empty_file.txt is empty\n\nERROR: Unable to open file for reading.\ninput file: test/empty_file.txt\n'
+
+        assert captured.err == expected_stderr
+        assert captured.out == ''
+        assert e.value.code == 1
+        assert e.type == SystemExit
+    else:
+        # Act
         extract_otp_secret_keys.main(['test/empty_file.txt'])
 
-    # Assert
-    captured = capsys.readouterr()
+        # Assert
+        captured = capsys.readouterr()
 
-    expected_stderr = 'WARN: test/empty_file.txt is empty\n\nERROR: Unable to open file for reading.\ninput file: test/empty_file.txt\n'
-
-    assert captured.err == expected_stderr
-    assert captured.out == ''
-    assert e.value.code == 1
-    assert e.type == SystemExit
+        assert captured.err == ''
+        assert captured.out == ''
 
 
 @pytest.mark.qreader

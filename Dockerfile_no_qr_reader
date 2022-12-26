@@ -4,8 +4,9 @@ WORKDIR /extract
 
 COPY . .
 
-RUN pip install protobuf qrcode Pillow
+RUN pip install protobuf qrcode Pillow \
+    && /extract/run_pytest.sh test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed
 
 WORKDIR /files
 
-ENTRYPOINT [ "python", "/extract/extract_otp_secret_keys.py" ]
+ENTRYPOINT ["python", "/extract/extract_otp_secret_keys.py"]
