@@ -303,9 +303,21 @@ Install [Docker](https://docs.docker.com/get-docker/).
 Build and run the app within the container:
 
 ```bash
-docker build . -t extract_otp
-docker run --rm -v "$(pwd)":/files:ro extract_otp -p example_export.txt
+docker build . -t extract_otp_secret_keys --pull
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys example_export.txt
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys example_export.png
 ```
+
+docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys = < example_export.png
+docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
+docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
+
+docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull
+docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader
+docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader"
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader example_export.txt
+docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys_no_qr_reader - < example_export.txt
+docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull && docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader" -vvv --relaxed -s
 
 ## Tests
 

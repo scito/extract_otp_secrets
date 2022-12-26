@@ -51,11 +51,12 @@ import re
 import sys
 import urllib.parse as urlparse
 
-import cv2
-import numpy
-
 import protobuf_generated_python.google_auth_pb2
 
+# These dynamic import are below:
+# import cv2
+# import numpy
+# from qreader import QReader
 
 def sys_main():
     main(sys.argv[1:])
@@ -66,6 +67,7 @@ def main(sys_args):
 
     # allow to use sys.stdout with with (avoid closing)
     sys.stdout.close = lambda: None
+    # sys.stdout.reconfigure(encoding='utf-8')
 
     args = parse_args(sys_args)
     verbose = args.verbose if args.verbose else 0
@@ -147,7 +149,7 @@ def get_lines_from_file(filename):
     if filename != '=':
         check_file_exists(filename)
         lines = read_lines_from_text_file(filename)
-        if lines:
+        if lines or filename == '-':
             return lines
 
     # could not process text file, try reading as image
@@ -166,6 +168,8 @@ def read_lines_from_text_file(filename):
                 abort('\nBinary input was given in stdin, please use = instead of - as infile argument for images.')
             # unfortunately yield line leads to random test fails
             lines.append(line)
+        if not lines:
+            eprint("WARN: {} is empty".format(filename.replace('-', 'stdin')))
         return lines
     except UnicodeDecodeError:
         if filename == '-':
@@ -178,6 +182,12 @@ def read_lines_from_text_file(filename):
 
 
 def convert_img_to_line(filename):
+    try:
+        import cv2
+        import numpy
+    except Exception as e:
+        eprint("WARNING: No cv2 or numpy module installed. Exception: {}".format(str(e)))
+        return []
     if verbose: print('Reading image {}'.format(filename))
     try:
         if filename != '=':
@@ -188,11 +198,15 @@ def convert_img_to_line(filename):
             except AttributeError:
                 # Workaround for pytest, since pytest cannot monkeypatch sys.stdin.buffer
                 stdin = sys.stdin.read()
+            if not stdin:
+                eprint("WARN: stdin is empty")
             try:
-                array = numpy.frombuffer(stdin, dtype='uint8')
+                img_array = numpy.frombuffer(stdin, dtype='uint8')
             except TypeError as e:
                 abort('\nERROR: Cannot read binary stdin buffer. Exception: {}'.format(str(e)))
-            image = cv2.imdecode(array, cv2.IMREAD_UNCHANGED)
+            if not img_array.size:
+                return []
+            image = cv2.imdecode(img_array, cv2.IMREAD_UNCHANGED)
 
         if image is None:
             abort('\nERROR: Unable to open file for reading.\ninput file: {}'.format(filename))

@@ -14,12 +14,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import csv
+import glob
+import io
 import json
 import os
+import re
 import shutil
-import io
 import sys
-import glob
 
 
 # Ref. https://stackoverflow.com/a/16571630
@@ -107,3 +108,17 @@ def read_binary_file_as_stream(filename):
     """Returns binary file content."""
     with open(filename, "rb",) as infile:
         return io.BytesIO(infile.read())
+
+def replace_escaped_octal_utf8_bytes_with_str(str):
+    encoded_name_strings = re.findall(r'name: .*$', str, flags=re.MULTILINE)
+    for encoded_name_string in encoded_name_strings:
+        escaped_bytes = re.findall(r'((?:\\[0-9]+)+)', encoded_name_string)
+        for byte_sequence in escaped_bytes:
+            unicode_str = b''.join([int(byte, 8).to_bytes(1) for byte in byte_sequence.split('\\') if byte]).decode('utf-8')
+            print("Replace '{}' by '{}'".format(byte_sequence, unicode_str))
+            str = str.replace(byte_sequence, unicode_str)
+    return str
+
+
+def quick_and_dirty_workaround_encoding_problem(str):
+    return re.sub(r'name: "encoding: .*$', '', str, flags=re.MULTILINE)
