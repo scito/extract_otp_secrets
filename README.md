@@ -46,7 +46,7 @@ cd extract_otp_secret_keys
 <pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] infile [infile ...]
 
 positional arguments:
-  infile                   1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; 2) image file containing a QR code or = for stdin for an image containing a QR code
+  infile                   1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; or 2) image file containing a QR code or = for stdin for an image containing a QR code
 
 options:
   -h, --help               show this help message and exit
@@ -56,7 +56,13 @@ options:
   --printqr, -p            print QR code(s) as text to the terminal (requires qrcode module)
   --saveqr DIR, -s DIR     save QR code(s) as images to the given folder (requires qrcode module)
   --verbose, -v            verbose output
-  --quiet, -q              no stdout output, except output set by -</pre>
+  --quiet, -q              no stdout output, except output set by -
+
+examples:
+python extract_otp_secret_keys.py example_*.txt
+python extract_otp_secret_keys.py - < example_export.txt
+python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
+python extract_otp_secret_keys.py = < example_export.png</pre>
 
 ## Dependencies
 
@@ -318,6 +324,12 @@ docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extrac
 docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader example_export.txt
 docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys_no_qr_reader - < example_export.txt
 docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull && docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader" -vvv --relaxed -s
+
+docker pull scit0/extract_otp_secret_keys
+docker pull scit0/extract_otp_secret_keys_no_qr_reader
+
+docker pull ghcr.io/scito/extract_otp_secret_keys
+docker pull ghcr.io/scito/extract_otp_secret_keys_no_qr_reader
 
 ## Tests
 
