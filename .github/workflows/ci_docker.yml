@@ -48,10 +48,11 @@ jobs:
           file: Dockerfile_no_qr_reader
           # Note: tags has to be all lower-case
           tags: |
-            scito/extract_otp_secret_keys:latest
-            ghcr.io/scito/extract_otp_secret_keys:latest
+            scito/extract_otp_secret_keys_no_qr_reader:latest
+            ghcr.io/scito/extract_otp_secret_keys_no_qr_reader:latest
           # build on feature branches, push only on master branch
-          # push: ${{ github.ref == 'refs/heads/master' }}
+          # TODO push: ${{ github.ref == 'refs/heads/master' }}
+          push: true
 
       - name: "qr_reader: Build image and push to Docker Hub and GitHub Container Registry"
         uses: docker/build-push-action@v2
@@ -63,7 +64,8 @@ jobs:
             scito/extract_otp_secret_keys:latest
             ghcr.io/scito/extract_otp_secret_keys:latest
           # build on feature branches, push only on master branch
-          # push: ${{ github.ref == 'refs/heads/master' }}
+          # TODO push: ${{ github.ref == 'refs/heads/master' }}
+          push: true
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
