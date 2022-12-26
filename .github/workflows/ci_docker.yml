@@ -48,7 +48,7 @@ jobs:
           file: Dockerfile_no_qr_reader
           # Note: tags has to be all lower-case
           tags: |
-            scito/extract_otp_secret_keys_no_qr_reader:latest
+            scit0/extract_otp_secret_keys_no_qr_reader:latest
             ghcr.io/scito/extract_otp_secret_keys_no_qr_reader:latest
           # build on feature branches, push only on master branch
           # TODO push: ${{ github.ref == 'refs/heads/master' }}
@@ -61,7 +61,7 @@ jobs:
           context: .
           # Note: tags has to be all lower-case
           tags: |
-            scito/extract_otp_secret_keys:latest
+            scit0/extract_otp_secret_keys:latest
             ghcr.io/scito/extract_otp_secret_keys:latest
           # build on feature branches, push only on master branch
           # TODO push: ${{ github.ref == 'refs/heads/master' }}
