@@ -114,7 +114,7 @@ def replace_escaped_octal_utf8_bytes_with_str(str):
     for encoded_name_string in encoded_name_strings:
         escaped_bytes = re.findall(r'((?:\\[0-9]+)+)', encoded_name_string)
         for byte_sequence in escaped_bytes:
-            unicode_str = b''.join([int(byte, 8).to_bytes(1) for byte in byte_sequence.split('\\') if byte]).decode('utf-8')
+            unicode_str = b''.join([int(byte, 8).to_bytes(1, 'little') for byte in byte_sequence.split('\\') if byte]).decode('utf-8')
             print("Replace '{}' by '{}'".format(byte_sequence, unicode_str))
             str = str.replace(byte_sequence, unicode_str)
     return str
