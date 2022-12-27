@@ -10,3 +10,5 @@ RUN pip install protobuf qrcode Pillow \
 WORKDIR /files
 
 ENTRYPOINT ["python", "/extract/extract_otp_secret_keys.py"]
+
+LABEL org.opencontainers.image.source https://github.com/scito/extract_otp_secret_keys
