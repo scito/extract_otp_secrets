@@ -5,10 +5,12 @@ WORKDIR /extract
 COPY . .
 
 ARG run_tests=true
+ARG TARGETPLATFORM
 
-RUN apk add zlib-dev nano \
+RUN apk add nano \
+    && if [[ "$TARGETPLATFORM" == "linux/arm64" ]]; then apk add zlib-dev jpeg-dev; fi \
     && pip install protobuf qrcode Pillow \
-    && if [[ "$run_tests" == "true" ]] ; then /extract/run_pytest.sh test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed ; else echo "Not running tests..." ; fi
+    && if [[ "$run_tests" == "true" ]]; then /extract/run_pytest.sh test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed; else echo "Not running tests..."; fi
 
 WORKDIR /files
 
