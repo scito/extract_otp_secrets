@@ -5,9 +5,10 @@ WORKDIR /extract
 COPY . .
 
 ARG run_tests=true
-ARG TARGETPLATFORM
 
 RUN apk add nano \
+    && echo "TARGETARCH: $TARGETARCH" \
+    && echo "BUILDARCH: $BUILDARCH" \
     && if [[ "$TARGETARCH" == "arm64" ]]; then apk add zlib-dev jpeg-dev; fi \
     && pip install protobuf qrcode Pillow \
     && if [[ "$run_tests" == "true" ]]; then /extract/run_pytest.sh test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed; else echo "Not running tests..."; fi
