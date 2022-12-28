@@ -8,13 +8,20 @@ protobuf = "*"
 qrcode = "*"
 pillow = "*"
 qreader = "*"
-opencv-python = "*"
+opencv-contrib-python = "*"
+colorama = ">=0.4.6"
+# for macOS: opencv-contrib-python = "<=4.7.0"
+# for PYTHON <= 3.7: typing_extensions = "*"
 
 [dev-packages]
 pytest = "*"
+pytest-mock = "*"
+pytest-cov = "*"
 wheel = "*"
 flake8 = "*"
 pylint = "*"
+mypy = "*"
+types-protobuf = "*"
 
 [requires]
 python_version = "3.11"

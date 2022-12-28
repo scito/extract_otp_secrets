@@ -1,4 +1,10 @@
-wheel
-pytest
 flake8
+mypy
+types-protobuf
 pylint
+pytest
+pytest-mock
+pytest-cov
+setuptools
+wheel
+build

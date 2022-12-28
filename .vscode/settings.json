@@ -2,7 +2,7 @@
     "python.testing.pytestArgs": [
         "."
     ],
-    "python.testing.unittestEnabled": false,
+    "python.testing.unittestEnabled": true,
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
         "devbox",
@@ -16,5 +16,9 @@
         "qrcode",
         "TOTP",
         "venv"
-    ]
+    ],
+    "search.exclude": {
+        "**/build": true,
+        "**/dist": true
+      },
 }
