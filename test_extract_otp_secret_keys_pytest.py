@@ -433,21 +433,37 @@ def test_extract_help(capsys):
     assert e.type == SystemExit
     assert e.value.code == 0
 
-@pytest.mark.skipif(qreader_available, reason="Cannot test interactive mode")
-def test_extract_no_arguments(capsys):
-    # Act
-    with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main([])
+def test_extract_no_arguments(capsys, mocker):
+    if qreader_available:
+        # Arrange
+        otps = read_json('example_output.json')
+        mocker.patch('extract_otp_secret_keys.extract_otps_from_camera', return_value=otps)
 
-    # Assert
-    captured = capsys.readouterr()
+        # Act
+        extract_otp_secret_keys.main(['-c', '-'])
 
-    expected_err_msg = 'error: the following arguments are required: infile'
+        # Assert
+        captured = capsys.readouterr()
 
-    assert expected_err_msg in captured.err
-    assert captured.out == ''
-    assert e.value.code == 2
-    assert e.type == SystemExit
+        expected_csv = read_csv('example_output.csv')
+        actual_csv = read_csv_str(captured.out)
+
+        assert actual_csv == expected_csv
+        assert captured.err == ''
+    else:
+        # Act
+        with pytest.raises(SystemExit) as e:
+            extract_otp_secret_keys.main([])
+
+        # Assert
+        captured = capsys.readouterr()
+
+        expected_err_msg = 'error: the following arguments are required: infile'
+
+        assert expected_err_msg in captured.err
+        assert captured.out == ''
+        assert e.value.code == 2
+        assert e.type == SystemExit
 
 
 def test_verbose_and_quiet(capsys):

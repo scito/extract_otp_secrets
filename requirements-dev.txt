@@ -2,3 +2,4 @@ wheel
 pytest
 flake8
 pylint
+pytest-mock
