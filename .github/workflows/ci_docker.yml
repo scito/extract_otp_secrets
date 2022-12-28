@@ -54,6 +54,8 @@ jobs:
           tags: |
             scit0/extract_otp_secret_keys_no_qr_reader:latest
             ghcr.io/scito/extract_otp_secret_keys_no_qr_reader:latest
+            scit0/extract_otp_secret_keys:latest-no-qreader
+            ghcr.io/scito/extract_otp_secret_keys:latest-no-qreader
           # build on feature branches, push only on master branch
           # TODO push: ${{ github.ref == 'refs/heads/master' }}
           push: true

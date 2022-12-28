@@ -179,7 +179,7 @@ Type:    totp
     def test_extract_debug(self):
         out = io.StringIO()
         with redirect_stdout(out):
-            extract_otp_secret_keys.main(['-vv', 'example_export.txt'])
+            extract_otp_secret_keys.main(['-vvv', 'example_export.txt'])
         actual_output = out.getvalue()
 
         expected_stdout = read_file_to_str('test/print_verbose_output.txt')

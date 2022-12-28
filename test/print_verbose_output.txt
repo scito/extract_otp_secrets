@@ -2,6 +2,7 @@ Input files: ['example_export.txt']
 Processing infile example_export.txt
 Reading lines of example_export.txt
 # 2FA example from https://www.raspberrypi.org/blog/setting-up-two-factor-authentication-on-your-raspberry-pi/
+
 # Secret key: 7KSQL2JTUDIS5EF65KLMRQIIGY
 # otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
 otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B
@@ -20,6 +21,7 @@ otpauth-migration://offline?data=CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAE
 # Name: "encoding: ¿äÄéÉ? (demo)"
 otpauth-migration://offline?data=CjYKEPqlBekzoNEukL7qlsjBCDYSHGVuY29kaW5nOiDCv8Okw4TDqcOJPyAoZGVtbykgASgBMAIQARgBIAAorfCurv%2F%2F%2F%2F%2F%2FAQ%3D%3D
 # 2FA example from https://www.raspberrypi.org/blog/setting-up-two-factor-authentication-on-your-raspberry-pi/
+
 # Secret key: 7KSQL2JTUDIS5EF65KLMRQIIGY
 # otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
 otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B
@@ -157,4 +159,4 @@ Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Type:    totp
 otpauth://totp/encoding%3A%20%C2%BF%C3%A4%C3%84%C3%A9%C3%89%3F%20%28demo%29?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
 
-1 infile(s) processed
+1 infile processed

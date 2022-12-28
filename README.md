@@ -20,7 +20,16 @@ cd extract_otp_secret_keys
 
 ## Usage
 
-### With builtin QR decoder
+### Capture QR codes from camera
+
+1. Open "Google Authenticator" app on the mobile phone
+2. Export the QR codes from "Google Authenticator" app
+3. Point the QR codes to the camera of your computer
+4. Call this script with the file as input:
+
+    python extract_otp_secret_keys.py
+
+### With builtin QR decoder from image files
 
 1. Open "Google Authenticator" app on the mobile phone
 2. Export the QR codes from "Google Authenticator" app
@@ -30,7 +39,7 @@ cd extract_otp_secret_keys
 
     python extract_otp_secret_keys.py example_export.png
 
-### With external QR decoder app
+### With external QR decoder app from text files
 
 1. Open "Google Authenticator" app on the mobile phone
 2. Export the QR codes from "Google Authenticator" app
@@ -43,22 +52,28 @@ cd extract_otp_secret_keys
 
 ## Program help: arguments and options
 
-<pre>usage: extract_otp_secret_keys.py [-h] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] infile [infile ...]
+<pre>usage: extract_otp_secret_keys.py [-h] [--camera NUMBER] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] [infile ...]
+
+Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app.
+If no infiles are provided, the QR codes are interactively captured from the camera.
 
 positional arguments:
-  infile                   1) file or - for stdin with "otpauth-migration://..." URLs separated by newlines, lines starting with # are ignored; or 2) image file containing a QR code or = for stdin for an image containing a QR code
+  infile                      a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
+                              b) image file containing a QR code or = for stdin for an image containing a QR code
 
 options:
-  -h, --help               show this help message and exit
-  --json FILE, -j FILE     export json file or - for stdout
-  --csv FILE, -c FILE      export csv file or - for stdout
-  --keepass FILE, -k FILE  export totp/hotp csv file(s) for KeePass, - for stdout
-  --printqr, -p            print QR code(s) as text to the terminal (requires qrcode module)
-  --saveqr DIR, -s DIR     save QR code(s) as images to the given folder (requires qrcode module)
-  --verbose, -v            verbose output
-  --quiet, -q              no stdout output, except output set by -
+  -h, --help                  show this help message and exit
+  --camera NUMBER, -C NUMBER  camera number of system (default camera: 0)
+  --json FILE, -j FILE        export json file or - for stdout
+  --csv FILE, -c FILE         export csv file or - for stdout
+  --keepass FILE, -k FILE     export totp/hotp csv file(s) for KeePass, - for stdout
+  --printqr, -p               print QR code(s) as text to the terminal (requires qrcode module)
+  --saveqr DIR, -s DIR        save QR code(s) as images to the given folder (requires qrcode module)
+  --verbose, -v               verbose output
+  --quiet, -q                 no stdout output, except output set by -
 
 examples:
+python extract_otp_secret_keys.py
 python extract_otp_secret_keys.py example_*.txt
 python extract_otp_secret_keys.py - < example_export.txt
 python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
@@ -318,6 +333,7 @@ docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys = < example_exp
 docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
 docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
 
+docker login -uscit0
 docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull
 docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull --build-arg run_tests=false
 docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader

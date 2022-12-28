@@ -28,7 +28,7 @@ import pytest
 import extract_otp_secret_keys
 from utils import *
 
-qreader_available = extract_otp_secret_keys.check_module_available('cv2')
+qreader_available = extract_otp_secret_keys.qreader_available
 
 
 def test_extract_stdout(capsys):
@@ -39,22 +39,6 @@ def test_extract_stdout(capsys):
     captured = capsys.readouterr()
 
     assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
-    assert captured.err == ''
-
-
-@pytest.mark.qreader
-def test_extract_multiple_files_and_mixed(capsys):
-    # Act
-    extract_otp_secret_keys.main([
-        'example_export.txt',
-        'test/test_googleauth_export.png',
-        'example_export.txt',
-        'test/test_googleauth_export.png'])
-
-    # Assert
-    captured = capsys.readouterr()
-
-    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT + EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG + EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT + EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
     assert captured.err == ''
 
 
@@ -142,26 +126,6 @@ def test_extract_stdin_img_empty(capsys, monkeypatch):
 
     assert captured.out == ''
     assert captured.err == 'WARN: stdin is empty\n'
-
-
-@pytest.mark.qreader
-def test_extract_stdin_stdout_wrong_symbol(capsys, monkeypatch):
-    # Arrange
-    monkeypatch.setattr('sys.stdin', io.StringIO(read_file_to_str('example_export.txt')))
-
-    # Act
-    with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['='])
-
-    # Assert
-    captured = capsys.readouterr()
-
-    expected_stderr = "\nERROR: Cannot read binary stdin buffer. Exception: a bytes-like object is required, not 'str'\n"
-
-    assert captured.err == expected_stderr
-    assert captured.out == ''
-    assert e.value.code == 1
-    assert e.type == SystemExit
 
 
 def test_extract_csv(capsys):
@@ -443,7 +407,7 @@ def test_extract_verbose(capsys, relaxed):
 
 def test_extract_debug(capsys):
     # Act
-    extract_otp_secret_keys.main(['-vv', 'example_export.txt'])
+    extract_otp_secret_keys.main(['-vvv', 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -469,7 +433,7 @@ def test_extract_help(capsys):
     assert e.type == SystemExit
     assert e.value.code == 0
 
-
+@pytest.mark.skipif(qreader_available, reason="Cannot test interactive mode")
 def test_extract_no_arguments(capsys):
     # Act
     with pytest.raises(SystemExit) as e:
@@ -530,13 +494,13 @@ def test_wrong_content(capsys):
 
     expected_stderr = '''
 WARN: line is not a otpauth-migration:// URL
-input file: test/test_export_wrong_content.txt
-line "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua."
+input: test/test_export_wrong_content.txt
+line 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
 Probably a wrong file was given
 
 ERROR: no data query parameter in input URL
 input file: test/test_export_wrong_content.txt
-line "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua."
+line 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
 Probably a wrong file was given
 '''
 
@@ -555,8 +519,8 @@ def test_wrong_prefix(capsys):
 
     expected_stderr = '''
 WARN: line is not a otpauth-migration:// URL
-input file: test/test_export_wrong_prefix.txt
-line "QR-Code:otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B"
+input: test/test_export_wrong_prefix.txt
+line 'QR-Code:otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B'
 Probably a wrong file was given
 '''
 
@@ -587,6 +551,23 @@ def test_img_qr_reader_from_file_happy_path(capsys):
 
     assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
     assert captured.err == ''
+
+
+@pytest.mark.qreader
+def test_extract_multiple_files_and_mixed(capsys):
+    # Act
+    extract_otp_secret_keys.main([
+        'example_export.txt',
+        'test/test_googleauth_export.png',
+        'example_export.txt',
+        'test/test_googleauth_export.png'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT + EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG + EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT + EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
+    assert captured.err == ''
+
 
 @pytest.mark.qreader
 def test_img_qr_reader_from_stdin(capsys, monkeypatch):
@@ -644,6 +625,26 @@ def test_img_qr_reader_from_stdin_wrong_symbol(capsys, monkeypatch):
 
 
 @pytest.mark.qreader
+def test_extract_stdin_stdout_wrong_symbol(capsys, monkeypatch):
+    # Arrange
+    monkeypatch.setattr('sys.stdin', io.StringIO(read_file_to_str('example_export.txt')))
+
+    # Act
+    with pytest.raises(SystemExit) as e:
+        extract_otp_secret_keys.main(['='])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = "\nERROR: Cannot read binary stdin buffer. Exception: a bytes-like object is required, not 'str'\n"
+
+    assert captured.err == expected_stderr
+    assert captured.out == ''
+    assert e.value.code == 1
+    assert e.type == SystemExit
+
+
+@pytest.mark.qreader
 def test_img_qr_reader_no_qr_code_in_image(capsys):
     # Act
     with pytest.raises(SystemExit) as e:
@@ -686,13 +687,13 @@ def test_non_image_file(capsys):
     captured = capsys.readouterr()
     expected_stderr = '''
 WARN: line is not a otpauth-migration:// URL
-input file: test/text_masquerading_as_image.jpeg
-line "This is just a text file masquerading as an image file."
+input: test/text_masquerading_as_image.jpeg
+line 'This is just a text file masquerading as an image file.'
 Probably a wrong file was given
 
 ERROR: no data query parameter in input URL
 input file: test/text_masquerading_as_image.jpeg
-line "This is just a text file masquerading as an image file."
+line 'This is just a text file masquerading as an image file.'
 Probably a wrong file was given
 '''
 

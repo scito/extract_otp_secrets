@@ -65,13 +65,13 @@ class TestQRImageExtract(unittest.TestCase):
         expected_output = [
             '',
             'WARN: line is not a otpauth-migration:// URL',
-            'input file: test/text_masquerading_as_image.jpeg',
-            'line "This is just a text file masquerading as an image file."',
+            'input: test/text_masquerading_as_image.jpeg',
+            "line 'This is just a text file masquerading as an image file.'",
             'Probably a wrong file was given',
             '',
             'ERROR: no data query parameter in input URL',
             'input file: test/text_masquerading_as_image.jpeg',
-            'line "This is just a text file masquerading as an image file."',
+            "line 'This is just a text file masquerading as an image file.'",
             'Probably a wrong file was given'
         ]
 
