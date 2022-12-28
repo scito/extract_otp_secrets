@@ -6,7 +6,7 @@ COPY . .
 
 ARG run_tests=true
 
-RUN apk add zlib nano \
+RUN apk add zlib-dev nano \
     && pip install protobuf qrcode Pillow \
     && if [[ "$run_tests" == "true" ]] ; then /extract/run_pytest.sh test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed ; else echo "Not running tests..." ; fi
 
