@@ -1,9 +1,13 @@
 name: tests
 
+# https://docs.github.com/de/actions/using-workflows/workflow-syntax-for-github-actions
+# https://docs.github.com/en/actions/using-workflows
+
 on:
   push:
   pull_request:
   schedule:
+    # Run daily on default branch
     - cron: '37 3 * * *'
 
 jobs:
@@ -13,9 +17,7 @@ jobs:
       matrix:
         python-version: ["3.x", "3.11", "3.10", "3.9", "3.8", "3.7"]
         platform: [ubuntu-latest, macos-latest, windows-latest]
-        exclude:
-          - platform: windows-latest
-          - python-version: [pypy-3.9]
+        # exclude:
 
     runs-on: ${{ matrix.platform }}
 
@@ -36,13 +38,31 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install --use-pep517 -r requirements.txt
+          pip install -U -r requirements-dev.txt
+          pip install -U .
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --statistics
+        if: matrix.python-version != '3.7'
+      - name: Type checking with mypy
+        run: |
+          mypy --install-types --non-interactive src/*.py tests/*.py
+          mypy --strict src/*.py tests/*.py
+        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
       - name: Test with pytest
         run: pytest
+        if: (matrix.python-version != '3.x' || matrix.platform != 'ubuntu-latest')
+        # && matrix.platform != 'macos-latest'
+      - name: Test with pytest (with code coverage)
+        run: pytest --cov=extract_otp_secrets_test --junitxml=pytest.xml --cov-report=term-missing | tee pytest-coverage.txt
+        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
+      # https://github.com/marketplace/actions/pytest-coverage-comment
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml
+        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'

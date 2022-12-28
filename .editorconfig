@@ -6,3 +6,10 @@ indent_size = 4
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
+
+[*.md]
+indent_size = 4
+trim_trailing_whitespace = false
+
+[*.{yml,toml}]
+indent_size = 2

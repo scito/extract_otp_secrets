@@ -1,4 +1,4 @@
-# Unit test for extract_otp_secret_keys.py
+# Unit test for extract_otp_secrets.py
 
 # Run tests:
 # python -m unittest
@@ -18,37 +18,44 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import unittest
-import io
-from contextlib import redirect_stdout
-from utils import read_csv, read_json, remove_file, remove_dir_with_files, Capturing, read_file_to_str
-import os
-import sys
+from __future__ import annotations  # workaround for PYTHON <= 3.10
 
-import extract_otp_secret_keys
+import io
+import os
+import unittest
+from contextlib import redirect_stdout
+
+from utils import (Capturing, count_files_in_dir, read_csv, read_file_to_str,
+                   read_json, remove_dir_with_files, remove_file)
+
+import extract_otp_secrets
+
+# Conditional skip example
+# if sys.implementation.name == 'pypy' or sys.platform.startswith("win") or sys.version_info < (3, 10):
+#             self.skipTest("Avoid encoding problems")
 
 
 class TestExtract(unittest.TestCase):
 
-    def test_extract_csv(self):
-        extract_otp_secret_keys.main(['-q', '-c', 'test_example_output.csv', 'example_export.txt'])
+    def test_extract_csv(self) -> None:
+        extract_otp_secrets.main(['-q', '-c', 'test_example_output.csv', 'example_export.txt'])
 
         expected_csv = read_csv('example_output.csv')
         actual_csv = read_csv('test_example_output.csv')
 
         self.assertEqual(actual_csv, expected_csv)
 
-    def test_extract_json(self):
-        extract_otp_secret_keys.main(['-q', '-j', 'test_example_output.json', 'example_export.txt'])
+    def test_extract_json(self) -> None:
+        extract_otp_secrets.main(['-q', '-j', 'test_example_output.json', 'example_export.txt'])
 
         expected_json = read_json('example_output.json')
         actual_json = read_json('test_example_output.json')
 
         self.assertEqual(actual_json, expected_json)
 
-    def test_extract_stdout_1(self):
+    def test_extract_stdout_1(self) -> None:
         with Capturing() as output:
-            extract_otp_secret_keys.main(['example_export.txt'])
+            extract_otp_secrets.main(['example_export.txt'])
 
         expected_output = [
             'Name:    pi@raspberrypi',
@@ -82,10 +89,10 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(output, expected_output)
 
     # Ref for capturing https://stackoverflow.com/a/40984270
-    def test_extract_stdout_2(self):
+    def test_extract_stdout_2(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
-            extract_otp_secret_keys.main(['example_export.txt'])
+            extract_otp_secrets.main(['example_export.txt'])
         actual_output = out.getvalue()
 
         expected_output = '''Name:    pi@raspberrypi
@@ -118,10 +125,10 @@ Type:    totp
 '''
         self.assertEqual(actual_output, expected_output)
 
-    def test_extract_not_encoded_plus(self):
+    def test_extract_not_encoded_plus(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
-            extract_otp_secret_keys.main(['test/test_plus_problem_export.txt'])
+            extract_otp_secrets.main(['tests/data/test_plus_problem_export.txt'])
         actual_output = out.getvalue()
 
         expected_output = '''Name:    SerenityLabs:test1@serenitylabs.co.uk
@@ -147,51 +154,43 @@ Type:    totp
 '''
         self.assertEqual(actual_output, expected_output)
 
-    def test_extract_printqr(self):
+    def test_extract_printqr(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
-            extract_otp_secret_keys.main(['-p', 'example_export.txt'])
+            extract_otp_secrets.main(['-p', 'example_export.txt'])
         actual_output = out.getvalue()
 
-        expected_output = read_file_to_str('test/printqr_output.txt')
+        expected_output = read_file_to_str('tests/data/printqr_output.txt')
 
         self.assertEqual(actual_output, expected_output)
 
-    def test_extract_saveqr(self):
-        extract_otp_secret_keys.main(['-q', '-s', 'testout/qr/', 'example_export.txt'])
+    def test_extract_saveqr(self) -> None:
+        extract_otp_secrets.main(['-q', '-s', 'testout/qr/', 'example_export.txt'])
 
         self.assertTrue(os.path.isfile('testout/qr/1-piraspberrypi-raspberrypi.png'))
         self.assertTrue(os.path.isfile('testout/qr/2-piraspberrypi.png'))
         self.assertTrue(os.path.isfile('testout/qr/3-piraspberrypi.png'))
         self.assertTrue(os.path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png'))
+        self.assertTrue(os.path.isfile('testout/qr/5-hotpdemo.png'))
+        self.assertTrue(os.path.isfile('testout/qr/6-encodingäÄéÉdemo.png'))
+        self.assertEqual(count_files_in_dir('testout/qr'), 6)
 
-    def test_extract_verbose(self):
-        if sys.implementation.name == 'pypy': self.skipTest("Encoding problems in verbose mode in pypy.")
+    def test_extract_debug(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
-            extract_otp_secret_keys.main(['-v', 'example_export.txt'])
+            extract_otp_secrets.main(['-vvv', 'example_export.txt'])
         actual_output = out.getvalue()
 
-        expected_output = read_file_to_str('test/print_verbose_output.txt')
-
-        self.assertEqual(actual_output, expected_output)
-
-    def test_extract_debug(self):
-        out = io.StringIO()
-        with redirect_stdout(out):
-            extract_otp_secret_keys.main(['-vv', 'example_export.txt'])
-        actual_output = out.getvalue()
-
-        expected_stdout = read_file_to_str('test/print_verbose_output.txt')
+        expected_stdout = read_file_to_str('tests/data/print_verbose_output.txt')
 
         self.assertGreater(len(actual_output), len(expected_stdout))
         self.assertTrue("DEBUG: " in actual_output)
 
-    def test_extract_help_1(self):
+    def test_extract_help_1(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
             try:
-                extract_otp_secret_keys.main(['-h'])
+                extract_otp_secrets.main(['-h'])
                 self.fail("Must abort")
             except SystemExit as e:
                 self.assertEqual(e.code, 0)
@@ -199,36 +198,36 @@ Type:    totp
         actual_output = out.getvalue()
 
         self.assertGreater(len(actual_output), 0)
-        self.assertTrue("-h, --help" in actual_output and "--verbose, -v" in actual_output)
+        self.assertTrue("-h, --help" in actual_output and "-v, --verbose" in actual_output)
 
-    def test_extract_help_2(self):
+    def test_extract_help_2(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secret_keys.main(['-h'])
+                extract_otp_secrets.main(['-h'])
 
         actual_output = out.getvalue()
 
         self.assertGreater(len(actual_output), 0)
-        self.assertTrue("-h, --help" in actual_output and "--verbose, -v" in actual_output)
+        self.assertTrue("-h, --help" in actual_output and "-v, --verbose" in actual_output)
         self.assertEqual(context.exception.code, 0)
 
-    def test_extract_help_3(self):
+    def test_extract_help_3(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secret_keys.main(['-h'])
+                extract_otp_secrets.main(['-h'])
 
         self.assertGreater(len(actual_output), 0)
-        self.assertTrue("-h, --help" in "\n".join(actual_output) and "--verbose, -v" in "\n".join(actual_output))
+        self.assertTrue("-h, --help" in "\n".join(actual_output) and "-v, --verbose" in "\n".join(actual_output))
         self.assertEqual(context.exception.code, 0)
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.cleanup()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.cleanup()
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         remove_file('test_example_output.csv')
         remove_file('test_example_output.json')
         remove_dir_with_files('testout/')
