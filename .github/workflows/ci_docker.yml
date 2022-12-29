@@ -27,6 +27,7 @@ jobs:
 
       # setup Docker build action
       - name: Set up Docker Buildx
+        id: buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Login to DockerHub
@@ -43,12 +44,14 @@ jobs:
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
       - name: "no_qr_reader: Build image and push to Docker Hub and GitHub Container Registry"
+        id: docker_build_no_qr_reader
         uses: docker/build-push-action@v2
         with:
           # relative path to the place where source code with Dockerfile is located
           platforms: linux/amd64,linux/arm64
           context: .
           file: Dockerfile_no_qr_reader
+          # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
           tags: |
             scit0/extract_otp_secret_keys_no_qr_reader:latest
@@ -62,11 +65,13 @@ jobs:
             RUN_TESTS=true
 
       - name: "qr_reader: Build image and push to Docker Hub and GitHub Container Registry"
+        id: docker_build_qr_reader
         uses: docker/build-push-action@v2
         with:
           platforms: linux/amd64,linux/arm64
           # relative path to the place where source code with Dockerfile is located
           context: .
+          # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
           tags: |
             scit0/extract_otp_secret_keys:latest
@@ -76,4 +81,6 @@ jobs:
           push: true
 
       - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+        run: |
+          echo ${{ steps.docker_build_no_qr_reader.outputs.digest }}
+          echo ${{ steps.docker_build_qr_reader.outputs.digest }}
