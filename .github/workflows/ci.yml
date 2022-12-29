@@ -38,7 +38,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 pytest pytest-mock mypy types-protobuf
           pip install --use-pep517 -r requirements.txt
-          mypy --install-types --non-interactive *.py
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -47,7 +46,8 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --statistics
       - name: Type checking with mypy
         run: |
+          mypy --install-types --non-interactive *.py
           mypy --strict *.py
-        if: ${{ matrix.python-version == '3.x' }}
+        if: ${{ matrix.python-version }} == '3.x'
       - name: Test with pytest
         run: pytest
