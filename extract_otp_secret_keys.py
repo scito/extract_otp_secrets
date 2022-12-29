@@ -53,7 +53,7 @@ import sys
 import urllib.parse as urlparse
 from enum import Enum
 from operator import add
-from typing import Any, TextIO, TypedDict
+from typing import Any, TextIO, TypedDict, Union
 
 from qrcode import QRCode  # type: ignore
 
@@ -79,7 +79,8 @@ except ImportError:
 # Types
 Args = argparse.Namespace
 OtpUrl = str
-Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': int | None, 'url': OtpUrl})
+# Workaround for PYTHON < 3.10: use Union[int, None] instead of int | None
+Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': Union[int, None], 'url': OtpUrl})
 Otps = list[Otp]
 OtpUrls = list[OtpUrl]
 
@@ -360,7 +361,7 @@ def get_payload_from_otp_url(otpauth_migration_url: str, i: int, input_source: s
     if verbose > 2: print(f"\nDEBUG: parsed_url={parsed_url}")
     try:
         params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
-    except Exception:  # Not necessary for Python >= 3.11
+    except Exception:  # Necessary for PYTHON < 3.11
         params = {}
     if verbose > 2: print(f"\nDEBUG: querystring params={params}")
     if 'data' not in params:
