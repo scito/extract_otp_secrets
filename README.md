@@ -330,7 +330,11 @@ docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys example_export.png
 ```
 
 docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys = < example_export.png
+docker run --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix extract_otp_secret_keys
+docker run --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix scit0/extract_otp_secret_keys
 docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
+docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix scit0/extract_otp_secret_keys
+docker run --pull always --rm -v "$(pwd)":/files:ro -i scit0/extract_otp_secret_keys
 docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
 
 docker login -uscit0
