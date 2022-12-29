@@ -53,18 +53,18 @@ import urllib.parse as urlparse
 from enum import Enum
 from operator import add
 
-from qrcode import QRCode
+from qrcode import QRCode # type: ignore
 
-import protobuf_generated_python.google_auth_pb2
+import protobuf_generated_python.google_auth_pb2 # type: ignore
 
 
 try:
-    import cv2
+    import cv2 # type: ignore
     import numpy
 
     try:
-        import pyzbar.pyzbar as zbar
-        from qreader import QReader
+        import pyzbar.pyzbar as zbar # type: ignore
+        from qreader import QReader # type: ignore
     except ImportError as e:
         raise SystemExit(f"""
 ERROR: Cannot import QReader module. This problem is probably due to the missing zbar shared library.

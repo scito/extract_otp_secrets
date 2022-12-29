@@ -1,5 +1,5 @@
 import pathlib
-from setuptools import setup
+from setuptools import setup # type: ignore
 
 setup(
     name='extract_otp_secret_keys',

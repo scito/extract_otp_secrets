@@ -213,6 +213,16 @@ cmd="$FLAKE8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --s
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
+# Type checking
+
+cmd="mypy --install-types --non-interactive"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="mypy *.py"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
 # Test
 
 cmd="pytest"
