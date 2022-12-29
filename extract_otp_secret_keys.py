@@ -57,6 +57,12 @@ from qrcode import QRCode
 
 import protobuf_generated_python.google_auth_pb2
 
+
+def abort(*args, **kwargs):
+    eprint(*args, **kwargs)
+    sys.exit(1)
+
+
 try:
     import cv2
     import numpy
@@ -183,7 +189,7 @@ def extract_otps_from_camera(args):
                 cv2.polylines(img, [pts], True, rect_color_success if otp_url else rect_color, rect_thickness)
                 extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
         else:
-            assert False, f"ERROR: Wrong QReader mode {qreader.name}"
+            assert False, f"ERROR: Wrong QReader mode {qr_mode.name}"
 
         cv2.putText(img, f"Mode: {qr_mode.name} (Hit space to change)", pos_text, font, font_scale, text_color, font_thickness, font_line)
         cv2.putText(img, "Hit ESC to quit", tuple(map(add, pos_text, font_dy)), font, font_scale, text_color, font_thickness, font_line)
@@ -528,11 +534,6 @@ def is_binary(line):
 def eprint(*args, **kwargs):
     '''Print to stderr.'''
     print(*args, file=sys.stderr, **kwargs)
-
-
-def abort(*args, **kwargs):
-    eprint(*args, **kwargs)
-    sys.exit(1)
 
 
 if __name__ == '__main__':

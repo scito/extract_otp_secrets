@@ -266,6 +266,19 @@ pip install git+https://github.com/scito/extract_otp_secret_keys
 python -m extract_otp_secret_keys
 ```
 
+#### For development
+
+```
+pip install git+https://github.com/scito/extract_otp_secret_keys@support_img_read
+python -m extract_otp_secret_keys
+```
+
+```
+# pip install -e git+https://github.com/scito/extract_otp_secret_keys@$(git ls-remote  git@github.com:scito/extract_otp_secret_keys@support_img_read.git | head -1 | awk '{print $1;}')#egg=extract_otp_secret_keys
+pip3.11 install -e git+https://github.com/scito/extract_otp_secret_keys.git@$(git ls-remote git@github.com:scito/extract_otp_secret_keys.git | grep support_img_read | head -1 | awk '{print $1;}')#egg=extract_otp_secret_keys
+python -m extract_otp_secret_keys
+```
+
 #### Example
 
 ```
@@ -330,10 +343,10 @@ docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys example_export.png
 ```
 
 docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys = < example_export.png
-docker run --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix extract_otp_secret_keys
-docker run --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix scit0/extract_otp_secret_keys
+docker run --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secret_keys
+docker run --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secret_keys
 docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
-docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix scit0/extract_otp_secret_keys
+docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secret_keys
 docker run --pull always --rm -v "$(pwd)":/files:ro -i scit0/extract_otp_secret_keys
 docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
 
