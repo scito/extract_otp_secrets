@@ -59,7 +59,7 @@ jobs:
           # TODO push: ${{ github.ref == 'refs/heads/master' }}
           push: true
           build-args: |
-            RUN_TESTS=false
+            RUN_TESTS=true
 
       - name: "qr_reader: Build image and push to Docker Hub and GitHub Container Registry"
         uses: docker/build-push-action@v2
