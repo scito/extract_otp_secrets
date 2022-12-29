@@ -27,10 +27,6 @@ jobs:
 
       # setup Docker build action
       - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Login to DockerHub
