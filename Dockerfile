@@ -1,4 +1,4 @@
-FROM python:3.11-bullseye
+FROM python:3.11-slim-bullseye
 
 WORKDIR /extract
 
@@ -6,7 +6,7 @@ COPY . .
 
 ARG RUN_TESTS=true
 
-RUN apt-get update && apt-get install -y libzbar0 python3-opencv nano \
+RUN apt-get update && apt-get install -y libzbar0 libsm6 python3-opencv nano \
     && pip install --no-cache-dir -r requirements.txt \
     && if [ "$RUN_TESTS" = "true" ]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi
 

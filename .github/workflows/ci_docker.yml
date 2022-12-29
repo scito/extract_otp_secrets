@@ -82,5 +82,5 @@ jobs:
 
       - name: Image digest
         run: |
-          echo ${{ steps.docker_build_no_qr_reader.outputs.digest }}
-          echo ${{ steps.docker_build_qr_reader.outputs.digest }}
+          echo "extract_otp_secret_keys: ${{ steps.docker_build_qr_reader.outputs.digest }}"
+          echo "extract_otp_secret_keys_no_qr_reader: ${{ steps.docker_build_no_qr_reader.outputs.digest }}"
