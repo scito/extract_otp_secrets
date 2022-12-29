@@ -209,7 +209,7 @@ cmd="$FLAKE8 . --count --select=E9,F63,F7,F82 --show-source --statistics"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$FLAKE8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --statistics"
+cmd="$FLAKE8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --statistics --exclude=.git,__pycache__,docs/source/conf.py,old,build,dist,protobuf_generated_python"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -239,7 +239,7 @@ cmd="docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k 'not qreader' -vvv --relaxed"
+cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k 'not qreader' -vvv --relaxed"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -247,7 +247,7 @@ cmd="docker build . -t extract_otp_secret_keys --pull"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys"
+cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 

@@ -53,18 +53,18 @@ import urllib.parse as urlparse
 from enum import Enum
 from operator import add
 
-from qrcode import QRCode # type: ignore
+from qrcode import QRCode  # type: ignore
 
-import protobuf_generated_python.google_auth_pb2 # type: ignore
+import protobuf_generated_python.google_auth_pb2  # type: ignore
 
 
 try:
-    import cv2 # type: ignore
-    import numpy
+    import cv2  # type: ignore
+    import numpy  # type: ignore
 
     try:
-        import pyzbar.pyzbar as zbar # type: ignore
-        from qreader import QReader # type: ignore
+        import pyzbar.pyzbar as zbar  # type: ignore
+        from qreader import QReader  # type: ignore
     except ImportError as e:
         raise SystemExit(f"""
 ERROR: Cannot import QReader module. This problem is probably due to the missing zbar shared library.
@@ -72,7 +72,7 @@ On Linux and macOS libzbar0 must be installed.
 See in README.md for the installation of the libzbar0.
 Exception: {e}""")
     qreader_available = True
-except ImportError as e:
+except ImportError:
     qreader_available = False
 
 
@@ -95,7 +95,6 @@ def main(sys_args):
 
 def parse_args(sys_args):
     global verbose, quiet
-    formatter = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=52)
     description_text = "Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app."
     if qreader_available:
         description_text += "\nIf no infiles are provided, the QR codes are interactively captured from the camera."
@@ -106,7 +105,7 @@ python extract_otp_secret_keys.py - < example_export.txt
 python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
 python extract_otp_secret_keys.py = < example_export.png"""
 
-    arg_parser = argparse.ArgumentParser(formatter_class=formatter,
+    arg_parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=52),
                                          description=description_text,
                                          epilog=example_text)
     arg_parser.add_argument('infile', help="""a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
@@ -143,7 +142,7 @@ def extract_otps_from_camera(args):
     otp_urls = []
     otps = []
 
-    QRMode = Enum('QRMode', ['QREADER', 'DEEP_QREADER', 'CV2'], start = 0)
+    QRMode = Enum('QRMode', ['QREADER', 'DEEP_QREADER', 'CV2'], start=0)
     qr_mode = QRMode.QREADER
     if verbose: print(f"QR reading mode: {qr_mode}")
 
@@ -270,8 +269,8 @@ def read_lines_from_text_file(filename):
     except UnicodeDecodeError:
         if filename == '-':
             abort("\nERROR: Unable to open text file form stdin. "
-            "In case you want read an image file from stdin, you must use '=' instead of '-'.")
-        else: # The file is probably an image, process below
+                  "In case you want read an image file from stdin, you must use '=' instead of '-'.")
+        else:  # The file is probably an image, process below
             return None
     finally:
         finput.close()
@@ -285,7 +284,7 @@ def extract_otp_from_otp_url(otpauth_migration_url, otps, i, j, infile, args):
         j += 1
         if verbose: print(f"\n{j}. Secret Key")
         secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
-        otp_type_enum = get_enum_name_by_number(raw_otp, 'type')
+        if verbose: print('OTP enum type:', get_enum_name_by_number(raw_otp, 'type'))
         otp_type = get_otp_type_str_from_code(raw_otp.type)
         otp_url = build_otp_url(secret, raw_otp)
         otp = {
@@ -349,7 +348,7 @@ def get_payload_from_otp_url(otpauth_migration_url, i, input_source):
     if verbose > 2: print(f"\nDEBUG: parsed_url={parsed_url}")
     try:
         params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
-    except:  # Not necessary for Python >= 3.11
+    except Exception:  # Not necessary for Python >= 3.11
         params = []
     if verbose > 2: print(f"\nDEBUG: querystring params={params}")
     if 'data' not in params:
@@ -362,9 +361,9 @@ def get_payload_from_otp_url(otpauth_migration_url, i, input_source):
     payload = protobuf_generated_python.google_auth_pb2.MigrationPayload()
     try:
         payload.ParseFromString(data)
-    except:
+    except Exception:
         abort(f"\nERROR: Cannot decode otpauth-migration migration payload.\n"
-        f"data={data_base64}")
+              f"data={data_base64}")
     if verbose:
         print(f"\n{i}. Payload Line", payload, sep='\n')
 
@@ -515,7 +514,7 @@ def open_file_or_stdout_for_csv(filename):
 def check_file_exists(filename):
     if filename != '-' and not os.path.isfile(filename):
         abort(f"\nERROR: Input file provided is non-existent or not a file."
-        f"\ninput file: {filename}")
+              f"\ninput file: {filename}")
 
 
 def is_binary(line):

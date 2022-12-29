@@ -42,6 +42,7 @@ batch_id: -1320898453
 
 
 1. Secret Key
+OTP enum type: OTP_TOTP
 Name:    pi@raspberrypi
 Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Issuer:  raspberrypi
@@ -66,6 +67,7 @@ batch_id: -2094403140
 
 
 2. Secret Key
+OTP enum type: OTP_TOTP
 Name:    pi@raspberrypi
 Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Type:    totp
@@ -98,6 +100,7 @@ batch_id: -1822886384
 
 
 3. Secret Key
+OTP enum type: OTP_TOTP
 Name:    pi@raspberrypi
 Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Type:    totp
@@ -105,6 +108,7 @@ otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
 
 
 4. Secret Key
+OTP enum type: OTP_TOTP
 Name:    pi@raspberrypi
 Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Issuer:  raspberrypi
@@ -130,6 +134,7 @@ batch_id: -1558849573
 
 
 5. Secret Key
+OTP enum type: OTP_HOTP
 Name:    hotp demo
 Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Type:    hotp
@@ -155,6 +160,7 @@ batch_id: -171198419
 
 
 6. Secret Key
+OTP enum type: OTP_TOTP
 Name:    encoding: ¿äÄéÉ? (demo)
 Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
 Type:    totp

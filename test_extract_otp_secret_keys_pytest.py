@@ -20,13 +20,15 @@
 
 import io
 import os
-import re
 import sys
 
 import pytest
 
 import extract_otp_secret_keys
-from utils import *
+from utils import (file_exits, quick_and_dirty_workaround_encoding_problem,
+                   read_binary_file_as_stream, read_csv, read_csv_str,
+                   read_file_to_str, read_json, read_json_str,
+                   replace_escaped_octal_utf8_bytes_with_str)
 
 qreader_available = extract_otp_secret_keys.qreader_available
 
@@ -213,7 +215,6 @@ def test_keepass_csv_stdout(capsys):
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
-    expected_hotp_csv = read_csv('example_keepass_output.hotp.csv')
     assert not file_exits('test_example_keepass_output.totp.csv')
     assert not file_exits('test_example_keepass_output.hotp.csv')
     assert not file_exits('test_example_keepass_output.csv')
@@ -340,7 +341,8 @@ def test_extract_saveqr(capsys, tmp_path):
 
 
 def test_normalize_bytes():
-    assert replace_escaped_octal_utf8_bytes_with_str('Before\\\\302\\\\277\\\\303\nname: enc: \\302\\277\\303\\244\\303\\204\\303\\251\\303\\211?\nAfter') == 'Before\\\\302\\\\277\\\\303\nname: enc: ¿äÄéÉ?\nAfter'
+    assert replace_escaped_octal_utf8_bytes_with_str(
+        'Before\\\\302\\\\277\\\\303\nname: enc: \\302\\277\\303\\244\\303\\204\\303\\251\\303\\211?\nAfter') == 'Before\\\\302\\\\277\\\\303\nname: enc: ¿äÄéÉ?\nAfter'
 
 
 def test_extract_verbose(capsys, relaxed):
@@ -351,6 +353,9 @@ def test_extract_verbose(capsys, relaxed):
     captured = capsys.readouterr()
 
     expected_stdout = read_file_to_str('test/print_verbose_output.txt')
+
+    if not qreader_available:
+        expected_stdout = expected_stdout.replace('QReader installed: True', 'QReader installed: False')
 
     if relaxed or sys.implementation.name == 'pypy':
         print('\nRelaxed mode\n')
@@ -389,6 +394,7 @@ def test_extract_help(capsys):
     assert captured.err == ''
     assert e.type == SystemExit
     assert e.value.code == 0
+
 
 def test_extract_no_arguments(capsys, mocker):
     if qreader_available:
@@ -554,8 +560,7 @@ def test_img_qr_reader_from_stdin(capsys, monkeypatch):
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout =\
-'''Name:    Test1:test1@example1.com
+    expected_stdout = '''Name:    Test1:test1@example1.com
 Secret:  JBSWY3DPEHPK3PXP
 Issuer:  Test1
 Type:    totp
@@ -705,8 +710,7 @@ Type:    totp
 
 '''
 
-EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG =\
-'''Name:    Test1:test1@example1.com
+EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG = '''Name:    Test1:test1@example1.com
 Secret:  JBSWY3DPEHPK3PXP
 Issuer:  Test1
 Type:    totp

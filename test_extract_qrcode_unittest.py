@@ -23,15 +23,16 @@ from utils import Capturing
 
 import extract_otp_secret_keys
 
+
 class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_happy_path(self):
         with Capturing() as actual_output:
             extract_otp_secret_keys.main(['test/test_googleauth_export.png'])
 
         expected_output =\
-        ['Name:    Test1:test1@example1.com', 'Secret:  JBSWY3DPEHPK3PXP', 'Issuer:  Test1', 'Type:    totp', '',
-         'Name:    Test2:test2@example2.com', 'Secret:  JBSWY3DPEHPK3PXQ', 'Issuer:  Test2', 'Type:    totp', '',
-         'Name:    Test3:test3@example3.com', 'Secret:  JBSWY3DPEHPK3PXR', 'Issuer:  Test3', 'Type:    totp', '']
+            ['Name:    Test1:test1@example1.com', 'Secret:  JBSWY3DPEHPK3PXP', 'Issuer:  Test1', 'Type:    totp', '',
+             'Name:    Test2:test2@example2.com', 'Secret:  JBSWY3DPEHPK3PXQ', 'Issuer:  Test2', 'Type:    totp', '',
+             'Name:    Test3:test3@example3.com', 'Secret:  JBSWY3DPEHPK3PXR', 'Issuer:  Test3', 'Type:    totp', '']
 
         self.assertEqual(actual_output, expected_output)
 
@@ -40,8 +41,7 @@ class TestQRImageExtract(unittest.TestCase):
             with self.assertRaises(SystemExit) as context:
                 extract_otp_secret_keys.main(['test/lena_std.tif'])
 
-        expected_output =\
-        ['', 'ERROR: Unable to read QR Code from file.', 'input file: test/lena_std.tif']
+        expected_output = ['', 'ERROR: Unable to read QR Code from file.', 'input file: test/lena_std.tif']
 
         self.assertEqual(actual_output, expected_output)
         self.assertEqual(context.exception.code, 1)
@@ -51,8 +51,7 @@ class TestQRImageExtract(unittest.TestCase):
             with self.assertRaises(SystemExit) as context:
                 extract_otp_secret_keys.main(['test/nonexistent.bmp'])
 
-        expected_output =\
-        ['', 'ERROR: Input file provided is non-existent or not a file.', 'input file: test/nonexistent.bmp']
+        expected_output = ['', 'ERROR: Input file provided is non-existent or not a file.', 'input file: test/nonexistent.bmp']
 
         self.assertEqual(actual_output, expected_output)
         self.assertEqual(context.exception.code, 1)

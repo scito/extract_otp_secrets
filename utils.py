@@ -104,10 +104,12 @@ def read_file_to_str(filename):
     """Returns a str."""
     return "".join(read_file_to_list(filename))
 
+
 def read_binary_file_as_stream(filename):
     """Returns binary file content."""
     with open(filename, "rb",) as infile:
         return io.BytesIO(infile.read())
+
 
 def replace_escaped_octal_utf8_bytes_with_str(str):
     encoded_name_strings = re.findall(r'name: .*$', str, flags=re.MULTILINE)

@@ -2,7 +2,7 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption( "--relaxed", action='store_true', help="run tests in relaxed mode")
+    parser.addoption("--relaxed", action='store_true', help="run tests in relaxed mode")
 
 
 @pytest.fixture
