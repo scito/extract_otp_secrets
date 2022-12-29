@@ -108,8 +108,10 @@ done
 BIN="$HOME/bin"
 DOWNLOADS="$HOME/downloads"
 
+PYTHON="python3.11"
 PIP="pip3.11"
-PIPENV="python3.11 -m pipenv"
+PIPENV="$PYTHON -m pipenv"
+FLAKE8="$PYTHON -m flake8"
 
 # Upgrade protoc
 
@@ -200,6 +202,16 @@ if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";
 eval "$cmd"
 
 $PIPENV run python --version
+
+# Lint
+
+cmd="$FLAKE8 . --count --select=E9,F63,F7,F82 --show-source --statistics"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="$FLAKE8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --statistics"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
 
 # Test
 
