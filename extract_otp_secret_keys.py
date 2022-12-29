@@ -58,11 +58,6 @@ from qrcode import QRCode
 import protobuf_generated_python.google_auth_pb2
 
 
-def abort(*args, **kwargs):
-    eprint(*args, **kwargs)
-    sys.exit(1)
-
-
 try:
     import cv2
     import numpy
@@ -71,7 +66,7 @@ try:
         import pyzbar.pyzbar as zbar
         from qreader import QReader
     except ImportError as e:
-        abort(f"""
+        raise SystemExit(f"""
 ERROR: Cannot import QReader module. This problem is probably due to the missing zbar shared library.
 On Linux and macOS libzbar0 must be installed.
 See in README.md for the installation of the libzbar0.
@@ -154,15 +149,14 @@ def extract_otps_from_camera(args):
     cam = cv2.VideoCapture(args.camera)
     window_name = "Extract OTP Secret Keys: Capture QR Codes from Camera"
     cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
+    neutral_color = 255, 0, 255
+    sucess_color = 0, 255, 0
     font = cv2.FONT_HERSHEY_PLAIN
     font_scale = 1
     font_thickness = 1
     pos_text = 5, 20
     font_dy = 0, cv2.getTextSize("M", font, font_scale, font_thickness)[0][1] + 5
     font_line = cv2.LINE_AA
-    text_color = 255, 255, 255
-    rect_color = 255, 0, 255
-    rect_color_success = 0, 255, 0
     rect_thickness = 5
 
     decoder = QReader()
@@ -178,7 +172,7 @@ def extract_otps_from_camera(args):
             elif qr_mode == QRMode.QREADER:
                 otp_url = decoder.decode(img, bbox) if found else None
             if found:
-                cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), rect_color_success if otp_url else rect_color, rect_thickness)
+                cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), sucess_color if otp_url else neutral_color, rect_thickness)
             if otp_url:
                 extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
         elif qr_mode == QRMode.CV2:
@@ -186,22 +180,22 @@ def extract_otps_from_camera(args):
                 otp_url = qrcode.data.decode('utf-8')
                 pts = numpy.array([qrcode.polygon], numpy.int32)
                 pts = pts.reshape((-1, 1, 2))
-                cv2.polylines(img, [pts], True, rect_color_success if otp_url else rect_color, rect_thickness)
+                cv2.polylines(img, [pts], True, sucess_color if otp_url else neutral_color, rect_thickness)
                 extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
         else:
             assert False, f"ERROR: Wrong QReader mode {qr_mode.name}"
 
-        cv2.putText(img, f"Mode: {qr_mode.name} (Hit space to change)", pos_text, font, font_scale, text_color, font_thickness, font_line)
-        cv2.putText(img, "Hit ESC to quit", tuple(map(add, pos_text, font_dy)), font, font_scale, text_color, font_thickness, font_line)
+        cv2.putText(img, f"Mode: {qr_mode.name} (Hit space to change)", pos_text, font, font_scale, neutral_color, font_thickness, font_line)
+        cv2.putText(img, "Hit ESC to quit", tuple(map(add, pos_text, font_dy)), font, font_scale, neutral_color, font_thickness, font_line)
 
         window_dim = cv2.getWindowImageRect(window_name)
         qrcodes_text = f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured"
         pos_qrcodes_text = window_dim[2] - cv2.getTextSize(qrcodes_text, font, font_scale, font_thickness)[0][0] - 5, pos_text[1]
-        cv2.putText(img, qrcodes_text, pos_qrcodes_text, font, font_scale, text_color, font_thickness, font_line)
+        cv2.putText(img, qrcodes_text, pos_qrcodes_text, font, font_scale, neutral_color, font_thickness, font_line)
 
         otps_text = f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted"
         pos_otps_text = window_dim[2] - cv2.getTextSize(otps_text, font, font_scale, font_thickness)[0][0] - 5, pos_text[1] + font_dy[1]
-        cv2.putText(img, otps_text, pos_otps_text, font, font_scale, text_color, font_thickness, font_line)
+        cv2.putText(img, otps_text, pos_otps_text, font, font_scale, neutral_color, font_thickness, font_line)
         cv2.imshow(window_name, img)
 
         key = cv2.waitKey(1) & 0xFF
@@ -534,6 +528,11 @@ def is_binary(line):
 def eprint(*args, **kwargs):
     '''Print to stderr.'''
     print(*args, file=sys.stderr, **kwargs)
+
+
+def abort(*args, **kwargs):
+    eprint(*args, **kwargs)
+    sys.exit(1)
 
 
 if __name__ == '__main__':
