@@ -56,7 +56,7 @@ from typing import TextIO, Any, TypedDict
 
 from qrcode import QRCode  # type: ignore
 
-import protobuf_generated_python.google_auth_pb2 as migration_protobuf
+import protobuf_generated_python.google_auth_pb2 as pb
 
 
 try:
@@ -353,7 +353,7 @@ def convert_img_to_otp_url(filename: str) -> OtpUrls:
     return [decoded_text]
 
 
-def get_payload_from_otp_url(otpauth_migration_url: str, i: int, input_source: str) -> migration_protobuf.MigrationPayload:
+def get_payload_from_otp_url(otpauth_migration_url: str, i: int, input_source: str) -> pb.MigrationPayload:
     if not otpauth_migration_url.startswith('otpauth-migration://'):
         eprint(f"\nWARN: line is not a otpauth-migration:// URL\ninput: {input_source}\nline '{otpauth_migration_url}'\nProbably a wrong file was given")
     parsed_url = urlparse.urlparse(otpauth_migration_url)
@@ -370,7 +370,7 @@ def get_payload_from_otp_url(otpauth_migration_url: str, i: int, input_source: s
     data_base64_fixed = data_base64.replace(' ', '+')
     if verbose > 2: print(f"\nDEBUG: data_base64_fixed={data_base64_fixed}")
     data = base64.b64decode(data_base64_fixed, validate=True)
-    payload = migration_protobuf.MigrationPayload()
+    payload = pb.MigrationPayload()
     try:
         payload.ParseFromString(data)
     except Exception:
@@ -396,7 +396,7 @@ def convert_secret_from_bytes_to_base32_str(bytes: bytes) -> str:
     return str(base64.b32encode(bytes), 'utf-8').replace('=', '')
 
 
-def build_otp_url(secret: str, raw_otp: migration_protobuf.MigrationPayload.OtpParameters) -> str:
+def build_otp_url(secret: str, raw_otp: pb.MigrationPayload.OtpParameters) -> str:
     url_params = {'secret': secret}
     if raw_otp.type == 1: url_params['counter'] = str(raw_otp.counter)
     if raw_otp.issuer: url_params['issuer'] = raw_otp.issuer
