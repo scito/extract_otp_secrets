@@ -4,11 +4,11 @@ WORKDIR /extract
 
 COPY . .
 
-ARG run_tests=true
+ARG RUN_TESTS=true
 
 RUN apt-get update && apt-get install -y libzbar0 python3-opencv nano \
     && pip install -r requirements.txt \
-    && if [[ "$run_tests" == "true" ]]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi
+    && if [[ "$RUN_TESTS" == "true" ]]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi
 
 WORKDIR /files
 

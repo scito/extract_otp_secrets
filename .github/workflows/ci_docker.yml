@@ -58,6 +58,8 @@ jobs:
           # build on feature branches, push only on master branch
           # TODO push: ${{ github.ref == 'refs/heads/master' }}
           push: true
+          build-args: |
+            RUN_TESTS=false
 
       - name: "qr_reader: Build image and push to Docker Hub and GitHub Container Registry"
         uses: docker/build-push-action@v2
@@ -72,8 +74,6 @@ jobs:
           # build on feature branches, push only on master branch
           # TODO push: ${{ github.ref == 'refs/heads/master' }}
           push: true
-          build-args: |
-            run_tests=false
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
