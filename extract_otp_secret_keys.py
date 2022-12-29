@@ -75,17 +75,19 @@ Exception: {e}""")
 except ImportError:
     qreader_available = False
 
+verbose: int
+quiet: bool
 
-def sys_main():
+
+def sys_main() -> None:
     main(sys.argv[1:])
 
 
-def main(sys_args):
+def main(sys_args: list[str]) -> None:
     # allow to use sys.stdout with with (avoid closing)
-    sys.stdout.close = lambda: None
+    sys.stdout.close = lambda: None  # type: ignore
 
     args = parse_args(sys_args)
-    if verbose: print(f"QReader installed: {qreader_available}")
 
     otps = extract_otps(args)
     write_csv(args, otps)
@@ -93,7 +95,7 @@ def main(sys_args):
     write_json(args, otps)
 
 
-def parse_args(sys_args):
+def parse_args(sys_args: list[str]) -> argparse.Namespace:
     global verbose, quiet
     description_text = "Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app."
     if qreader_available:
@@ -126,6 +128,7 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
 
     verbose = args.verbose if args.verbose else 0
     quiet = True if args.quiet else False
+    if verbose: print(f"QReader installed: {qreader_available}")
 
     return args
 

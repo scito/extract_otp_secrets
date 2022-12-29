@@ -112,6 +112,7 @@ PYTHON="python3.11"
 PIP="pip3.11"
 PIPENV="$PYTHON -m pipenv"
 FLAKE8="$PYTHON -m flake8"
+MYPY="$PYTHON -m mypy"
 
 # Upgrade protoc
 
@@ -215,11 +216,11 @@ eval "$cmd"
 
 # Type checking
 
-cmd="mypy --install-types --non-interactive"
+cmd="$MYPY --install-types --non-interactive"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="mypy *.py"
+cmd="$MYPY *.py"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
