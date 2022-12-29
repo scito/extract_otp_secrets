@@ -52,12 +52,11 @@ import sys
 import urllib.parse as urlparse
 from enum import Enum
 from operator import add
-from typing import TextIO, Any, TypedDict
+from typing import Any, TextIO, TypedDict
 
 from qrcode import QRCode  # type: ignore
 
 import protobuf_generated_python.google_auth_pb2 as pb
-
 
 try:
     import cv2  # type: ignore

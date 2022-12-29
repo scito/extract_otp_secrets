@@ -20,8 +20,8 @@
 
 import io
 import os
-import sys
 import pathlib
+import sys
 
 import pytest
 from pytest_mock import MockerFixture

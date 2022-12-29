@@ -19,9 +19,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest
-from utils import Capturing
 
 import extract_otp_secret_keys
+from utils import Capturing
 
 
 class TestQRImageExtract(unittest.TestCase):

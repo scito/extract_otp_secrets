@@ -18,14 +18,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import unittest
 import io
-from contextlib import redirect_stdout
-from utils import read_csv, read_json, remove_file, remove_dir_with_files, Capturing, read_file_to_str
 import os
 import sys
+import unittest
+from contextlib import redirect_stdout
 
 import extract_otp_secret_keys
+from utils import (Capturing, read_csv, read_file_to_str, read_json,
+                   remove_dir_with_files, remove_file)
 
 
 class TestExtract(unittest.TestCase):
