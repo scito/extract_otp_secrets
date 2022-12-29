@@ -49,5 +49,5 @@ jobs:
           mypy --install-types --non-interactive *.py
           mypy --strict *.py
         if: matrix.python-version == '3.x'
-      - name: Test with pytest
-        run: pytest
+      - name: Test with pytest (with code coverage)
+        run: pytest --cov=test_extract_otp_secret_keys_pytest

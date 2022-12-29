@@ -3,5 +3,6 @@ pytest
 flake8
 pylint
 pytest-mock
+pytest-cov
 mypy
 types-protobuf

@@ -76,10 +76,11 @@ Exception: {e}""")
 except ImportError:
     qreader_available = False
 
+# TODO Workaround for PYTHON < 3.10: Union[int, None] used instead of int | None
+
 # Types
 Args = argparse.Namespace
 OtpUrl = str
-# Workaround for PYTHON < 3.10: use Union[int, None] instead of int | None
 Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': Union[int, None], 'url': OtpUrl})
 Otps = list[Otp]
 OtpUrls = list[OtpUrl]

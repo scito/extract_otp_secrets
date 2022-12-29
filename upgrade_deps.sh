@@ -238,11 +238,11 @@ eval "$cmd"
 
 # Test
 
-cmd="pytest"
+cmd="pytest --cov=test_extract_otp_secret_keys_pytest"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$PIPENV run pytest"
+cmd="$PIPENV run pytest --cov=test_extract_otp_secret_keys_pytest"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 

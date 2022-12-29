@@ -22,7 +22,12 @@ import re
 import shutil
 import sys
 import pathlib
-from typing import BinaryIO, Any
+from typing import BinaryIO, Any, Union
+
+
+# Types
+# PYTHON < 3.10: Workaround for str | pathlib.Path
+PathLike = Union[str, pathlib.Path]
 
 
 # Ref. https://stackoverflow.com/a/16571630
@@ -50,11 +55,11 @@ with Capturing() as output:
         sys.stderr = self._stderr
 
 
-def file_exits(file: str | pathlib.Path) -> bool:
+def file_exits(file: PathLike) -> bool:
     return os.path.isfile(file)
 
 
-def remove_file(file: str | pathlib.Path) -> None:
+def remove_file(file: PathLike) -> None:
     if file_exits(file): os.remove(file)
 
 
@@ -63,7 +68,7 @@ def remove_files(glob_pattern: str) -> None:
         os.remove(f)
 
 
-def remove_dir_with_files(dir: str | pathlib.Path) -> None:
+def remove_dir_with_files(dir: PathLike) -> None:
     if os.path.exists(dir): shutil.rmtree(dir)
 
 

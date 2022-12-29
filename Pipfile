@@ -12,6 +12,8 @@ opencv-python = "*"
 
 [dev-packages]
 pytest = "*"
+pytest-mock = "*"
+pytest-cov = "*"
 wheel = "*"
 flake8 = "*"
 pylint = "*"
