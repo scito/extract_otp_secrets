@@ -228,7 +228,7 @@ eval "$cmd"
 
 # Type checking
 
-cmd="$MYPY --install-types --non-interactive"
+cmd="$MYPY --install-types --non-interactive *.py"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
