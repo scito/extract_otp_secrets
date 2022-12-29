@@ -47,7 +47,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --statistics
       - name: Type checking with mypy
         run: |
-          mypy *.py
+          mypy --strict *.py
         if: matrix.python-version == "3.x"
       - name: Test with pytest
         run: pytest

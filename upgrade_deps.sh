@@ -79,7 +79,7 @@ BASEVERSION=4
 echo
 
 interactive=true
-check_version=true
+ignore_version_check=true
 
 while test $# -gt 0; do
     case $1 in
@@ -99,7 +99,7 @@ while test $# -gt 0; do
             shift
             ;;
         -C)
-            check_version=false
+            ignore_version_check=false
             shift
             ;;
     esac
@@ -122,7 +122,7 @@ OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
 echo -e "\nProtoc remote version $VERSION\n"
 echo -e "Protoc local version: $OLDVERSION\n"
 
-if [ "$OLDVERSION" != "$VERSION" ]; then
+if [ "$OLDVERSION" != "$VERSION" ] || ! $ignore_version_check; then
     echo "Upgrade protoc from $OLDVERSION to $VERSION"
 
     NAME="protoc-$VERSION"
@@ -162,7 +162,7 @@ if [ "$OLDVERSION" != "$VERSION" ]; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="$BIN/$DEST/bin/protoc --python_out=protobuf_generated_python google_auth.proto"
+    cmd="$BIN/$DEST/bin/protoc --plugin=protoc-gen-mypy=/home/rkurmann/.local/bin/protoc-gen-mypy --python_out=protobuf_generated_python --mypy_out=protobuf_generated_python google_auth.proto"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -196,6 +196,18 @@ cmd="$PIP install -U pipenv"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
+cmd="sudo $PIP install --use-pep517 -U -r requirements.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="sudo $PIP install --use-pep517 -U -r requirements-dev.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="sudo $PIP install -U pipenv"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
 $PIPENV --version
 
 cmd="$PIPENV update && $PIPENV --rm && $PIPENV install"
@@ -220,7 +232,7 @@ cmd="$MYPY --install-types --non-interactive"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$MYPY *.py"
+cmd="$MYPY --strict *.py"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 

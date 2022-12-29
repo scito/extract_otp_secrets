@@ -25,7 +25,7 @@ import extract_otp_secret_keys
 
 
 class TestQRImageExtract(unittest.TestCase):
-    def test_img_qr_reader_happy_path(self):
+    def test_img_qr_reader_happy_path(self) -> None:
         with Capturing() as actual_output:
             extract_otp_secret_keys.main(['test/test_googleauth_export.png'])
 
@@ -36,7 +36,7 @@ class TestQRImageExtract(unittest.TestCase):
 
         self.assertEqual(actual_output, expected_output)
 
-    def test_img_qr_reader_no_qr_code_in_image(self):
+    def test_img_qr_reader_no_qr_code_in_image(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
                 extract_otp_secret_keys.main(['test/lena_std.tif'])
@@ -46,7 +46,7 @@ class TestQRImageExtract(unittest.TestCase):
         self.assertEqual(actual_output, expected_output)
         self.assertEqual(context.exception.code, 1)
 
-    def test_img_qr_reader_nonexistent_file(self):
+    def test_img_qr_reader_nonexistent_file(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
                 extract_otp_secret_keys.main(['test/nonexistent.bmp'])
@@ -56,7 +56,7 @@ class TestQRImageExtract(unittest.TestCase):
         self.assertEqual(actual_output, expected_output)
         self.assertEqual(context.exception.code, 1)
 
-    def test_img_qr_reader_non_image_file(self):
+    def test_img_qr_reader_non_image_file(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
                 extract_otp_secret_keys.main(['test/text_masquerading_as_image.jpeg'])
@@ -77,13 +77,13 @@ class TestQRImageExtract(unittest.TestCase):
         self.assertEqual(actual_output, expected_output)
         self.assertEqual(context.exception.code, 1)
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.cleanup()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.cleanup()
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         pass
 
 
