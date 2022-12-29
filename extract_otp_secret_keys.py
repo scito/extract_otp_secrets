@@ -85,6 +85,7 @@ def main(sys_args):
     sys.stdout.close = lambda: None
 
     args = parse_args(sys_args)
+    if verbose: print(f"QReader installed: {qreader_available}")
 
     otps = extract_otps(args)
     write_csv(args, otps)

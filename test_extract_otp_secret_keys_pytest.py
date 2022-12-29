@@ -128,16 +128,16 @@ def test_extract_stdin_img_empty(capsys, monkeypatch):
     assert captured.err == 'WARN: stdin is empty\n'
 
 
-def test_extract_csv(capsys):
+def test_extract_csv(capsys, tmp_path):
     # Arrange
-    cleanup()
+    output_file = str(tmp_path / 'test_example_output.csv')
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-c', 'test_example_output.csv', 'example_export.txt'])
+    extract_otp_secret_keys.main(['-q', '-c', output_file, 'example_export.txt'])
 
     # Assert
     expected_csv = read_csv('example_output.csv')
-    actual_csv = read_csv('test_example_output.csv')
+    actual_csv = read_csv(output_file)
 
     assert actual_csv == expected_csv
 
@@ -146,14 +146,8 @@ def test_extract_csv(capsys):
     assert captured.out == ''
     assert captured.err == ''
 
-    # Clean up
-    cleanup()
-
 
 def test_extract_csv_stdout(capsys):
-    # Arrange
-    cleanup()
-
     # Act
     extract_otp_secret_keys.main(['-c', '-', 'example_export.txt'])
 
@@ -168,13 +162,9 @@ def test_extract_csv_stdout(capsys):
     assert actual_csv == expected_csv
     assert captured.err == ''
 
-    # Clean up
-    cleanup()
-
 
 def test_extract_stdin_and_csv_stdout(capsys, monkeypatch):
     # Arrange
-    cleanup()
     monkeypatch.setattr('sys.stdin', io.StringIO(read_file_to_str('example_export.txt')))
 
     # Act
@@ -191,42 +181,33 @@ def test_extract_stdin_and_csv_stdout(capsys, monkeypatch):
     assert actual_csv == expected_csv
     assert captured.err == ''
 
-    # Clean up
-    cleanup()
 
-
-def test_keepass_csv(capsys):
+def test_keepass_csv(capsys, tmp_path):
     '''Two csv files .totp and .htop are generated.'''
     # Arrange
-    cleanup()
+    file_name = str(tmp_path / 'test_example_keepass_output.csv')
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-k', 'test_example_keepass_output.csv', 'example_export.txt'])
+    extract_otp_secret_keys.main(['-q', '-k', file_name, 'example_export.txt'])
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
     expected_hotp_csv = read_csv('example_keepass_output.hotp.csv')
-    actual_totp_csv = read_csv('test_example_keepass_output.totp.csv')
-    actual_hotp_csv = read_csv('test_example_keepass_output.hotp.csv')
+    actual_totp_csv = read_csv(str(tmp_path / 'test_example_keepass_output.totp.csv'))
+    actual_hotp_csv = read_csv(str(tmp_path / 'test_example_keepass_output.hotp.csv'))
 
     assert actual_totp_csv == expected_totp_csv
     assert actual_hotp_csv == expected_hotp_csv
-    assert not file_exits('test_example_keepass_output.csv')
+    assert not file_exits(file_name)
 
     captured = capsys.readouterr()
 
     assert captured.out == ''
     assert captured.err == ''
 
-    # Clean up
-    cleanup()
-
 
 def test_keepass_csv_stdout(capsys):
     '''Two csv files .totp and .htop are generated.'''
-    # Arrange
-    cleanup()
-
     # Act
     extract_otp_secret_keys.main(['-k', '-', 'test/example_export_only_totp.txt'])
 
@@ -243,45 +224,36 @@ def test_keepass_csv_stdout(capsys):
     assert actual_totp_csv == expected_totp_csv
     assert captured.err == ''
 
-    # Clean up
-    cleanup()
 
-
-def test_single_keepass_csv(capsys):
+def test_single_keepass_csv(capsys, tmp_path):
     '''Does not add .totp or .hotp pre-suffix'''
-    # Arrange
-    cleanup()
-
     # Act
-    extract_otp_secret_keys.main(['-q', '-k', 'test_example_keepass_output.csv', 'test/example_export_only_totp.txt'])
+    extract_otp_secret_keys.main(['-q', '-k', str(tmp_path / 'test_example_keepass_output.csv'), 'test/example_export_only_totp.txt'])
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
-    actual_totp_csv = read_csv('test_example_keepass_output.csv')
+    actual_totp_csv = read_csv(str(tmp_path / 'test_example_keepass_output.csv'))
 
     assert actual_totp_csv == expected_totp_csv
-    assert not file_exits('test_example_keepass_output.totp.csv')
-    assert not file_exits('test_example_keepass_output.hotp.csv')
+    assert not file_exits(tmp_path / 'test_example_keepass_output.totp.csv')
+    assert not file_exits(tmp_path / 'test_example_keepass_output.hotp.csv')
 
     captured = capsys.readouterr()
 
     assert captured.out == ''
     assert captured.err == ''
 
-    # Clean up
-    cleanup()
 
-
-def test_extract_json(capsys):
+def test_extract_json(capsys, tmp_path):
     # Arrange
-    cleanup()
+    output_file = str(tmp_path / 'test_example_output.json')
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-j', 'test_example_output.json', 'example_export.txt'])
+    extract_otp_secret_keys.main(['-q', '-j', output_file, 'example_export.txt'])
 
     # Assert
     expected_json = read_json('example_output.json')
-    actual_json = read_json('test_example_output.json')
+    actual_json = read_json(output_file)
 
     assert actual_json == expected_json
 
@@ -290,14 +262,8 @@ def test_extract_json(capsys):
     assert captured.out == ''
     assert captured.err == ''
 
-    # Clean up
-    cleanup()
-
 
 def test_extract_json_stdout(capsys):
-    # Arrange
-    cleanup()
-
     # Act
     extract_otp_secret_keys.main(['-j', '-', 'example_export.txt'])
 
@@ -309,9 +275,6 @@ def test_extract_json_stdout(capsys):
 
     assert actual_json == expected_json
     assert captured.err == ''
-
-    # Clean up
-    cleanup()
 
 
 def test_extract_not_encoded_plus(capsys):
@@ -360,12 +323,9 @@ def test_extract_printqr(capsys):
     assert captured.err == ''
 
 
-def test_extract_saveqr(capsys):
-    # Arrange
-    cleanup()
-
+def test_extract_saveqr(capsys, tmp_path):
     # Act
-    extract_otp_secret_keys.main(['-q', '-s', 'testout/qr/', 'example_export.txt'])
+    extract_otp_secret_keys.main(['-q', '-s', str(tmp_path), 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -373,13 +333,10 @@ def test_extract_saveqr(capsys):
     assert captured.out == ''
     assert captured.err == ''
 
-    assert os.path.isfile('testout/qr/1-piraspberrypi-raspberrypi.png')
-    assert os.path.isfile('testout/qr/2-piraspberrypi.png')
-    assert os.path.isfile('testout/qr/3-piraspberrypi.png')
-    assert os.path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png')
-
-    # Clean up
-    cleanup()
+    assert os.path.isfile(tmp_path / '1-piraspberrypi-raspberrypi.png')
+    assert os.path.isfile(tmp_path / '2-piraspberrypi.png')
+    assert os.path.isfile(tmp_path / '3-piraspberrypi.png')
+    assert os.path.isfile(tmp_path / '4-piraspberrypi-raspberrypi.png')
 
 
 def test_normalize_bytes():
@@ -717,12 +674,6 @@ Probably a wrong file was given
     assert captured.out == ''
     assert e.value.code == 1
     assert e.type == SystemExit
-
-
-def cleanup():
-    remove_files('test_example_*.csv')
-    remove_files('test_example_*.json')
-    remove_dir_with_files('testout/')
 
 
 EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT = '''Name:    pi@raspberrypi

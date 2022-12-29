@@ -1,3 +1,4 @@
+QReader installed: True
 Input files: ['example_export.txt']
 Processing infile example_export.txt
 Reading lines of example_export.txt
