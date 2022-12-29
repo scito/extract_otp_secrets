@@ -72,6 +72,8 @@ jobs:
           # build on feature branches, push only on master branch
           # TODO push: ${{ github.ref == 'refs/heads/master' }}
           push: true
+          build-args: |
+            run_tests=false
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
