@@ -1,6 +1,6 @@
 from __future__ import annotations  # for compatibility with Python < 3.11
 import pathlib
-from setuptools import setup  # type: ignore
+from setuptools import setup
 
 setup(
     name='extract_otp_secret_keys',
@@ -14,10 +14,13 @@ setup(
     author='scito',
     author_email='info@scito.ch',
 
+    # https://pypi.org/classifiers/
     classifiers=[
         'Development Status :: 5 - Production/Stable',
 
         'Environment :: Console',
+        'Environment :: X11 Applications :: Qt',
+        'Environment :: Win32 (MS Windows)',
         'Topic :: System :: Archiving :: Backup',
         'Topic :: Utilities',
 

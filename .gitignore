@@ -16,3 +16,5 @@ venv/
 *.whl
 build/
 extract_otp_secret_keys.egg-info/
+*.xml
+pytest-coverage.txt

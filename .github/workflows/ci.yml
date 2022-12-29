@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest pytest-mock mypy types-protobuf
+          pip install flake8 pytest pytest-mock pytest-cov mypy types-protobuf
           pip install --use-pep517 -r requirements.txt
       - name: Lint with flake8
         run: |
@@ -49,5 +49,15 @@ jobs:
           mypy --install-types --non-interactive *.py
           mypy --strict *.py
         if: matrix.python-version == '3.x'
+      - name: Test with pytest
+        run: pytest
+        if: matrix.python-version != '3.x' || matrix.platform == 'ubuntu-latest'
       - name: Test with pytest (with code coverage)
-        run: pytest --cov=test_extract_otp_secret_keys_pytest
+        run: pytest --cov=test_extract_otp_secret_keys_pytest --junitxml=pytest.xml --cov-report=term-missing | tee pytest-coverage.txt
+        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
+      # https://github.com/marketplace/actions/pytest-coverage-comment
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml

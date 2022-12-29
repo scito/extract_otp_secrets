@@ -238,13 +238,19 @@ eval "$cmd"
 
 # Test
 
-cmd="pytest --cov=test_extract_otp_secret_keys_pytest"
+cmd="pytest --cov=test_extract_otp_secret_keys_pytest --junitxml=pytest.xml --cov-report=term-missing | tee pytest-coverage.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 cmd="$PIPENV run pytest --cov=test_extract_otp_secret_keys_pytest"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
+
+# Update Code Coverage in README.md
+
+# https://github.com/marketplace/actions/pytest-coverage-comment
+# Coverage-95%25-yellowgreen
+TOTAL_COVERAGE=$(cat pytest-coverage.txt | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
 
 # Build docker
 

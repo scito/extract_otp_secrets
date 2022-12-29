@@ -1,6 +1,7 @@
 # Extract TOTP/HOTP secret keys from Google Authenticator
 
 [![CI Status](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml)
+![coverage](https://img.shields.io/badge/coverage-95%25-yellowgreen)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/protobuf)
 [![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/scito/extract_otp_secret_keys)](https://github.com/scito/extract_otp_secret_keys/blob/master/Pipfile.lock)
 ![protobuf version](https://img.shields.io/badge/protobuf-4.21.12-informational)
