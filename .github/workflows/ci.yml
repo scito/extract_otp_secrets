@@ -48,6 +48,6 @@ jobs:
       - name: Type checking with mypy
         run: |
           mypy --strict *.py
-        if: matrix.python-version == '3.x'
+        if: ${{ matrix.python-version == '3.x' }}
       - name: Test with pytest
         run: pytest
