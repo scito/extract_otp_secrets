@@ -223,6 +223,9 @@ def extract_otps_from_camera(args: Args) -> Otps:
         elif key == 32:
             qr_mode = QRMode((qr_mode.value + 1) % len(QRMode))
             if verbose: print(f"QR reading mode: {qr_mode}")
+        if cv2.getWindowProperty(window_name,cv2.WND_PROP_VISIBLE) < 1:
+            # Window close clicked
+            break
 
     cam.release()
     cv2.destroyAllWindows()
