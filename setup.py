@@ -20,6 +20,7 @@ setup(
         'Environment :: Console',
         'Environment :: X11 Applications :: Qt',
         'Environment :: Win32 (MS Windows)',
+        'Environment :: MacOS X',
         'Topic :: System :: Archiving :: Backup',
         'Topic :: Utilities',
 
@@ -33,7 +34,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
 
-        'Programming Language :: Python'
+        'Programming Language :: Python',
         'Natural Language :: English',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     ],
@@ -49,13 +50,13 @@ setup(
 
     python_requires='>=3.7, <4',
     install_requires=[
-        'protobuf',
-        'qrcode',
-        'Pillow',
-        'qreader',
-        'pyzbar',
-        'opencv-python',
-        'typing_extensions'  # PYTHON < 3.11: add types
+        "protobuf",
+        "qrcode",
+        "Pillow",
+        "qreader",
+        "pyzbar",
+        "opencv-python",
+        "typing_extensions;python_version<='3.7'"
     ],
 
     project_urls={
