@@ -51,7 +51,8 @@ jobs:
         if: matrix.python-version == '3.x'
       - name: Test with pytest
         run: pytest
-        if: (matrix.python-version != '3.x' || matrix.platform != 'ubuntu-latest') && matrix.platform != 'macos-latest'
+        if: (matrix.python-version != '3.x' || matrix.platform != 'ubuntu-latest')
+        # && matrix.platform != 'macos-latest'
       - name: Test with pytest (with code coverage)
         run: pytest --cov=test_extract_otp_secret_keys_pytest --junitxml=pytest.xml --cov-report=term-missing | tee pytest-coverage.txt
         if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
