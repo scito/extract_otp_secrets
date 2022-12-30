@@ -240,13 +240,13 @@ eval "$cmd"
 
 # Type checking
 
-cmd="$MYPY --install-types --non-interactive *.py"
+cmd="$MYPY --install-types --non-interactive src/*.py tests/*.py"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 # change to src as python -m mypy adds the current dir Python sys.path
 # execute in a subshell in order not to loose the exit code and not to change the dir in the currrent shell
-cmd="(cd src && $MYPY --strict *.py ../tests)"
+cmd="$MYPY --strict src/*.py tests/*.py"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -275,7 +275,7 @@ if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";
 eval "$cmd"
 
 COVERAGE_OUT="tests/reports/pytest-coverage.txt"
-cmd="pytest --cov=test_extract_otp_secret_keys_pytest --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT"
+cmd="mkdir -p tests/reports; pytest --cov=test_extract_otp_secret_keys_pytest --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
