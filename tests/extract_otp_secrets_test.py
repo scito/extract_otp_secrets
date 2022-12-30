@@ -1,4 +1,4 @@
-# pytest for extract_otp_secret_keys.py
+# pytest for extract_otp_secrets.py
 
 # Run tests:
 # pytest
@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # for compatibility with Python < 3.11
+from __future__ import annotations  # for compatibility with PYTHON < 3.11
 import io
 import os
 import pathlib
@@ -27,18 +27,18 @@ import sys
 import pytest
 from pytest_mock import MockerFixture
 
-import extract_otp_secret_keys
+import extract_otp_secrets
 from utils import (file_exits, quick_and_dirty_workaround_encoding_problem,
                    read_binary_file_as_stream, read_csv, read_csv_str,
                    read_file_to_str, read_json, read_json_str,
                    replace_escaped_octal_utf8_bytes_with_str)
 
-qreader_available: bool = extract_otp_secret_keys.qreader_available
+qreader_available: bool = extract_otp_secrets.qreader_available
 
 
 def test_extract_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['example_export.txt'])
+    extract_otp_secrets.main(['example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -50,7 +50,7 @@ def test_extract_stdout(capsys: pytest.CaptureFixture[str]) -> None:
 def test_extract_non_existent_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['non_existent_file.txt'])
+        extract_otp_secrets.main(['non_existent_file.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -68,7 +68,7 @@ def test_extract_stdin_stdout(capsys: pytest.CaptureFixture[str], monkeypatch: p
     monkeypatch.setattr('sys.stdin', io.StringIO(read_file_to_str('example_export.txt')))
 
     # Act
-    extract_otp_secret_keys.main(['-'])
+    extract_otp_secrets.main(['-'])
 
     # Assert
     captured = capsys.readouterr()
@@ -82,7 +82,7 @@ def test_extract_stdin_empty(capsys: pytest.CaptureFixture[str], monkeypatch: py
     monkeypatch.setattr('sys.stdin', io.StringIO())
 
     # Act
-    extract_otp_secret_keys.main(['-'])
+    extract_otp_secrets.main(['-'])
 
     # Assert
     captured = capsys.readouterr()
@@ -96,7 +96,7 @@ def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> No
     if qreader_available:
         # Act
         with pytest.raises(SystemExit) as e:
-            extract_otp_secret_keys.main(['tests/data/empty_file.txt'])
+            extract_otp_secrets.main(['tests/data/empty_file.txt'])
 
         # Assert
         captured = capsys.readouterr()
@@ -109,7 +109,7 @@ def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> No
         assert e.type == SystemExit
     else:
         # Act
-        extract_otp_secret_keys.main(['tests/data/empty_file.txt'])
+        extract_otp_secrets.main(['tests/data/empty_file.txt'])
 
         # Assert
         captured = capsys.readouterr()
@@ -124,7 +124,7 @@ def test_extract_stdin_img_empty(capsys: pytest.CaptureFixture[str], monkeypatch
     monkeypatch.setattr('sys.stdin', io.BytesIO())
 
     # Act
-    extract_otp_secret_keys.main(['='])
+    extract_otp_secrets.main(['='])
 
     # Assert
     captured = capsys.readouterr()
@@ -138,7 +138,7 @@ def test_extract_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path)
     output_file = str(tmp_path / 'test_example_output.csv')
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-c', output_file, 'example_export.txt'])
+    extract_otp_secrets.main(['-q', '-c', output_file, 'example_export.txt'])
 
     # Assert
     expected_csv = read_csv('example_output.csv')
@@ -154,7 +154,7 @@ def test_extract_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path)
 
 def test_extract_csv_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['-c', '-', 'example_export.txt'])
+    extract_otp_secrets.main(['-c', '-', 'example_export.txt'])
 
     # Assert
     assert not file_exits('test_example_output.csv')
@@ -173,7 +173,7 @@ def test_extract_stdin_and_csv_stdout(capsys: pytest.CaptureFixture[str], monkey
     monkeypatch.setattr('sys.stdin', io.StringIO(read_file_to_str('example_export.txt')))
 
     # Act
-    extract_otp_secret_keys.main(['-c', '-', '-'])
+    extract_otp_secrets.main(['-c', '-', '-'])
 
     # Assert
     assert not file_exits('test_example_output.csv')
@@ -193,7 +193,7 @@ def test_keepass_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path)
     file_name = str(tmp_path / 'test_example_keepass_output.csv')
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-k', file_name, 'example_export.txt'])
+    extract_otp_secrets.main(['-q', '-k', file_name, 'example_export.txt'])
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
@@ -214,7 +214,7 @@ def test_keepass_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path)
 def test_keepass_csv_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     '''Two csv files .totp and .htop are generated.'''
     # Act
-    extract_otp_secret_keys.main(['-k', '-', 'tests/data/example_export_only_totp.txt'])
+    extract_otp_secrets.main(['-k', '-', 'tests/data/example_export_only_totp.txt'])
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
@@ -232,7 +232,7 @@ def test_keepass_csv_stdout(capsys: pytest.CaptureFixture[str]) -> None:
 def test_single_keepass_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
     '''Does not add .totp or .hotp pre-suffix'''
     # Act
-    extract_otp_secret_keys.main(['-q', '-k', str(tmp_path / 'test_example_keepass_output.csv'), 'tests/data/example_export_only_totp.txt'])
+    extract_otp_secrets.main(['-q', '-k', str(tmp_path / 'test_example_keepass_output.csv'), 'tests/data/example_export_only_totp.txt'])
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
@@ -253,7 +253,7 @@ def test_extract_json(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path
     output_file = str(tmp_path / 'test_example_output.json')
 
     # Act
-    extract_otp_secret_keys.main(['-q', '-j', output_file, 'example_export.txt'])
+    extract_otp_secrets.main(['-q', '-j', output_file, 'example_export.txt'])
 
     # Assert
     expected_json = read_json('example_output.json')
@@ -269,7 +269,7 @@ def test_extract_json(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path
 
 def test_extract_json_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['-j', '-', 'example_export.txt'])
+    extract_otp_secrets.main(['-j', '-', 'example_export.txt'])
 
     # Assert
     expected_json = read_json('example_output.json')
@@ -283,7 +283,7 @@ def test_extract_json_stdout(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_extract_not_encoded_plus(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['tests/data/test_plus_problem_export.txt'])
+    extract_otp_secrets.main(['tests/data/test_plus_problem_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -316,7 +316,7 @@ Type:    totp
 
 def test_extract_printqr(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['-p', 'example_export.txt'])
+    extract_otp_secrets.main(['-p', 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -329,7 +329,7 @@ def test_extract_printqr(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_extract_saveqr(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
     # Act
-    extract_otp_secret_keys.main(['-q', '-s', str(tmp_path), 'example_export.txt'])
+    extract_otp_secrets.main(['-q', '-s', str(tmp_path), 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -350,7 +350,7 @@ def test_normalize_bytes() -> None:
 
 def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
     # Act
-    extract_otp_secret_keys.main(['-v', 'example_export.txt'])
+    extract_otp_secrets.main(['-v', 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -372,7 +372,7 @@ def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> N
 
 def test_extract_debug(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['-vvv', 'example_export.txt'])
+    extract_otp_secrets.main(['-vvv', 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -387,7 +387,7 @@ def test_extract_debug(capsys: pytest.CaptureFixture[str]) -> None:
 def test_extract_help(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as e:
         # Act
-        extract_otp_secret_keys.main(['-h'])
+        extract_otp_secrets.main(['-h'])
 
     # Assert
     captured = capsys.readouterr()
@@ -403,10 +403,10 @@ def test_extract_no_arguments(capsys: pytest.CaptureFixture[str], mocker: Mocker
     if qreader_available:
         # Arrange
         otps = read_json('example_output.json')
-        mocker.patch('extract_otp_secret_keys.extract_otps_from_camera', return_value=otps)
+        mocker.patch('extract_otp_secrets.extract_otps_from_camera', return_value=otps)
 
         # Act
-        extract_otp_secret_keys.main(['-c', '-'])
+        extract_otp_secrets.main(['-c', '-'])
 
         # Assert
         captured = capsys.readouterr()
@@ -419,7 +419,7 @@ def test_extract_no_arguments(capsys: pytest.CaptureFixture[str], mocker: Mocker
     else:
         # Act
         with pytest.raises(SystemExit) as e:
-            extract_otp_secret_keys.main([])
+            extract_otp_secrets.main([])
 
         # Assert
         captured = capsys.readouterr()
@@ -435,7 +435,7 @@ def test_extract_no_arguments(capsys: pytest.CaptureFixture[str], mocker: Mocker
 def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as e:
         # Act
-        extract_otp_secret_keys.main(['-v', '-q', 'example_export.txt'])
+        extract_otp_secrets.main(['-v', '-q', 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -450,7 +450,7 @@ def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
 def test_wrong_data(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as e:
         # Act
-        extract_otp_secret_keys.main(['tests/data/test_export_wrong_data.txt'])
+        extract_otp_secrets.main(['tests/data/test_export_wrong_data.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -469,7 +469,7 @@ data=XXXX
 def test_wrong_content(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as e:
         # Act
-        extract_otp_secret_keys.main(['tests/data/test_export_wrong_content.txt'])
+        extract_otp_secrets.main(['tests/data/test_export_wrong_content.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -494,7 +494,7 @@ Probably a wrong file was given
 
 def test_wrong_prefix(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['tests/data/test_export_wrong_prefix.txt'])
+    extract_otp_secrets.main(['tests/data/test_export_wrong_prefix.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -518,15 +518,15 @@ Type:    totp
 
 
 def test_add_pre_suffix(capsys: pytest.CaptureFixture[str]) -> None:
-    assert extract_otp_secret_keys.add_pre_suffix("name.csv", "totp") == "name.totp.csv"
-    assert extract_otp_secret_keys.add_pre_suffix("name.csv", "") == "name..csv"
-    assert extract_otp_secret_keys.add_pre_suffix("name", "totp") == "name.totp"
+    assert extract_otp_secrets.add_pre_suffix("name.csv", "totp") == "name.totp.csv"
+    assert extract_otp_secrets.add_pre_suffix("name.csv", "") == "name..csv"
+    assert extract_otp_secrets.add_pre_suffix("name", "totp") == "name.totp"
 
 
 @pytest.mark.qreader
 def test_img_qr_reader_from_file_happy_path(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['tests/data/test_googleauth_export.png'])
+    extract_otp_secrets.main(['tests/data/test_googleauth_export.png'])
 
     # Assert
     captured = capsys.readouterr()
@@ -538,7 +538,7 @@ def test_img_qr_reader_from_file_happy_path(capsys: pytest.CaptureFixture[str]) 
 @pytest.mark.qreader
 def test_extract_multiple_files_and_mixed(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main([
+    extract_otp_secrets.main([
         'example_export.txt',
         'tests/data/test_googleauth_export.png',
         'example_export.txt',
@@ -558,7 +558,7 @@ def test_img_qr_reader_from_stdin(capsys: pytest.CaptureFixture[str], monkeypatc
     monkeypatch.setattr('sys.stdin', read_binary_file_as_stream('tests/data/test_googleauth_export.png'))
 
     # Act
-    extract_otp_secret_keys.main(['='])
+    extract_otp_secrets.main(['='])
 
     # Assert
     captured = capsys.readouterr()
@@ -592,7 +592,7 @@ def test_img_qr_reader_from_stdin_wrong_symbol(capsys: pytest.CaptureFixture[str
 
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['-'])
+        extract_otp_secrets.main(['-'])
 
     # Assert
     captured = capsys.readouterr()
@@ -612,7 +612,7 @@ def test_extract_stdin_stdout_wrong_symbol(capsys: pytest.CaptureFixture[str], m
 
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['='])
+        extract_otp_secrets.main(['='])
 
     # Assert
     captured = capsys.readouterr()
@@ -629,7 +629,7 @@ def test_extract_stdin_stdout_wrong_symbol(capsys: pytest.CaptureFixture[str], m
 def test_img_qr_reader_no_qr_code_in_image(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['tests/data/lena_std.tif'])
+        extract_otp_secrets.main(['tests/data/lena_std.tif'])
 
     # Assert
     captured = capsys.readouterr()
@@ -646,7 +646,7 @@ def test_img_qr_reader_no_qr_code_in_image(capsys: pytest.CaptureFixture[str]) -
 def test_img_qr_reader_nonexistent_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['nonexistent.bmp'])
+        extract_otp_secrets.main(['nonexistent.bmp'])
 
     # Assert
     captured = capsys.readouterr()
@@ -662,7 +662,7 @@ def test_img_qr_reader_nonexistent_file(capsys: pytest.CaptureFixture[str]) -> N
 def test_non_image_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['tests/data/text_masquerading_as_image.jpeg'])
+        extract_otp_secrets.main(['tests/data/text_masquerading_as_image.jpeg'])
 
     # Assert
     captured = capsys.readouterr()

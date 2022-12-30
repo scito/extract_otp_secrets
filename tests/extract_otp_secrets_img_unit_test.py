@@ -1,4 +1,4 @@
-# Unit test for extract_otp_secret_keys.py
+# Unit test for extract_otp_secrets.py
 
 # Run tests:
 # python -m unittest
@@ -18,17 +18,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # for compatibility with Python < 3.11
+from __future__ import annotations  # for compatibility with PYTHON < 3.11
 import unittest
 
-import extract_otp_secret_keys
+import extract_otp_secrets
 from utils import Capturing
 
 
 class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_happy_path(self) -> None:
         with Capturing() as actual_output:
-            extract_otp_secret_keys.main(['tests/data/test_googleauth_export.png'])
+            extract_otp_secrets.main(['tests/data/test_googleauth_export.png'])
 
         expected_output =\
             ['Name:    Test1:test1@example1.com', 'Secret:  JBSWY3DPEHPK3PXP', 'Issuer:  Test1', 'Type:    totp', '',
@@ -40,7 +40,7 @@ class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_no_qr_code_in_image(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secret_keys.main(['tests/data/lena_std.tif'])
+                extract_otp_secrets.main(['tests/data/lena_std.tif'])
 
         expected_output = ['', 'ERROR: Unable to read QR Code from file.', 'input file: tests/data/lena_std.tif']
 
@@ -50,7 +50,7 @@ class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_nonexistent_file(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secret_keys.main(['nonexistent.bmp'])
+                extract_otp_secrets.main(['nonexistent.bmp'])
 
         expected_output = ['', 'ERROR: Input file provided is non-existent or not a file.', 'input file: nonexistent.bmp']
 
@@ -60,7 +60,7 @@ class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_non_image_file(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secret_keys.main(['tests/data/text_masquerading_as_image.jpeg'])
+                extract_otp_secrets.main(['tests/data/text_masquerading_as_image.jpeg'])
 
         expected_output = [
             '',

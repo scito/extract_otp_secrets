@@ -5,7 +5,7 @@
 # 2. Read QR codes with QR code reader (e.g. with a second device)
 # 3. Save the captured QR codes in a text file. Save each QR code on a new line. (The captured QR codes look like "otpauth-migration://offline?data=...")
 # 4. Call this script with the file as input:
-#    python extract_otp_secret_keys.py example_export.txt
+#    python extract_otp_secrets.py example_export.txt
 #
 # Requirement:
 # The protobuf package of Google for proto3 is required for running this script.
@@ -41,7 +41,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # for compatibility with Python < 3.11
+from __future__ import annotations  # for compatibility with PYTHON < 3.11
 import argparse
 import base64
 import csv
@@ -124,11 +124,11 @@ def parse_args(sys_args: list[str]) -> Args:
     if qreader_available:
         description_text += "\nIf no infiles are provided, the QR codes are interactively captured from the camera."
     example_text = """examples:
-python extract_otp_secret_keys.py
-python extract_otp_secret_keys.py example_*.txt
-python extract_otp_secret_keys.py - < example_export.txt
-python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
-python extract_otp_secret_keys.py = < example_export.png"""
+python extract_otp_secrets.py
+python extract_otp_secrets.py example_*.txt
+python extract_otp_secrets.py - < example_export.txt
+python extract_otp_secrets.py --csv - example_*.png | tail -n+2
+python extract_otp_secrets.py = < example_export.png"""
 
     arg_parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=52),
                                          description=description_text,

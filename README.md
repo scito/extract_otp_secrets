@@ -32,7 +32,7 @@ cd extract_otp_secret_keys
 3. Point the QR codes to the camera of your computer
 4. Call this script with the file as input:
 
-    python extract_otp_secret_keys.py
+    python extract_otp_secrets.py
 
 ### With builtin QR decoder from image files
 
@@ -42,7 +42,7 @@ cd extract_otp_secret_keys
 5. Transfer the images files to the computer where his script is installed.
 6. Call this script with the file as input:
 
-    python extract_otp_secret_keys.py example_export.png
+    python extract_otp_secrets.py example_export.png
 
 ### With external QR decoder app from text files
 
@@ -53,11 +53,11 @@ cd extract_otp_secret_keys
 5. Transfer the file to the computer where his script is installed.
 6. Call this script with the file as input:
 
-    python extract_otp_secret_keys.py example_export.txt
+    python extract_otp_secrets.py example_export.txt
 
 ## Program help: arguments and options
 
-<pre>usage: extract_otp_secret_keys.py [-h] [--camera NUMBER] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] [infile ...]
+<pre>usage: extract_otp_secrets.py [-h] [--camera NUMBER] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] [infile ...]
 
 Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app.
 If no infiles are provided, the QR codes are interactively captured from the camera.
@@ -78,11 +78,11 @@ options:
   --quiet, -q                 no stdout output, except output set by -
 
 examples:
-python extract_otp_secret_keys.py
-python extract_otp_secret_keys.py example_*.txt
-python extract_otp_secret_keys.py - < example_export.txt
-python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
-python extract_otp_secret_keys.py = < example_export.png</pre>
+python extract_otp_secrets.py
+python extract_otp_secrets.py example_*.txt
+python extract_otp_secrets.py - < example_export.txt
+python extract_otp_secrets.py --csv - example_*.png | tail -n+2
+python extract_otp_secrets.py = < example_export.png</pre>
 
 ## Dependencies
 
@@ -93,7 +93,7 @@ Known to work with
 * Python 3.10.8, protobuf 4.21.9, qrcode 7.3.1, and pillow 9.2
 * Python 3.11.1, protobuf 4.21.12, qrcode 7.3.1, and pillow 9.2
 
-For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secret_keys version 1.4.0.
+For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secrets version 1.4.0.
 
 ### Shared libs installation for reading QR code images
 
@@ -126,38 +126,38 @@ The zbar DLLs are included with the Windows Python wheels. On other operating sy
 
 ### Printing otp secrets form text file
 
-    python extract_otp_secret_keys.py example_export.txt
+    python extract_otp_secrets.py example_export.txt
 
 ### Printing otp secrets from image file
 
-    python extract_otp_secret_keys.py example_export.png
+    python extract_otp_secrets.py example_export.png
 
 ### Printing otp secrets multiple files
 
-    python extract_otp_secret_keys.py example_*.txt
-    python extract_otp_secret_keys.py example_*.png
-    python extract_otp_secret_keys.py example_export.*
-    python extract_otp_secret_keys.py example_*.txt example_*.png
+    python extract_otp_secrets.py example_*.txt
+    python extract_otp_secrets.py example_*.png
+    python extract_otp_secrets.py example_export.*
+    python extract_otp_secrets.py example_*.txt example_*.png
 
 ### Printing otp secrets from stdin (text)
 
-    python extract_otp_secret_keys.py - < example_export.txt
+    python extract_otp_secrets.py - < example_export.txt
 
 ### Printing otp secrets from stdin (image)
 
-    python extract_otp_secret_keys.py = < example_export.png
+    python extract_otp_secrets.py = < example_export.png
 
 ### Printing otp secrets csv to stdout
 
-    python extract_otp_secret_keys.py --csv - example_export.txt
+    python extract_otp_secrets.py --csv - example_export.txt
 
 ### Printing otp secrets csv to stdout without header line
 
-    python extract_otp_secret_keys.py --csv - example_*.png | tail -n+2
+    python extract_otp_secrets.py --csv - example_*.png | tail -n+2
 
 ### Reading from stdin and printing to stdout
 
-    cat example_*.txt | python extract_otp_secret_keys.py --csv - - | tail -n+2
+    cat example_*.txt | python extract_otp_secrets.py --csv - - | tail -n+2
 
 ## Features
 
@@ -200,7 +200,7 @@ The zbar DLLs are included with the Windows Python wheels. On other operating sy
 * Uses UTF-8 on all platforms
 * Supports Python >= 3.7
 * All these features are backed by tests ran nightly
-* All functionality in one Python script: extract_otp_secret_keys.py (except protobuf generated code in protobuf_generated_python)
+* All functionality in one Python script: extract_otp_secrets.py (except protobuf generated code in protobuf_generated_python)
 
 ## KeePass
 
@@ -273,27 +273,27 @@ https://github.com/nipunn1313/mypy-protobuf
 
 ```
 pip install git+https://github.com/scito/extract_otp_secret_keys
-python -m extract_otp_secret_keys
+python -m extract_otp_secrets
 ```
 
 #### For development
 
 ```
 pip install git+https://github.com/scito/extract_otp_secret_keys@support_img_read
-python -m extract_otp_secret_keys
+python -m extract_otp_secrets
 ```
 
 ```
-# pip install -e git+https://github.com/scito/extract_otp_secret_keys@$(git ls-remote  git@github.com:scito/extract_otp_secret_keys@support_img_read.git | head -1 | awk '{print $1;}')#egg=extract_otp_secret_keys
-pip3.11 install -e git+https://github.com/scito/extract_otp_secret_keys.git@$(git ls-remote git@github.com:scito/extract_otp_secret_keys.git | grep support_img_read | head -1 | awk '{print $1;}')#egg=extract_otp_secret_keys
-python -m extract_otp_secret_keys
+# pip install -e git+https://github.com/scito/extract_otp_secret_keys@$(git ls-remote  git@github.com:scito/extract_otp_secret_keys@support_img_read.git | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
+pip3.11 install -e git+https://github.com/scito/extract_otp_secret_keys.git@$(git ls-remote git@github.com:scito/extract_otp_secret_keys.git | grep support_img_read | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
+python -m extract_otp_secrets
 ```
 
 #### Example
 
 ```
 wget https://raw.githubusercontent.com/scito/extract_otp_secret_keys/master/example_export.txt
-python -m extract_otp_secret_keys example_export.txt
+python -m extract_otp_secrets example_export.txt
 ```
 
 ### local pip
@@ -304,27 +304,27 @@ pip install -e .
 
 ### pipenv
 
-You can you use [Pipenv](https://github.com/pypa/pipenv) for running extract_otp_secret_keys.
+You can you use [Pipenv](https://github.com/pypa/pipenv) for running extract_otp_secrets.
 
 ```
 pipenv --rm
 pipenv install
 pipenv shell
-python extract_otp_secret_keys.py example_export.txt
+python extract_otp_secrets.py example_export.txt
 ```
 
 ### Visual Studio Code Remote - Containers / VSCode devcontainer
 
-You can you use [VSCode devcontainer](https://code.visualstudio.com/docs/remote/containers-tutorial) for running extract_otp_secret_keys.
+You can you use [VSCode devcontainer](https://code.visualstudio.com/docs/remote/containers-tutorial) for running extract_otp_secrets.
 
 Requirement: Docker
 
 1. Start VSCode
-2. Open extract_otp_secret_keys.code-workspace
+2. Open extract_otp_secrets.code-workspace
 3. Open VSCode command palette (Ctrl-Shift-P)
 4. Type command "Remote-Containers: Reopen in Container"
 5. Open integrated bash terminal in VSCode
-6. Execute: python extract_otp_secret_keys.py example_export.txt
+6. Execute: python extract_otp_secrets.py example_export.txt
 
 ### venv
 
@@ -353,36 +353,36 @@ Install [Docker](https://docs.docker.com/get-docker/).
 Build and run the app within the container:
 
 ```bash
-docker build . -t extract_otp_secret_keys --pull
-docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys example_export.txt
-docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys example_export.png
+docker build . -t extract_otp_secrets --pull
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets example_export.txt
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets example_export.png
 ```
 
-docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys = < example_export.png
-docker run --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secret_keys
-docker run --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secret_keys
-docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
-docker run --pull always --rm -v "$(pwd)":/files:ro -i scit0/extract_otp_secret_keys
+docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secrets = < example_export.png
+docker run --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets
+docker run --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secrets
+docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_secrets
+docker run --pull always --rm -v "$(pwd)":/files:ro -i scit0/extract_otp_secrets
 
 docker login -uscit0
-docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull
-docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull --build-arg RUN_TESTS=false
-docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro scit0/extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed
-docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader example_export.txt
-docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys_no_qr_reader - < example_export.txt
-docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull && docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader" -vvv --relaxed -s
+docker build . -t extract_otp_secrets_no_qr_reader -f Dockerfile_no_qr_reader --pull
+docker build . -t extract_otp_secrets_no_qr_reader -f Dockerfile_no_qr_reader --pull --build-arg RUN_TESTS=false
+docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro scit0/extract_otp_secrets_no_qr_reader extract_otp_secrets_test.py -k "not qreader" --relaxed
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets_no_qr_reader example_export.txt
+docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secrets_no_qr_reader - < example_export.txt
+docker build . -t extract_otp_secrets_no_qr_reader -f Dockerfile_no_qr_reader --pull && docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secrets_no_qr_reader extract_otp_secrets_test.py -k "not qreader" -vvv --relaxed -s
 
-docker pull scit0/extract_otp_secret_keys
-docker pull scit0/extract_otp_secret_keys_no_qr_reader
+docker pull scit0/extract_otp_secrets
+docker pull scit0/extract_otp_secrets_no_qr_reader
 
-docker pull ghcr.io/scito/extract_otp_secret_keys
-docker pull ghcr.io/scito/extract_otp_secret_keys_no_qr_reader
+docker pull ghcr.io/scito/extract_otp_secrets
+docker pull ghcr.io/scito/extract_otp_secrets_no_qr_reader
 
 ## Tests
 
 ### PyTest
 
-There are basic [pytest](https://pytest.org)s, see `test_extract_otp_secret_keys_pytest.py`.
+There are basic [pytest](https://pytest.org)s, see `extract_otp_secrets_test.py`.
 
 Run tests:
 
@@ -406,7 +406,7 @@ https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#pytest-vs-python-m-
 
 ### unittest
 
-There are basic [unittest](https://docs.python.org/3.10/library/unittest.html)s, see `test_extract_otp_secret_keys_unittest.py`.
+There are basic [unittest](https://docs.python.org/3.10/library/unittest.html)s, see `extract_otp_secrets_txt_unit_test.py`.
 
 Run tests:
 
@@ -429,7 +429,7 @@ Setup for running the tests in VSCode.
 
 ```
 pip install -e .
-python src/extract_otp_secret_keys.py
+python src/extract_otp_secrets.py
 
 pip wheel .
 # --isolated

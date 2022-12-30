@@ -256,30 +256,30 @@ cmd="$PIP install -e ."
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="extract_otp_secret_keys example_export.txt"
+cmd="extract_otp_secrets example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="extract_otp_secret_keys - < example_export.txt"
+cmd="extract_otp_secrets - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 # Test
 
-cmd="$PYTHON src/extract_otp_secret_keys.py example_export.txt"
+cmd="$PYTHON src/extract_otp_secrets.py example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$PYTHON src/extract_otp_secret_keys.py - < example_export.txt"
+cmd="$PYTHON src/extract_otp_secrets.py - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 COVERAGE_OUT="tests/reports/pytest-coverage.txt"
-cmd="mkdir -p tests/reports; pytest --cov=test_extract_otp_secret_keys_pytest --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT"
+cmd="mkdir -p tests/reports; pytest --cov=extract_otp_secrets_test --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$PIPENV run pytest --cov=test_extract_otp_secret_keys_pytest tests/"
+cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -292,35 +292,35 @@ TOTAL_COVERAGE=$(cat $COVERAGE_OUT | grep 'TOTAL' | perl -ne 'print "$&" if /\b(
 
 # Build docker
 
-cmd="docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull"
+cmd="docker build . -t extract_otp_secrets_no_qr_reader -f Dockerfile_no_qr_reader --pull"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys_no_qr_reader example_export.txt"
+cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_no_qr_reader example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secret_keys_no_qr_reader - < example_export.txt"
+cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets_no_qr_reader - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys_no_qr_reader tests/test_extract_otp_secret_keys_pytest.py -k 'not qreader' -vvv --relaxed"
+cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_no_qr_reader tests/extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker build . -t extract_otp_secret_keys --pull"
+cmd="docker build . -t extract_otp_secrets --pull"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys example_export.txt"
+cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secret_keys - < example_export.txt"
+cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys"
+cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -328,7 +328,7 @@ cmd="docker image prune || echo 'No docker image pruning'"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$PYTHON src/extract_otp_secret_keys.py &"
+cmd="$PYTHON src/extract_otp_secrets.py &"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 

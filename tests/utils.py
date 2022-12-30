@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # for compatibility with Python < 3.11
+from __future__ import annotations  # for compatibility with PYTHON < 3.11
 import csv
 import glob
 import io

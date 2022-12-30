@@ -5,20 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: extract_otp_secret_keys.py",
+            "name": "Python: extract_otp_secrets.py",
             "type": "python",
             "request": "launch",
-            "program": "extract_otp_secret_keys.py",
+            "program": "extract_otp_secrets.py",
             "args": [
                 "example_export.txt"
             ],
             "console": "integratedTerminal"
         },
         {
-            "name": "Python: extract_otp_secret_keys.py stdin pic",
+            "name": "Python: extract_otp_secrets.py stdin pic",
             "type": "python",
             "request": "launch",
-            "program": "extract_otp_secret_keys.py",
+            "program": "extract_otp_secrets.py",
             "args": [
                 "-",
                 "<",
@@ -27,10 +27,10 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python: extract_otp_secret_keys.py -C",
+            "name": "Python: extract_otp_secrets.py -C",
             "type": "python",
             "request": "launch",
-            "program": "extract_otp_secret_keys.py",
+            "program": "extract_otp_secrets.py",
             "args": [
                 "-v",
             ],
