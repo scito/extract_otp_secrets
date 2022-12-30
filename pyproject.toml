@@ -60,5 +60,5 @@ enabled = true
 
 # https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure%3E
 # https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html#which-import-mode
-# [tool.pytest.ini_options]
-# addopts = [ "--import-mode=importlib", ]
+[tool.pytest.ini_options]
+addopts = [ "--import-mode=importlib", ]
