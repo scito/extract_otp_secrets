@@ -80,6 +80,7 @@ echo
 
 interactive=true
 ignore_version_check=true
+clean=false
 
 while test $# -gt 0; do
     case $1 in
@@ -91,6 +92,7 @@ while test $# -gt 0; do
             echo "Options:"
             echo "-a                      Automatic mode"
             echo "-C                      Ignore version check"
+            echo "-c                      Clean"
             echo "-h, --help              Help"
             quit
             ;;
@@ -100,6 +102,10 @@ while test $# -gt 0; do
             ;;
         -C)
             ignore_version_check=false
+            shift
+            ;;
+        -c)
+            clean=true
             shift
             ;;
     esac
@@ -121,6 +127,12 @@ DEST="protoc"
 OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
 echo -e "\nProtoc remote version $VERSION\n"
 echo -e "Protoc local version: $OLDVERSION\n"
+
+if $clean; then
+    cmd="rm -r dist/ build/ *.whl pytest.xml pytest-coverage.txt .coverage tests/reports || true; find . -name '*.pyc' -type f -delete; find . -name '__pycache__' -type d -exec rm -r {} \; || true; find . -name '*.egg-info' -type d -exec rm -r {} \; || true; find . -name '*_cache' -type d -exec rm -r {} \; || true"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+fi
 
 if [ "$OLDVERSION" != "$VERSION" ] || ! $ignore_version_check; then
     echo "Upgrade protoc from $OLDVERSION to $VERSION"

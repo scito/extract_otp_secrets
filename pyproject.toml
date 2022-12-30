@@ -1,6 +1,8 @@
 [build-system]
 requires = [
-  "setuptools>=64.0.0", "wheel>=0.37.0", "pip", "setuptools-git-versioning",
+  "setuptools>=64.0.0", "wheel>=0.37.0", "pip",
+  # https://setuptools-git-versioning.readthedocs.io/en/latest/differences.html
+  "setuptools-git-versioning",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -46,19 +48,17 @@ requires-python = ">=3.7, <4"
 scripts = {extract_otp_secret_keys = "extract_otp_secret_keys:sys_main"}
 urls = {Project-URL = "https://github.com/scito/extract_otp_secret_keys", Bug-Reports = "https://github.com/scito/extract_otp_secret_keys/issues", Source = "https://github.com/scito/extract_otp_secret_keys" }
 
-[tool.setuptools]
-py-modules = ["extract_otp_secret_keys", "protobuf_generated_python"]
+# TODO cleanup
+# [tool.setuptools]
+# py-modules = ["extract_otp_secret_keys", "protobuf_generated_python.protobuf_generated_python"]
 
-[tool.setuptools.dynamic]
+# [tool.setuptools.dynamic]
 # version = {attr = "extract_otp_secret_keys.VERSION"}
 
 [tool.setuptools-git-versioning]
 enabled = true
 
-[tool.setuptools.package-data]
-"extract_otp_secret_keys" = ["*.txt", "*.json", "*.csv", "*.png", "*.md"]
-
 # https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure%3E
 # https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html#which-import-mode
-[tool.pytest.ini_options]
-addopts = [ "--import-mode=importlib", ]
+# [tool.pytest.ini_options]
+# addopts = [ "--import-mode=importlib", ]
