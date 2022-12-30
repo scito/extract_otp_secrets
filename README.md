@@ -12,6 +12,9 @@
 
 ---
 
+TODO add src/
+TODO rename extract_otp_secret_keys
+
 Extract two-factor authentication (2FA, TFA, OTP) secret keys from export QR codes of "Google Authenticator" app.
 The secret and otp values can be printed and exported to json or csv. The QR codes can be printed or saved as PNG images.
 
@@ -293,6 +296,12 @@ wget https://raw.githubusercontent.com/scito/extract_otp_secret_keys/master/exam
 python -m extract_otp_secret_keys example_export.txt
 ```
 
+### local pip
+
+```
+pip install -e .
+```
+
 ### pipenv
 
 You can you use [Pipenv](https://github.com/pypa/pipenv) for running extract_otp_secret_keys.
@@ -385,6 +394,16 @@ or
 python -m pytest
 ```
 
+#### Hints
+
+Your tests can run against an installed version after executing pip install .
+
+Your tests can run against the local copy with an editable install after executing pip install --editable .
+
+If you don’t use an editable install and are relying on the fact that Python by default puts the current directory in sys.path to import your package, you can execute python -m pytest to execute the tests against the local copy directly, without using pip.
+
+https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#pytest-vs-python-m-pytest
+
 ### unittest
 
 There are basic [unittest](https://docs.python.org/3.10/library/unittest.html)s, see `test_extract_otp_secret_keys_unittest.py`.
@@ -404,7 +423,22 @@ Setup for running the tests in VSCode.
 3. Choose unittest or pytest. (pytest is recommended, both are supported)
 4. Set ". Root" directory
 
-## Maintenance
+## Development
+
+### Build
+
+```
+pip install -e .
+python src/extract_otp_secret_keys.py
+
+pip wheel .
+# --isolated
+# --prefer-binary
+
+python3.11 -m build --wheel
+# =
+pip wheel --no-deps .
+```
 
 ### Upgrade pip Packages
 

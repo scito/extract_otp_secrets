@@ -123,7 +123,7 @@ Type:    totp
     def test_extract_not_encoded_plus(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
-            extract_otp_secret_keys.main(['test/test_plus_problem_export.txt'])
+            extract_otp_secret_keys.main(['tests/data/test_plus_problem_export.txt'])
         actual_output = out.getvalue()
 
         expected_output = '''Name:    SerenityLabs:test1@serenitylabs.co.uk
@@ -155,7 +155,7 @@ Type:    totp
             extract_otp_secret_keys.main(['-p', 'example_export.txt'])
         actual_output = out.getvalue()
 
-        expected_output = read_file_to_str('test/printqr_output.txt')
+        expected_output = read_file_to_str('tests/data/printqr_output.txt')
 
         self.assertEqual(actual_output, expected_output)
 
@@ -174,7 +174,7 @@ Type:    totp
             extract_otp_secret_keys.main(['-v', 'example_export.txt'])
         actual_output = out.getvalue()
 
-        expected_output = read_file_to_str('test/print_verbose_output.txt')
+        expected_output = read_file_to_str('tests/data/print_verbose_output.txt')
 
         self.assertEqual(actual_output, expected_output)
 
@@ -184,7 +184,7 @@ Type:    totp
             extract_otp_secret_keys.main(['-vvv', 'example_export.txt'])
         actual_output = out.getvalue()
 
-        expected_stdout = read_file_to_str('test/print_verbose_output.txt')
+        expected_stdout = read_file_to_str('tests/data/print_verbose_output.txt')
 
         self.assertGreater(len(actual_output), len(expected_stdout))
         self.assertTrue("DEBUG: " in actual_output)

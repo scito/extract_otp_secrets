@@ -15,6 +15,7 @@ venv/
 !.devcontainer/*.json
 *.whl
 build/
+dist/
 extract_otp_secret_keys.egg-info/
 *.xml
 pytest-coverage.txt

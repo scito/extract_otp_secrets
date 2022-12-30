@@ -50,12 +50,12 @@ def test_extract_stdout(capsys: pytest.CaptureFixture[str]) -> None:
 def test_extract_non_existent_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['test/non_existent_file.txt'])
+        extract_otp_secret_keys.main(['non_existent_file.txt'])
 
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = '\nERROR: Input file provided is non-existent or not a file.\ninput file: test/non_existent_file.txt\n'
+    expected_stderr = '\nERROR: Input file provided is non-existent or not a file.\ninput file: non_existent_file.txt\n'
 
     assert captured.err == expected_stderr
     assert captured.out == ''
@@ -96,12 +96,12 @@ def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> No
     if qreader_available:
         # Act
         with pytest.raises(SystemExit) as e:
-            extract_otp_secret_keys.main(['test/empty_file.txt'])
+            extract_otp_secret_keys.main(['tests/data/empty_file.txt'])
 
         # Assert
         captured = capsys.readouterr()
 
-        expected_stderr = 'WARN: test/empty_file.txt is empty\n\nERROR: Unable to open file for reading.\ninput file: test/empty_file.txt\n'
+        expected_stderr = 'WARN: tests/data/empty_file.txt is empty\n\nERROR: Unable to open file for reading.\ninput file: tests/data/empty_file.txt\n'
 
         assert captured.err == expected_stderr
         assert captured.out == ''
@@ -109,7 +109,7 @@ def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> No
         assert e.type == SystemExit
     else:
         # Act
-        extract_otp_secret_keys.main(['test/empty_file.txt'])
+        extract_otp_secret_keys.main(['tests/data/empty_file.txt'])
 
         # Assert
         captured = capsys.readouterr()
@@ -214,7 +214,7 @@ def test_keepass_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path)
 def test_keepass_csv_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     '''Two csv files .totp and .htop are generated.'''
     # Act
-    extract_otp_secret_keys.main(['-k', '-', 'test/example_export_only_totp.txt'])
+    extract_otp_secret_keys.main(['-k', '-', 'tests/data/example_export_only_totp.txt'])
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
@@ -232,7 +232,7 @@ def test_keepass_csv_stdout(capsys: pytest.CaptureFixture[str]) -> None:
 def test_single_keepass_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
     '''Does not add .totp or .hotp pre-suffix'''
     # Act
-    extract_otp_secret_keys.main(['-q', '-k', str(tmp_path / 'test_example_keepass_output.csv'), 'test/example_export_only_totp.txt'])
+    extract_otp_secret_keys.main(['-q', '-k', str(tmp_path / 'test_example_keepass_output.csv'), 'tests/data/example_export_only_totp.txt'])
 
     # Assert
     expected_totp_csv = read_csv('example_keepass_output.totp.csv')
@@ -283,7 +283,7 @@ def test_extract_json_stdout(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_extract_not_encoded_plus(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['test/test_plus_problem_export.txt'])
+    extract_otp_secret_keys.main(['tests/data/test_plus_problem_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -321,7 +321,7 @@ def test_extract_printqr(capsys: pytest.CaptureFixture[str]) -> None:
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = read_file_to_str('test/printqr_output.txt')
+    expected_stdout = read_file_to_str('tests/data/printqr_output.txt')
 
     assert captured.out == expected_stdout
     assert captured.err == ''
@@ -355,7 +355,7 @@ def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> N
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = read_file_to_str('test/print_verbose_output.txt')
+    expected_stdout = read_file_to_str('tests/data/print_verbose_output.txt')
 
     if not qreader_available:
         expected_stdout = expected_stdout.replace('QReader installed: True', 'QReader installed: False')
@@ -377,7 +377,7 @@ def test_extract_debug(capsys: pytest.CaptureFixture[str]) -> None:
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = read_file_to_str('test/print_verbose_output.txt')
+    expected_stdout = read_file_to_str('tests/data/print_verbose_output.txt')
 
     assert len(captured.out) > len(expected_stdout)
     assert "DEBUG: " in captured.out
@@ -450,7 +450,7 @@ def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
 def test_wrong_data(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as e:
         # Act
-        extract_otp_secret_keys.main(['test/test_export_wrong_data.txt'])
+        extract_otp_secret_keys.main(['tests/data/test_export_wrong_data.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -469,19 +469,19 @@ data=XXXX
 def test_wrong_content(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as e:
         # Act
-        extract_otp_secret_keys.main(['test/test_export_wrong_content.txt'])
+        extract_otp_secret_keys.main(['tests/data/test_export_wrong_content.txt'])
 
     # Assert
     captured = capsys.readouterr()
 
     expected_stderr = '''
 WARN: line is not a otpauth-migration:// URL
-input: test/test_export_wrong_content.txt
+input: tests/data/test_export_wrong_content.txt
 line 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
 Probably a wrong file was given
 
 ERROR: no data query parameter in input URL
-input file: test/test_export_wrong_content.txt
+input file: tests/data/test_export_wrong_content.txt
 line 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
 Probably a wrong file was given
 '''
@@ -494,14 +494,14 @@ Probably a wrong file was given
 
 def test_wrong_prefix(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['test/test_export_wrong_prefix.txt'])
+    extract_otp_secret_keys.main(['tests/data/test_export_wrong_prefix.txt'])
 
     # Assert
     captured = capsys.readouterr()
 
     expected_stderr = '''
 WARN: line is not a otpauth-migration:// URL
-input: test/test_export_wrong_prefix.txt
+input: tests/data/test_export_wrong_prefix.txt
 line 'QR-Code:otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B'
 Probably a wrong file was given
 '''
@@ -526,7 +526,7 @@ def test_add_pre_suffix(capsys: pytest.CaptureFixture[str]) -> None:
 @pytest.mark.qreader
 def test_img_qr_reader_from_file_happy_path(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secret_keys.main(['test/test_googleauth_export.png'])
+    extract_otp_secret_keys.main(['tests/data/test_googleauth_export.png'])
 
     # Assert
     captured = capsys.readouterr()
@@ -540,9 +540,9 @@ def test_extract_multiple_files_and_mixed(capsys: pytest.CaptureFixture[str]) ->
     # Act
     extract_otp_secret_keys.main([
         'example_export.txt',
-        'test/test_googleauth_export.png',
+        'tests/data/test_googleauth_export.png',
         'example_export.txt',
-        'test/test_googleauth_export.png'])
+        'tests/data/test_googleauth_export.png'])
 
     # Assert
     captured = capsys.readouterr()
@@ -555,7 +555,7 @@ def test_extract_multiple_files_and_mixed(capsys: pytest.CaptureFixture[str]) ->
 def test_img_qr_reader_from_stdin(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
     # Arrange
     # sys.stdin.buffer should be monkey patched, but it does not work
-    monkeypatch.setattr('sys.stdin', read_binary_file_as_stream('test/test_googleauth_export.png'))
+    monkeypatch.setattr('sys.stdin', read_binary_file_as_stream('tests/data/test_googleauth_export.png'))
 
     # Act
     extract_otp_secret_keys.main(['='])
@@ -588,7 +588,7 @@ Type:    totp
 def test_img_qr_reader_from_stdin_wrong_symbol(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
     # Arrange
     # sys.stdin.buffer should be monkey patched, but it does not work
-    monkeypatch.setattr('sys.stdin', read_binary_file_as_stream('test/test_googleauth_export.png'))
+    monkeypatch.setattr('sys.stdin', read_binary_file_as_stream('tests/data/test_googleauth_export.png'))
 
     # Act
     with pytest.raises(SystemExit) as e:
@@ -629,12 +629,12 @@ def test_extract_stdin_stdout_wrong_symbol(capsys: pytest.CaptureFixture[str], m
 def test_img_qr_reader_no_qr_code_in_image(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['test/lena_std.tif'])
+        extract_otp_secret_keys.main(['tests/data/lena_std.tif'])
 
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = '\nERROR: Unable to read QR Code from file.\ninput file: test/lena_std.tif\n'
+    expected_stderr = '\nERROR: Unable to read QR Code from file.\ninput file: tests/data/lena_std.tif\n'
 
     assert captured.err == expected_stderr
     assert captured.out == ''
@@ -646,12 +646,12 @@ def test_img_qr_reader_no_qr_code_in_image(capsys: pytest.CaptureFixture[str]) -
 def test_img_qr_reader_nonexistent_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['test/nonexistent.bmp'])
+        extract_otp_secret_keys.main(['nonexistent.bmp'])
 
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = '\nERROR: Input file provided is non-existent or not a file.\ninput file: test/nonexistent.bmp\n'
+    expected_stderr = '\nERROR: Input file provided is non-existent or not a file.\ninput file: nonexistent.bmp\n'
 
     assert captured.err == expected_stderr
     assert captured.out == ''
@@ -662,18 +662,18 @@ def test_img_qr_reader_nonexistent_file(capsys: pytest.CaptureFixture[str]) -> N
 def test_non_image_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secret_keys.main(['test/text_masquerading_as_image.jpeg'])
+        extract_otp_secret_keys.main(['tests/data/text_masquerading_as_image.jpeg'])
 
     # Assert
     captured = capsys.readouterr()
     expected_stderr = '''
 WARN: line is not a otpauth-migration:// URL
-input: test/text_masquerading_as_image.jpeg
+input: tests/data/text_masquerading_as_image.jpeg
 line 'This is just a text file masquerading as an image file.'
 Probably a wrong file was given
 
 ERROR: no data query parameter in input URL
-input file: test/text_masquerading_as_image.jpeg
+input file: tests/data/text_masquerading_as_image.jpeg
 line 'This is just a text file masquerading as an image file.'
 Probably a wrong file was given
 '''

@@ -28,7 +28,7 @@ from utils import Capturing
 class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_happy_path(self) -> None:
         with Capturing() as actual_output:
-            extract_otp_secret_keys.main(['test/test_googleauth_export.png'])
+            extract_otp_secret_keys.main(['tests/data/test_googleauth_export.png'])
 
         expected_output =\
             ['Name:    Test1:test1@example1.com', 'Secret:  JBSWY3DPEHPK3PXP', 'Issuer:  Test1', 'Type:    totp', '',
@@ -40,9 +40,9 @@ class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_no_qr_code_in_image(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secret_keys.main(['test/lena_std.tif'])
+                extract_otp_secret_keys.main(['tests/data/lena_std.tif'])
 
-        expected_output = ['', 'ERROR: Unable to read QR Code from file.', 'input file: test/lena_std.tif']
+        expected_output = ['', 'ERROR: Unable to read QR Code from file.', 'input file: tests/data/lena_std.tif']
 
         self.assertEqual(actual_output, expected_output)
         self.assertEqual(context.exception.code, 1)
@@ -50,9 +50,9 @@ class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_nonexistent_file(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secret_keys.main(['test/nonexistent.bmp'])
+                extract_otp_secret_keys.main(['nonexistent.bmp'])
 
-        expected_output = ['', 'ERROR: Input file provided is non-existent or not a file.', 'input file: test/nonexistent.bmp']
+        expected_output = ['', 'ERROR: Input file provided is non-existent or not a file.', 'input file: nonexistent.bmp']
 
         self.assertEqual(actual_output, expected_output)
         self.assertEqual(context.exception.code, 1)
@@ -60,17 +60,17 @@ class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_non_image_file(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secret_keys.main(['test/text_masquerading_as_image.jpeg'])
+                extract_otp_secret_keys.main(['tests/data/text_masquerading_as_image.jpeg'])
 
         expected_output = [
             '',
             'WARN: line is not a otpauth-migration:// URL',
-            'input: test/text_masquerading_as_image.jpeg',
+            'input: tests/data/text_masquerading_as_image.jpeg',
             "line 'This is just a text file masquerading as an image file.'",
             'Probably a wrong file was given',
             '',
             'ERROR: no data query parameter in input URL',
-            'input file: test/text_masquerading_as_image.jpeg',
+            'input file: tests/data/text_masquerading_as_image.jpeg',
             "line 'This is just a text file masquerading as an image file.'",
             'Probably a wrong file was given'
         ]
