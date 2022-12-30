@@ -47,7 +47,7 @@ scripts = {extract_otp_secret_keys = "extract_otp_secret_keys:sys_main"}
 urls = {Project-URL = "https://github.com/scito/extract_otp_secret_keys", Bug-Reports = "https://github.com/scito/extract_otp_secret_keys/issues", Source = "https://github.com/scito/extract_otp_secret_keys" }
 
 [tool.setuptools]
-py-modules = ["extract_otp_secret_keys"]
+py-modules = ["extract_otp_secret_keys", "protobuf_generated_python"]
 
 [tool.setuptools.dynamic]
 # version = {attr = "extract_otp_secret_keys.VERSION"}
