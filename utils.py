@@ -22,7 +22,7 @@ import re
 import shutil
 import sys
 import pathlib
-from typing import BinaryIO, Any, Union
+from typing import BinaryIO, Any, Union, List
 
 
 # Types
@@ -31,7 +31,8 @@ PathLike = Union[str, pathlib.Path]
 
 
 # Ref. https://stackoverflow.com/a/16571630
-class Capturing(list[Any]):
+# PYTHON 3.11: class Capturing(list[Any]):
+class Capturing(List[Any]):
     '''Capture stdout and stderr
 Usage:
 with Capturing() as output:
@@ -72,19 +73,19 @@ def remove_dir_with_files(dir: PathLike) -> None:
     if os.path.exists(dir): shutil.rmtree(dir)
 
 
-def read_csv(filename: str) -> list[list[str]]:
+def read_csv(filename: str) -> List[List[str]]:
     """Returns a list of lines."""
     with open(filename, "r", encoding="utf-8", newline='') as infile:
-        lines: list[list[str]] = []
+        lines: List[List[str]] = []
         reader = csv.reader(infile)
         for line in reader:
             lines.append(line)
         return lines
 
 
-def read_csv_str(data_str: str) -> list[list[str]]:
+def read_csv_str(data_str: str) -> List[List[str]]:
     """Returns a list of lines."""
-    lines: list[list[str]] = []
+    lines: List[List[str]] = []
     reader = csv.reader(data_str.splitlines())
     for line in reader:
         lines.append(line)
@@ -102,7 +103,7 @@ def read_json_str(data_str: str) -> Any:
     return json.loads(data_str)
 
 
-def read_file_to_list(filename: str) -> list[str]:
+def read_file_to_list(filename: str) -> List[str]:
     """Returns a list of lines."""
     with open(filename, "r", encoding="utf-8") as infile:
         return infile.readlines()

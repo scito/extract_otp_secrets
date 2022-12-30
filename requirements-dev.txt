@@ -6,3 +6,4 @@ pytest-mock
 pytest-cov
 mypy
 types-protobuf
+setuptools

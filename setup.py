@@ -1,4 +1,3 @@
-from __future__ import annotations  # for compatibility with Python < 3.11
 import pathlib
 from setuptools import setup
 
