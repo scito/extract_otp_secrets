@@ -61,3 +61,4 @@ jobs:
         with:
           pytest-coverage-path: ./pytest-coverage.txt
           junitxml-path: ./pytest.xml
+        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
