@@ -274,4 +274,8 @@ cmd="docker image prune"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
+cmd="$PYTHON extract_otp_secret_keys.py &"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
 quit
