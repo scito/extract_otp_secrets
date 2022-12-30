@@ -48,8 +48,8 @@ requires-python = ">=3.7, <4"
 scripts = {extract_otp_secret_keys = "extract_otp_secret_keys:sys_main"}
 urls = {Project-URL = "https://github.com/scito/extract_otp_secret_keys", Bug-Reports = "https://github.com/scito/extract_otp_secret_keys/issues", Source = "https://github.com/scito/extract_otp_secret_keys" }
 
-# TODO cleanup
 # [tool.setuptools]
+# Still in beta, once it is stable move config from setup.cfg to pyproject.toml
 # py-modules = ["extract_otp_secret_keys", "protobuf_generated_python.protobuf_generated_python"]
 
 # [tool.setuptools.dynamic]
