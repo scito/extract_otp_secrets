@@ -2,6 +2,7 @@ protobuf
 qrcode
 Pillow
 qreader
-opencv-python
+opencv-python<=4.7.0; sys_platform == 'darwin'
+opencv-python; sys_platform != 'darwin'
 pyzbar
-typing_extensions  # PYTHON < 3.11: add types
+typing_extensions; python_version<='3.7'

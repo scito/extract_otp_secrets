@@ -9,6 +9,8 @@ qrcode = "*"
 pillow = "*"
 qreader = "*"
 opencv-python = "*"
+# for macOS: opencv-python = "<=4.7.0"
+# for PYTHON <= 3.7: typing_extensions = "*"
 
 [dev-packages]
 pytest = "*"
