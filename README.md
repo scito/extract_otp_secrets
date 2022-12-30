@@ -365,18 +365,18 @@ docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_sec
 docker run --pull always --rm -v "$(pwd)":/files:ro -i scit0/extract_otp_secrets
 
 docker login -uscit0
-docker build . -t extract_otp_secrets_no_qr_reader -f Dockerfile_no_qr_reader --pull
-docker build . -t extract_otp_secrets_no_qr_reader -f Dockerfile_no_qr_reader --pull --build-arg RUN_TESTS=false
-docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro scit0/extract_otp_secrets_no_qr_reader extract_otp_secrets_test.py -k "not qreader" --relaxed
-docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets_no_qr_reader example_export.txt
-docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secrets_no_qr_reader - < example_export.txt
-docker build . -t extract_otp_secrets_no_qr_reader -f Dockerfile_no_qr_reader --pull && docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secrets_no_qr_reader extract_otp_secrets_test.py -k "not qreader" -vvv --relaxed -s
+docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull
+docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull --build-arg RUN_TESTS=false
+docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro scit0/extract_otp_secrets_only_txt extract_otp_secrets_test.py -k "not qreader" --relaxed
+docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets_only_txt example_export.txt
+docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secrets_only_txt - < example_export.txt
+docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull && docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secrets_only_txt extract_otp_secrets_test.py -k "not qreader" -vvv --relaxed -s
 
 docker pull scit0/extract_otp_secrets
-docker pull scit0/extract_otp_secrets_no_qr_reader
+docker pull scit0/extract_otp_secrets_only_txt
 
 docker pull ghcr.io/scito/extract_otp_secrets
-docker pull ghcr.io/scito/extract_otp_secrets_no_qr_reader
+docker pull ghcr.io/scito/extract_otp_secrets_only_txt
 
 ## Tests
 

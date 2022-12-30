@@ -292,19 +292,19 @@ TOTAL_COVERAGE=$(cat $COVERAGE_OUT | grep 'TOTAL' | perl -ne 'print "$&" if /\b(
 
 # Build docker
 
-cmd="docker build . -t extract_otp_secrets_no_qr_reader -f Dockerfile_no_qr_reader --pull"
+cmd="docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_no_qr_reader example_export.txt"
+cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets_no_qr_reader - < example_export.txt"
+cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_no_qr_reader tests/extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
+cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt tests/extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
