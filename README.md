@@ -2,6 +2,7 @@
 
 [![CI Status](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml)
 ![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
+[![docker](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci_docker.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci_docker.yml)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/protobuf)
 [![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/scito/extract_otp_secret_keys)](https://github.com/scito/extract_otp_secret_keys/blob/master/Pipfile.lock)
 ![protobuf version](https://img.shields.io/badge/protobuf-4.21.12-informational)
@@ -159,17 +160,16 @@ The zbar DLLs are included with the Windows Python wheels. On other operating sy
 
 * Free and open source
 * Supports Google Authenticator exports (and compatible apps like Aegis Authenticator)
-* All functionality in one Python script: extract_otp_secret_keys.py (except protobuf generated code in protobuf_generated_python)
+* Captures the the QR codes directly from the camera using QR code detection (based on OpenCV)
 * Supports TOTP and HOTP
 * Generates QR codes
-* Reads QR Code images
 * Exports to various formats:
     * CSV
     * JSON
     * Dedicated CSV for KeePass
     * QR code images
 * Supports reading from stdin and writing to stdout
-* Reads from various import image formats containing export QR codes: (See [OpenCV docu](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
+* Reads QR codes images: (See [OpenCV docu](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
     * Portable Network Graphics - *.png
     * WebP - *.webp
     * JPEG files - *.jpeg, *.jpg, *.jpe
@@ -185,15 +185,19 @@ The zbar DLLs are included with the Windows Python wheels. On other operating sy
 * Many ways to run the script:
     * Native Python
     * pipenv
+    * pip
     * venv
     * Docker
     * VSCode devcontainer
     * devbox
-    * pip
-* Compatible with multiple platforms (tested by CI):
+* Compatible with major platforms:
     * Linux
     * macOS
     * Windows
+* Uses UTF-8 on all platforms
+* Supports Python >= 3.7
+* All these features are backed by tests ran nightly
+* All functionality in one Python script: extract_otp_secret_keys.py (except protobuf generated code in protobuf_generated_python)
 
 ## KeePass
 
