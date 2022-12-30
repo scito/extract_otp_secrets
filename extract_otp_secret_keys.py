@@ -53,7 +53,15 @@ import sys
 import urllib.parse as urlparse
 from enum import Enum
 from operator import add
-from typing import Any, TextIO, TypedDict, Union, List
+
+
+try:
+    from typing import Any, TextIO, TypedDict, Union, List
+except ImportError:
+    from typing import Any, TextIO, Union, List
+    # PYTHON < 3.8: compatibility
+    from typing_extensions import TypedDict
+
 
 from qrcode import QRCode  # type: ignore
 
