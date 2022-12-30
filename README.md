@@ -353,16 +353,11 @@ docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys = < example_exp
 docker run --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secret_keys
 docker run --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secret_keys
 docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
-docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secret_keys
 docker run --pull always --rm -v "$(pwd)":/files:ro -i scit0/extract_otp_secret_keys
-docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
 
 docker login -uscit0
 docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull
 docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_reader --pull --build-arg RUN_TESTS=false
-docker run --entrypoint /bin/sh -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader
-docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader
-docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed
 docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro scit0/extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed
 docker run --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader example_export.txt
 docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secret_keys_no_qr_reader - < example_export.txt

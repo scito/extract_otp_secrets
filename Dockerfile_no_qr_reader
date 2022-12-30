@@ -1,5 +1,9 @@
 FROM python:3.11-alpine
 
+# For debugging
+# docker run --entrypoint /bin/sh -it --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader
+# docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k "not qreader" --relaxed
+
 WORKDIR /extract
 
 COPY . .

@@ -1,5 +1,9 @@
 FROM python:3.11-slim-bullseye
 
+# For debugging
+# docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secret_keys
+# docker run --entrypoint /bin/bash -it --rm -v "$(pwd)":/files:ro --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secret_keys
+
 WORKDIR /extract
 
 COPY . .

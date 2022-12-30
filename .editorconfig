@@ -11,5 +11,5 @@ insert_final_newline = true
 indent_size = 4
 trim_trailing_whitespace = false
 
-[*.yml]
+[*.{yml,toml}]
 indent_size = 2
