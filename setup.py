@@ -53,7 +53,9 @@ setup(
         'qrcode',
         'Pillow',
         'qreader',
-        'opencv-python'
+        'pyzbar',
+        'opencv-python',
+        'typing_extensions'  # PYTHON < 3.11: add types
     ],
 
     project_urls={

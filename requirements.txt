@@ -4,3 +4,4 @@ Pillow
 qreader
 opencv-python
 pyzbar
+typing_extensions  # PYTHON < 3.11: add types
