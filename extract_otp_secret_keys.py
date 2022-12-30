@@ -53,7 +53,7 @@ import sys
 import urllib.parse as urlparse
 from enum import Enum
 from operator import add
-from typing import Any, TextIO, TypedDict, Union
+from typing import Any, TextIO, TypedDict, Union, List
 
 from qrcode import QRCode  # type: ignore
 
@@ -81,9 +81,12 @@ except ImportError:
 # Types
 Args = argparse.Namespace
 OtpUrl = str
+# PYTHON 3.11: Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': int | None, 'url': OtpUrl})
 Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': Union[int, None], 'url': OtpUrl})
-Otps = list[Otp]
-OtpUrls = list[OtpUrl]
+# PYTHON 3.11: Otps = list[Otp]
+Otps = List[Otp]
+# PYTHON 3.11: OtpUrls = list[OtpUrl]
+OtpUrls = List[OtpUrl]
 
 
 # Global variable declaration
