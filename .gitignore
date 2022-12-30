@@ -9,8 +9,7 @@ venv/
 !example_output.csv
 !.github/
 !.flake8
-.vscode
-!.vscode/settings.json
+!.vscode/
 !.devcontainer/
 !.devcontainer/*.json
 *.whl
@@ -19,3 +18,4 @@ dist/
 extract_otp_secret_keys.egg-info/
 *.xml
 pytest-coverage.txt
+tests/reports/

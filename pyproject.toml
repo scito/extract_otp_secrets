@@ -48,13 +48,13 @@ scripts = {extract_otp_secret_keys = "extract_otp_secret_keys:sys_main"}
 urls = {Project-URL = "https://github.com/scito/extract_otp_secret_keys", Bug-Reports = "https://github.com/scito/extract_otp_secret_keys/issues", Source = "https://github.com/scito/extract_otp_secret_keys" }
 
 [tool.setuptools]
-py-modules = ["extract_otp_secret_keys", "protobuf_generated_python.google_auth_pb2"]
+py-modules = ["extract_otp_secret_keys"]
 
 [tool.setuptools.dynamic]
 # TODO version = {attr = "extract_otp_secret_keys.VERSION"}
 
 [tool.setuptools.package-data]
-"." = ["*.txt", "*.json", "*.csv", "*.png", "*.md"]
+"extract_otp_secret_keys" = ["*.txt", "*.json", "*.csv", "*.png", "*.md"]
 
 # https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure%3E
 # https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html#which-import-mode

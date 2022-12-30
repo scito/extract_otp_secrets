@@ -39,7 +39,7 @@ Usage:
 with Capturing() as output:
     print("Output")
 '''
-    # TODO remove type ignore when fixed, see https://github.com/python/mypy/issues/11871, https://stackoverflow.com/questions/72174409/type-hinting-the-return-value-of-a-class-method-that-returns-self
+    # TODO remove type ignore if fixed, see https://github.com/python/mypy/issues/11871, https://stackoverflow.com/questions/72174409/type-hinting-the-return-value-of-a-class-method-that-returns-self
     def __enter__(self):  # type: ignore
         self._stdout = sys.stdout
         sys.stdout = self._stringio_std = io.StringIO()

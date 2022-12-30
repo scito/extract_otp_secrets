@@ -162,7 +162,7 @@ if [ "$OLDVERSION" != "$VERSION" ] || ! $ignore_version_check; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="$BIN/$DEST/bin/protoc --plugin=protoc-gen-mypy=/home/rkurmann/.local/bin/protoc-gen-mypy --python_out=protobuf_generated_python --mypy_out=protobuf_generated_python google_auth.proto"
+    cmd="$BIN/$DEST/bin/protoc --plugin=protoc-gen-mypy=$HOME/.local/bin/protoc-gen-mypy --python_out=protobuf_generated_python --mypy_out=protobuf_generated_python src/google_auth.proto"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -232,17 +232,42 @@ cmd="$MYPY --install-types --non-interactive *.py"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$MYPY --strict *.py"
+# change to src as python -m mypy adds the current dir Python sys.path
+# execute in a subshell in order not to loose the exit code and not to change the dir in the currrent shell
+cmd="(cd src && $MYPY --strict *.py ../tests)"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+# pip install
+
+cmd="$PIP install -e ."
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="extract_otp_secret_keys example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="extract_otp_secret_keys - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 # Test
 
-cmd="pytest --cov=test_extract_otp_secret_keys_pytest --junitxml=pytest.xml --cov-report=term-missing | tee pytest-coverage.txt"
+cmd="$PYTHON src/extract_otp_secret_keys.py example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$PIPENV run pytest --cov=test_extract_otp_secret_keys_pytest"
+cmd="$PYTHON src/extract_otp_secret_keys.py - < example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+COVERAGE_OUT="tests/reports/pytest-coverage.txt"
+cmd="pytest --cov=test_extract_otp_secret_keys_pytest --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="$PIPENV run pytest --cov=test_extract_otp_secret_keys_pytest tests/"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -250,7 +275,8 @@ eval "$cmd"
 
 # https://github.com/marketplace/actions/pytest-coverage-comment
 # Coverage-95%25-yellowgreen
-TOTAL_COVERAGE=$(cat pytest-coverage.txt | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
+echo -e "Upgrade code coverage in README.md"
+TOTAL_COVERAGE=$(cat $COVERAGE_OUT | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
 
 # Build docker
 
@@ -258,7 +284,15 @@ cmd="docker build . -t extract_otp_secret_keys_no_qr_reader -f Dockerfile_no_qr_
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys_no_qr_reader test_extract_otp_secret_keys_pytest.py -k 'not qreader' -vvv --relaxed"
+cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys_no_qr_reader example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secret_keys_no_qr_reader - < example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys_no_qr_reader tests/test_extract_otp_secret_keys_pytest.py -k 'not qreader' -vvv --relaxed"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -266,15 +300,23 @@ cmd="docker build . -t extract_otp_secret_keys --pull"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
+cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secret_keys - < example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
 cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secret_keys"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="docker image prune"
+cmd="docker image prune || echo 'No docker image pruning'"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$PYTHON extract_otp_secret_keys.py &"
+cmd="$PYTHON src/extract_otp_secret_keys.py &"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
