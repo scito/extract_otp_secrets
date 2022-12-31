@@ -81,6 +81,7 @@ echo
 interactive=true
 ignore_version_check=true
 clean=false
+build_docker=true
 
 while test $# -gt 0; do
     case $1 in
@@ -92,6 +93,7 @@ while test $# -gt 0; do
             echo "Options:"
             echo "-a                      Automatic mode"
             echo "-C                      Ignore version check"
+            echo "-D                      No docker build"
             echo "-c                      Clean"
             echo "-h, --help              Help"
             quit
@@ -102,6 +104,10 @@ while test $# -gt 0; do
             ;;
         -C)
             ignore_version_check=false
+            shift
+            ;;
+        -D)
+            build_docker=false
             shift
             ;;
         -c)
@@ -290,43 +296,45 @@ eval "$cmd"
 echo -e "Upgrade code coverage in README.md"
 TOTAL_COVERAGE=$(cat $COVERAGE_OUT | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
 
-# Build docker
+if $build_docker; then
+    # Build docker
 
-cmd="docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt example_export.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt example_export.txt"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt - < example_export.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt - < example_export.txt"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt tests/extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt tests/extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="docker build . -t extract_otp_secrets --pull"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker build . -t extract_otp_secrets --pull"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets example_export.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets example_export.txt"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - < example_export.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - < example_export.txt"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="docker image prune || echo 'No docker image pruning'"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="docker image prune || echo 'No docker image pruning'"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+fi
 
 cmd="$PYTHON src/extract_otp_secrets.py &"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
