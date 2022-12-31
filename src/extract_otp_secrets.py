@@ -91,19 +91,17 @@ Exception: {e}""")
     FONT_THICKNESS: Final[int] = 1
     FONT_LINE_STYLE: Final[int] = cv2.LINE_AA
     RECT_THICKNESS: Final[int] = 5
-    if sys.version_info >= (3, 8):
-        START_POS_TEXT: Final[Point] = 5, 20
-        NORMAL_COLOR: Final[ColorBGR] = 255, 0, 255
-        SUCCESS_COLOR: Final[ColorBGR] = 0, 255, 0
-        FAILURE_COLOR: Final[ColorBGR] = 0, 0, 255
-        FONT_DY: Final[Tuple[int, int]] = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
-    else:
-        # workaround for Python 3.7
-        START_POS_TEXT = 5, 20
-        NORMAL_COLOR = 255, 0, 255
-        SUCCESS_COLOR = 0, 255, 0
-        FAILURE_COLOR = 0, 0, 255
-        FONT_DY = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
+    # PYTHON <= 3.7: do not use Types in Final
+    # START_POS_TEXT: Final[Point] = 5, 20
+    # NORMAL_COLOR: Final[ColorBGR] = 255, 0, 255
+    # SUCCESS_COLOR: Final[ColorBGR] = 0, 255, 0
+    # FAILURE_COLOR: Final[ColorBGR] = 0, 0, 255
+    # FONT_DY: Final[Tuple[int, int]] = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
+    START_POS_TEXT: Final[Tuple[int, int]] = 5, 20
+    NORMAL_COLOR: Final[Tuple[int, int, int]] = 255, 0, 255
+    SUCCESS_COLOR: Final[Tuple[int, int, int]] = 0, 255, 0
+    FAILURE_COLOR: Final[Tuple[int, int, int]] = 0, 0, 255
+    FONT_DY: Final[Tuple[int, int]] = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
 
     qreader_available = True
 except ImportError:
