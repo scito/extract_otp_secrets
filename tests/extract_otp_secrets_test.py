@@ -38,7 +38,7 @@ qreader_available: bool = extract_otp_secrets.qreader_available
 
 
 # Quickfix comment
-#@pytest.mark.skipif(sys.platform.startswith("win") or not qreader_available or sys.implementation.name == 'pypy', reason="Quickfix")
+# @pytest.mark.skipif(sys.platform.startswith("win") or not qreader_available or sys.implementation.name == 'pypy', reason="Quickfix")
 
 
 def test_extract_stdout(capsys: pytest.CaptureFixture[str]) -> None:

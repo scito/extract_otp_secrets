@@ -136,8 +136,8 @@ def main(sys_args: list[str]) -> None:
     sys.stdout.close = lambda: None  # type: ignore
     # set encoding to utf-8, needed for Windows
     try:
-        sys.stdout.reconfigure(encoding='utf-8')
-        sys.stderr.reconfigure(encoding='utf-8')
+        sys.stdout.reconfigure(encoding='utf-8')  # type: ignore
+        sys.stderr.reconfigure(encoding='utf-8')  # type: ignore
     except AttributeError:  # '_io.StringIO' object has no attribute 'reconfigure'
         # StringIO in tests do not have all attributes, ignore it
         pass
