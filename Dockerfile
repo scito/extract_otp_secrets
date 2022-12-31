@@ -20,3 +20,4 @@ WORKDIR /files
 ENTRYPOINT ["python", "/extract/src/extract_otp_secrets.py"]
 
 LABEL org.opencontainers.image.source https://github.com/scito/extract_otp_secrets
+LABEL org.opencontainers.image.license GPL-3.0+
