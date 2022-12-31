@@ -97,11 +97,11 @@ Exception: {e}""")
     # SUCCESS_COLOR: Final[ColorBGR] = 0, 255, 0
     # FAILURE_COLOR: Final[ColorBGR] = 0, 0, 255
     # FONT_DY: Final[Tuple[int, int]] = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
-    START_POS_TEXT: Final[Tuple[int, int]] = 5, 20
-    NORMAL_COLOR: Final[Tuple[int, int, int]] = 255, 0, 255
-    SUCCESS_COLOR: Final[Tuple[int, int, int]] = 0, 255, 0
-    FAILURE_COLOR: Final[Tuple[int, int, int]] = 0, 0, 255
-    FONT_DY: Final[Tuple[int, int]] = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
+    START_POS_TEXT: Tuple[int, int] = 5, 20
+    NORMAL_COLOR: Tuple[int, int, int] = 255, 0, 255
+    SUCCESS_COLOR: Tuple[int, int, int] = 0, 255, 0
+    FAILURE_COLOR: Tuple[int, int, int] = 0, 0, 255
+    FONT_DY: Tuple[int, int] = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
 
     qreader_available = True
 except ImportError:
