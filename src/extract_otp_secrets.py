@@ -56,11 +56,11 @@ from enum import Enum
 from operator import add
 from typing import Any, List, Optional, TextIO, Tuple, Union
 
-try:
-    from typing import TypedDict, Final
-except ImportError:
-    # PYTHON < 3.8: compatibility
-    from typing_extensions import TypedDict, Final
+# PYTHON < 3.8: compatibility
+if sys.version_info >= (3, 8):
+    from typing import Final, TypedDict
+else:
+    from typing_extensions import Final, TypedDict
 
 from qrcode import QRCode  # type: ignore
 
