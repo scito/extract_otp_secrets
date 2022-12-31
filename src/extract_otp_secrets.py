@@ -113,6 +113,8 @@ Otps = List[Otp]
 # PYTHON > 3.9: OtpUrls = list[OtpUrl]
 OtpUrls = List[OtpUrl]
 
+QRMode = Enum('QRMode', ['QREADER', 'DEEP_QREADER', 'CV2'], start=0)
+
 
 # Constants
 CAMERA: Final[str] = 'camera'
@@ -157,6 +159,7 @@ python extract_otp_secrets.py = < example_export.png"""
 b) image file containing a QR code or = for stdin for an image containing a QR code""", nargs='*' if qreader_available else '+')
     if qreader_available:
         arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, nargs=1, metavar=('NUMBER'))
+        arg_parser.add_argument('--qr', '-Q', help=f'initial QR reader for camera (default: {QRMode.QREADER.name})', type=str, choices=[mode.name for mode in QRMode], default=QRMode.QREADER.name)
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
@@ -198,8 +201,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
     otp_urls: OtpUrls = []
     otps: Otps = []
 
-    QRMode = Enum('QRMode', ['QREADER', 'DEEP_QREADER', 'CV2'], start=0)
-    qr_mode = QRMode.QREADER
+    qr_mode = QRMode[args.qr]
     if verbose: print(f"QR reading mode: {qr_mode}")
 
     cam = cv2.VideoCapture(args.camera)

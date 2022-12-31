@@ -293,7 +293,7 @@ eval "$cmd"
 
 # https://github.com/marketplace/actions/pytest-coverage-comment
 # Coverage-95%25-yellowgreen
-echo -e "Upgrade code coverage in README.md"
+echo -e "Update code coverage in README.md"
 TOTAL_COVERAGE=$(cat $COVERAGE_OUT | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
 
 if $build_docker; then

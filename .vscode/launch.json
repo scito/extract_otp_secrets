@@ -32,6 +32,7 @@
             "request": "launch",
             "program": "src/extract_otp_secrets.py",
             "args": [
+                "--qr", "CV2"
             ],
             "console": "integratedTerminal"
         },
