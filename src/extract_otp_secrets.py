@@ -132,6 +132,8 @@ def sys_main() -> None:
 def main(sys_args: list[str]) -> None:
     # allow to use sys.stdout with with (avoid closing)
     sys.stdout.close = lambda: None  # type: ignore
+    # set encoding to utf-8, needed for Windows
+    sys.stdout.reconfigure(encoding='utf-8')  # type: ignore
 
     args = parse_args(sys_args)
 
