@@ -22,6 +22,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # avoid building if there are testing errors
+      - name: Run smoke test
+        run: |
+          sudo apt-get install -y libzbar0
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install .
+          pytest
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
