@@ -187,10 +187,10 @@
         },
         "qreader": {
             "hashes": [
-                "sha256:fc75684088b4bef2b268eefda7006cb4b0276e53d6cdd678bc7d2bbb7d8fcd21"
+                "sha256:f96d2879c9f47f9641da55dc3e1df765cd4d6f1cfbc8b7fa811b70c1e27d4fba"
             ],
             "index": "pypi",
-            "version": "==1.3.1"
+            "version": "==1.3.2"
         }
     },
     "develop": {

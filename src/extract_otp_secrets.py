@@ -412,15 +412,8 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
 
         qr_mode = QRMode[args.qr]
         otp_urls: OtpUrls = []
-        if qr_mode == QRMode.QREADER:
-            # otp_url = QReader().detect_and_decode(img, False)  # broken
-            qreader = QReader()
-            bbox, found = qreader.detect(img)
-            if found:
-                otp_url = qreader.decode(img, bbox)
-                otp_urls.append(otp_url)
-        elif qr_mode == QRMode.DEEP_QREADER:
-            otp_url = QReader().detect_and_decode(img, True)
+        if qr_mode in [QRMode.QREADER, QRMode.DEEP_QREADER]:
+            otp_url = QReader().detect_and_decode(img, qr_mode == QRMode.DEEP_QREADER)
             otp_urls.append(otp_url)
         elif qr_mode == QRMode.CV2:
             otp_url, _, _ = cv2.QRCodeDetector().detectAndDecode(img)

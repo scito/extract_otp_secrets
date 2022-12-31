@@ -362,6 +362,7 @@ def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> N
 
     if not qreader_available:
         expected_stdout = expected_stdout.replace('QReader installed: True', 'QReader installed: False')
+        expected_stdout = expected_stdout.replace('QR reading mode: ZBAR\n\n', '')
 
     if relaxed or sys.implementation.name == 'pypy':
         print('\nRelaxed mode\n')
