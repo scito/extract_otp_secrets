@@ -152,7 +152,7 @@ python extract_otp_secrets.py - < example_export.txt
 python extract_otp_secrets.py --csv - example_*.png | tail -n+2
 python extract_otp_secrets.py = < example_export.png"""
 
-    arg_parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=52),
+    arg_parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=32),
                                          description=description_text,
                                          epilog=example_text)
     arg_parser.add_argument('infile', help="""a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;

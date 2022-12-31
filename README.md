@@ -63,21 +63,21 @@ Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Aut
 If no infiles are provided, the QR codes are interactively captured from the camera.
 
 positional arguments:
-  infile                                            a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
-                                                    b) image file containing a QR code or = for stdin for an image containing a QR code
+  infile                        a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
+                                b) image file containing a QR code or = for stdin for an image containing a QR code
 
 options:
-  -h, --help                                        show this help message and exit
-  --camera NUMBER, -C NUMBER                        camera number of system (default camera: 0)
+  -h, --help                    show this help message and exit
+  --camera NUMBER, -C NUMBER    camera number of system (default camera: 0)
   --qr {QREADER,DEEP_QREADER,ZBAR,CV2,WECHAT}, -Q {QREADER,DEEP_QREADER,ZBAR,CV2,WECHAT}
-                                                    QR reader (default: ZBAR)
-  --json FILE, -j FILE                              export json file or - for stdout
-  --csv FILE, -c FILE                               export csv file or - for stdout
-  --keepass FILE, -k FILE                           export totp/hotp csv file(s) for KeePass, - for stdout
-  --printqr, -p                                     print QR code(s) as text to the terminal (requires qrcode module)
-  --saveqr DIR, -s DIR                              save QR code(s) as images to the given folder (requires qrcode module)
-  --verbose, -v                                     verbose output
-  --quiet, -q                                       no stdout output, except output set by -
+                                QR reader (default: ZBAR)
+  --json FILE, -j FILE          export json file or - for stdout
+  --csv FILE, -c FILE           export csv file or - for stdout
+  --keepass FILE, -k FILE       export totp/hotp csv file(s) for KeePass, - for stdout
+  --printqr, -p                 print QR code(s) as text to the terminal (requires qrcode module)
+  --saveqr DIR, -s DIR          save QR code(s) as images to the given folder (requires qrcode module)
+  --verbose, -v                 verbose output
+  --quiet, -q                   no stdout output, except output set by -
 
 examples:
 python extract_otp_secrets.py
