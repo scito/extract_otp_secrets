@@ -42,6 +42,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations  # for compatibility with PYTHON < 3.11
+
 import argparse
 import base64
 import csv
@@ -53,15 +54,13 @@ import sys
 import urllib.parse as urlparse
 from enum import Enum
 from operator import add
-
+from typing import Any, Final, List, Optional, TextIO, Tuple, Union
 
 try:
-    from typing import Any, TextIO, TypedDict, Union, List
+    from typing import TypedDict
 except ImportError:
-    from typing import Any, TextIO, Union, List
     # PYTHON < 3.8: compatibility
     from typing_extensions import TypedDict
-
 
 from qrcode import QRCode  # type: ignore
 
@@ -80,11 +79,29 @@ ERROR: Cannot import QReader module. This problem is probably due to the missing
 On Linux and macOS libzbar0 must be installed.
 See in README.md for the installation of the libzbar0.
 Exception: {e}""")
+
+    # Types
+    # PYTHON > 3.9: Final[tuple[int]]
+    ColorBGR = Tuple[int, int, int]  # RGB Color specified as Blue, Green, Red
+    Point = Tuple[int, int]
+
+    # CV2 camera capture constants
+    NORMAL_COLOR: Final[ColorBGR] = 255, 0, 255
+    SUCCESS_COLOR: Final[ColorBGR] = 0, 255, 0
+    FAILURE_COLOR: Final[ColorBGR] = 0, 0, 255
+    FONT: Final[int] = cv2.FONT_HERSHEY_PLAIN
+    FONT_SCALE: Final[int] = 1
+    FONT_THICKNESS: Final[int] = 1
+    START_POS_TEXT: Final[Point] = 5, 20
+    FONT_DY: Final[Tuple[int, int]] = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
+    FONT_LINE_STYLE: Final[int] = cv2.LINE_AA
+    RECT_THICKNESS: Final[int] = 5
+
     qreader_available = True
 except ImportError:
     qreader_available = False
 
-# TODO Workaround for PYTHON < 3.10: Union[int, None] used instead of int | None
+# Workaround for PYTHON < 3.10: Union[int, None] used instead of int | None
 
 # Types
 Args = argparse.Namespace
@@ -96,6 +113,9 @@ Otps = List[Otp]
 # PYTHON > 3.9: OtpUrls = list[OtpUrl]
 OtpUrls = List[OtpUrl]
 
+
+# Constants
+CAMERA: Final[str] = 'camera'
 
 # Global variable declaration
 verbose: int = 0
@@ -163,6 +183,16 @@ def extract_otps(args: Args) -> Otps:
         return extract_otps_from_files(args)
 
 
+def get_color(new_otps_count: int, otp_url: str) -> ColorBGR:
+    if new_otps_count:
+        return SUCCESS_COLOR
+    else:
+        if otp_url:
+            return FAILURE_COLOR
+        else:
+            return NORMAL_COLOR
+
+
 def extract_otps_from_camera(args: Args) -> Otps:
     if verbose: print("Capture QR codes from camera")
     otp_urls: OtpUrls = []
@@ -175,15 +205,6 @@ def extract_otps_from_camera(args: Args) -> Otps:
     cam = cv2.VideoCapture(args.camera)
     window_name = "Extract OTP Secret Keys: Capture QR Codes from Camera"
     cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
-    neutral_color = 255, 0, 255
-    sucess_color = 0, 255, 0
-    font = cv2.FONT_HERSHEY_PLAIN
-    font_scale = 1
-    font_thickness = 1
-    pos_text = 5, 20
-    font_dy = 0, cv2.getTextSize("M", font, font_scale, font_thickness)[0][1] + 5
-    font_line = cv2.LINE_AA
-    rect_thickness = 5
 
     decoder = QReader()
     while True:
@@ -197,36 +218,37 @@ def extract_otps_from_camera(args: Args) -> Otps:
                 otp_url = decoder.detect_and_decode(img)
             elif qr_mode == QRMode.QREADER:
                 otp_url = decoder.decode(img, bbox) if found else None
-            if found:
-                cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), sucess_color if otp_url else neutral_color, rect_thickness)
+            new_otps_count = 0
             if otp_url:
-                extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+                new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+            if found:
+                cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), get_color(new_otps_count, otp_url), RECT_THICKNESS)
         elif qr_mode == QRMode.CV2:
             for qrcode in zbar.decode(img):
                 otp_url = qrcode.data.decode('utf-8')
                 pts = numpy.array([qrcode.polygon], numpy.int32)
                 pts = pts.reshape((-1, 1, 2))
-                cv2.polylines(img, [pts], True, sucess_color if otp_url else neutral_color, rect_thickness)
-                extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+                new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+                cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
         else:
             assert False, f"ERROR: Wrong QReader mode {qr_mode.name}"
 
-        cv2.putText(img, f"Mode: {qr_mode.name} (Hit space to change)", pos_text, font, font_scale, neutral_color, font_thickness, font_line)
-        cv2.putText(img, "Hit ESC to quit", tuple(map(add, pos_text, font_dy)), font, font_scale, neutral_color, font_thickness, font_line)
+        cv2.putText(img, f"Mode: {qr_mode.name} (Hit space to change)", START_POS_TEXT, FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
+        cv2.putText(img, "Hit ESC to quit", tuple(map(add, START_POS_TEXT, FONT_DY)), FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
 
         window_dim = cv2.getWindowImageRect(window_name)
         qrcodes_text = f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured"
-        pos_qrcodes_text = window_dim[2] - cv2.getTextSize(qrcodes_text, font, font_scale, font_thickness)[0][0] - 5, pos_text[1]
-        cv2.putText(img, qrcodes_text, pos_qrcodes_text, font, font_scale, neutral_color, font_thickness, font_line)
+        pos_qrcodes_text = window_dim[2] - cv2.getTextSize(qrcodes_text, FONT, FONT_SCALE, FONT_THICKNESS)[0][0] - 5, START_POS_TEXT[1]
+        cv2.putText(img, qrcodes_text, pos_qrcodes_text, FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
 
         otps_text = f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted"
-        pos_otps_text = window_dim[2] - cv2.getTextSize(otps_text, font, font_scale, font_thickness)[0][0] - 5, pos_text[1] + font_dy[1]
-        cv2.putText(img, otps_text, pos_otps_text, font, font_scale, neutral_color, font_thickness, font_line)
+        pos_otps_text = window_dim[2] - cv2.getTextSize(otps_text, FONT, FONT_SCALE, FONT_THICKNESS)[0][0] - 5, START_POS_TEXT[1] + FONT_DY[1]
+        cv2.putText(img, otps_text, pos_otps_text, FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
         cv2.imshow(window_name, img)
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27 or key == ord('q') or key == 13:
-            # ESC pressed
+            # ESC or Enter or q pressed
             break
         elif key == 32:
             qr_mode = QRMode((qr_mode.value + 1) % len(QRMode))
@@ -241,28 +263,35 @@ def extract_otps_from_camera(args: Args) -> Otps:
     return otps
 
 
-def extract_otps_from_otp_url(otp_url: str, otp_urls: OtpUrls, otps: Otps, args: Args) -> None:
+# TODO write test
+def extract_otps_from_otp_url(otp_url: str, otp_urls: OtpUrls, otps: Otps, args: Args) -> int:
+    '''Returns -1 if opt_url was already added.'''
     if otp_url and verbose: print(otp_url)
-    if otp_url and otp_url not in otp_urls:
-        otp_urls.append(otp_url)
-        extract_otp_from_otp_url(otp_url, otps, len(otp_urls), len(otps), 'camera', args)
-        if verbose: print(f"{len(otps)} otp{'s'[:len(otps) != 1]} from {len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} extracted")
+    if not otp_url:
+        return 0
+    if otp_url not in otp_urls:
+        new_otps_count = extract_otp_from_otp_url(otp_url, otps, len(otp_urls), CAMERA, args)
+        if new_otps_count:
+            otp_urls.append(otp_url)
+        if verbose: print(f"Extracted {new_otps_count} otp{'s'[:len(otps) != 1]}. {len(otps)} otp{'s'[:len(otps) != 1]} from {len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} extracted")
+        return new_otps_count
+    return -1
 
 
 def extract_otps_from_files(args: Args) -> Otps:
     otps: Otps = []
 
-    i = j = k = 0
+    files_count = urls_count = otps_count = 0
     if verbose: print(f"Input files: {args.infile}")
     for infile in args.infile:
         if verbose: print(f"Processing infile {infile}")
-        k += 1
+        files_count += 1
         for line in get_otp_urls_from_file(infile):
             if verbose: print(line)
             if line.startswith('#') or line == '': continue
-            i += 1
-            j = extract_otp_from_otp_url(line, otps, i, j, infile, args)
-    if verbose: print(f"{k} infile{'s'[:k != 1]} processed")
+            urls_count += 1
+            otps_count += extract_otp_from_otp_url(line, otps, urls_count, infile, args)
+    if verbose: print(f"{files_count} infile{'s'[:files_count != 1]} processed")
     return otps
 
 
@@ -305,13 +334,17 @@ def read_lines_from_text_file(filename: str) -> list[str]:
     return lines
 
 
-def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, i: int, j: int, infile: str, args: Args) -> int:
-    payload = get_payload_from_otp_url(otpauth_migration_url, i, infile)
+def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count: int, infile: str, args: Args) -> int:
+    payload = get_payload_from_otp_url(otpauth_migration_url, urls_count, infile)
 
+    if not payload:
+        return 0
+
+    new_otps_count = 0
     # pylint: disable=no-member
     for raw_otp in payload.otp_parameters:
-        j += 1
-        if verbose: print(f"\n{j}. Secret Key")
+        new_otps_count += 1
+        if verbose: print(f"\n{len(otps) + 1}. Secret Key")
         secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
         if verbose: print('OTP enum type:', get_enum_name_by_number(raw_otp, 'type'))
         otp_type = get_otp_type_str_from_code(raw_otp.type)
@@ -330,11 +363,11 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, i: int, j: 
         if args.printqr:
             print_qr(args, otp_url)
         if args.saveqr:
-            save_qr(otp, args, j)
+            save_qr(otp, args, len(otps))
         if not quiet:
             print()
 
-    return j
+    return new_otps_count
 
 
 def convert_img_to_otp_url(filename: str) -> OtpUrls:
@@ -369,10 +402,16 @@ def convert_img_to_otp_url(filename: str) -> OtpUrls:
     return [decoded_text]
 
 
-def get_payload_from_otp_url(otpauth_migration_url: str, i: int, input_source: str) -> pb.MigrationPayload:
-    if not otpauth_migration_url.startswith('otpauth-migration://'):
-        eprint(f"\nWARN: line is not a otpauth-migration:// URL\ninput: {input_source}\nline '{otpauth_migration_url}'\nProbably a wrong file was given")
-    parsed_url = urlparse.urlparse(otpauth_migration_url)
+# PYTHON >= 3.10 use: pb.MigrationPayload | None
+def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.MigrationPayload]:
+    if not otp_url.startswith('otpauth-migration://'):
+        msg = f"input is not a otpauth-migration:// url\nsource: {source}\ninput: {otp_url}"
+        if source == CAMERA:
+            eprint(f"\nERROR: {msg}")
+            return None
+        else:
+            eprint(f"\nWARN: {msg}\nMaybe a wrong file was given")
+    parsed_url = urlparse.urlparse(otp_url)
     if verbose > 2: print(f"\nDEBUG: parsed_url={parsed_url}")
     try:
         params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
@@ -380,7 +419,8 @@ def get_payload_from_otp_url(otpauth_migration_url: str, i: int, input_source: s
         params = {}
     if verbose > 2: print(f"\nDEBUG: querystring params={params}")
     if 'data' not in params:
-        abort(f"\nERROR: no data query parameter in input URL\ninput file: {input_source}\nline '{otpauth_migration_url}'\nProbably a wrong file was given")
+        eprint(f"\nERROR: could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}")
+        return None
     data_base64 = params['data'][0]
     if verbose > 2: print(f"\nDEBUG: data_base64={data_base64}")
     data_base64_fixed = data_base64.replace(' ', '+')
@@ -438,7 +478,7 @@ def save_qr(otp: Otp, args: Args, j: int) -> str:
     file_otp_name = pattern.sub('', otp['name'])
     file_otp_issuer = pattern.sub('', otp['issuer'])
     save_qr_file(args, otp['url'], f"{dir}/{j}-{file_otp_name}{'-' + file_otp_issuer if file_otp_issuer else ''}.png")
-    return file_otp_issuer
+    return file_otp_name
 
 
 def save_qr_file(args: Args, otp_url: OtpUrl, name: str) -> None:

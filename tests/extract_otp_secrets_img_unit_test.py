@@ -59,24 +59,21 @@ class TestQRImageExtract(unittest.TestCase):
 
     def test_img_qr_reader_non_image_file(self) -> None:
         with Capturing() as actual_output:
-            with self.assertRaises(SystemExit) as context:
-                extract_otp_secrets.main(['tests/data/text_masquerading_as_image.jpeg'])
+            extract_otp_secrets.main(['tests/data/text_masquerading_as_image.jpeg'])
 
         expected_output = [
             '',
-            'WARN: line is not a otpauth-migration:// URL',
-            'input: tests/data/text_masquerading_as_image.jpeg',
-            "line 'This is just a text file masquerading as an image file.'",
-            'Probably a wrong file was given',
+            'WARN: input is not a otpauth-migration:// url',
+            'source: tests/data/text_masquerading_as_image.jpeg',
+            "input: This is just a text file masquerading as an image file.",
+            'Maybe a wrong file was given',
             '',
-            'ERROR: no data query parameter in input URL',
-            'input file: tests/data/text_masquerading_as_image.jpeg',
-            "line 'This is just a text file masquerading as an image file.'",
-            'Probably a wrong file was given'
+            'ERROR: could not parse query parameter in input url',
+            'source: tests/data/text_masquerading_as_image.jpeg',
+            "url: This is just a text file masquerading as an image file.",
         ]
 
         self.assertEqual(actual_output, expected_output)
-        self.assertEqual(context.exception.code, 1)
 
     def setUp(self) -> None:
         self.cleanup()

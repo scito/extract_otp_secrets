@@ -134,3 +134,7 @@ def replace_escaped_octal_utf8_bytes_with_str(str: str) -> str:
 
 def quick_and_dirty_workaround_encoding_problem(str: str) -> str:
     return re.sub(r'name: "encoding: .*$', '', str, flags=re.MULTILINE)
+
+
+def count_files_in_dir(path: PathLike) -> int:
+    return len([name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))])

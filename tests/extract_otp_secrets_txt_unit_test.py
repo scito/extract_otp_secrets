@@ -27,7 +27,7 @@ from contextlib import redirect_stdout
 
 import extract_otp_secrets
 from utils import (Capturing, read_csv, read_file_to_str, read_json,
-                   remove_dir_with_files, remove_file)
+                   remove_dir_with_files, remove_file, count_files_in_dir)
 
 
 class TestExtract(unittest.TestCase):
@@ -166,6 +166,9 @@ Type:    totp
         self.assertTrue(os.path.isfile('testout/qr/2-piraspberrypi.png'))
         self.assertTrue(os.path.isfile('testout/qr/3-piraspberrypi.png'))
         self.assertTrue(os.path.isfile('testout/qr/4-piraspberrypi-raspberrypi.png'))
+        self.assertTrue(os.path.isfile('testout/qr/5-hotpdemo.png'))
+        self.assertTrue(os.path.isfile('testout/qr/6-encodingäÄéÉdemo.png'))
+        self.assertEqual(count_files_in_dir('testout/qr'), 6)
 
     def test_extract_verbose(self) -> None:
         if sys.implementation.name == 'pypy': self.skipTest("Encoding problems in verbose mode in pypy.")

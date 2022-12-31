@@ -31,7 +31,7 @@ import extract_otp_secrets
 from utils import (file_exits, quick_and_dirty_workaround_encoding_problem,
                    read_binary_file_as_stream, read_csv, read_csv_str,
                    read_file_to_str, read_json, read_json_str,
-                   replace_escaped_octal_utf8_bytes_with_str)
+                   replace_escaped_octal_utf8_bytes_with_str, count_files_in_dir)
 
 qreader_available: bool = extract_otp_secrets.qreader_available
 
@@ -341,6 +341,9 @@ def test_extract_saveqr(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Pa
     assert os.path.isfile(tmp_path / '2-piraspberrypi.png')
     assert os.path.isfile(tmp_path / '3-piraspberrypi.png')
     assert os.path.isfile(tmp_path / '4-piraspberrypi-raspberrypi.png')
+    assert os.path.isfile(tmp_path / '5-hotpdemo.png')
+    assert os.path.isfile(tmp_path / '6-encodingäÄéÉdemo.png')
+    assert count_files_in_dir(tmp_path) == 6
 
 
 def test_normalize_bytes() -> None:
@@ -467,29 +470,73 @@ data=XXXX
 
 
 def test_wrong_content(capsys: pytest.CaptureFixture[str]) -> None:
-    with pytest.raises(SystemExit) as e:
-        # Act
-        extract_otp_secrets.main(['tests/data/test_export_wrong_content.txt'])
+    # Act
+    extract_otp_secrets.main(['tests/data/test_export_wrong_content.txt'])
 
     # Assert
     captured = capsys.readouterr()
 
     expected_stderr = '''
-WARN: line is not a otpauth-migration:// URL
-input: tests/data/test_export_wrong_content.txt
-line 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
-Probably a wrong file was given
+WARN: input is not a otpauth-migration:// url
+source: tests/data/test_export_wrong_content.txt
+input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+Maybe a wrong file was given
 
-ERROR: no data query parameter in input URL
-input file: tests/data/test_export_wrong_content.txt
-line 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
-Probably a wrong file was given
+ERROR: could not parse query parameter in input url
+source: tests/data/test_export_wrong_content.txt
+url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
 '''
 
     assert captured.out == ''
     assert captured.err == expected_stderr
-    assert e.value.code == 1
-    assert e.type == SystemExit
+
+
+def test_one_wrong_file(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['tests/data/test_export_wrong_content.txt', 'example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = '''
+WARN: input is not a otpauth-migration:// url
+source: tests/data/test_export_wrong_content.txt
+input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+Maybe a wrong file was given
+
+ERROR: could not parse query parameter in input url
+source: tests/data/test_export_wrong_content.txt
+url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+'''
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
+    assert captured.err == expected_stderr
+
+
+def test_one_wrong_line(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
+    # Arrange
+    monkeypatch.setattr('sys.stdin',
+                        io.StringIO(read_file_to_str('tests/data/test_export_wrong_content.txt') + read_file_to_str('example_export.txt')))
+
+    # Act
+    extract_otp_secrets.main(['-'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = '''
+WARN: input is not a otpauth-migration:// url
+source: -
+input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+Maybe a wrong file was given
+
+ERROR: could not parse query parameter in input url
+source: -
+url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+'''
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
+    assert captured.err == expected_stderr
 
 
 def test_wrong_prefix(capsys: pytest.CaptureFixture[str]) -> None:
@@ -500,10 +547,10 @@ def test_wrong_prefix(capsys: pytest.CaptureFixture[str]) -> None:
     captured = capsys.readouterr()
 
     expected_stderr = '''
-WARN: line is not a otpauth-migration:// URL
-input: tests/data/test_export_wrong_prefix.txt
-line 'QR-Code:otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B'
-Probably a wrong file was given
+WARN: input is not a otpauth-migration:// url
+source: tests/data/test_export_wrong_prefix.txt
+input: QR-Code:otpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B
+Maybe a wrong file was given
 '''
 
     expected_stdout = '''Name:    pi@raspberrypi
@@ -661,27 +708,23 @@ def test_img_qr_reader_nonexistent_file(capsys: pytest.CaptureFixture[str]) -> N
 
 def test_non_image_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    with pytest.raises(SystemExit) as e:
-        extract_otp_secrets.main(['tests/data/text_masquerading_as_image.jpeg'])
+    extract_otp_secrets.main(['tests/data/text_masquerading_as_image.jpeg'])
 
     # Assert
     captured = capsys.readouterr()
     expected_stderr = '''
-WARN: line is not a otpauth-migration:// URL
-input: tests/data/text_masquerading_as_image.jpeg
-line 'This is just a text file masquerading as an image file.'
-Probably a wrong file was given
+WARN: input is not a otpauth-migration:// url
+source: tests/data/text_masquerading_as_image.jpeg
+input: This is just a text file masquerading as an image file.
+Maybe a wrong file was given
 
-ERROR: no data query parameter in input URL
-input file: tests/data/text_masquerading_as_image.jpeg
-line 'This is just a text file masquerading as an image file.'
-Probably a wrong file was given
+ERROR: could not parse query parameter in input url
+source: tests/data/text_masquerading_as_image.jpeg
+url: This is just a text file masquerading as an image file.
 '''
 
     assert captured.err == expected_stderr
     assert captured.out == ''
-    assert e.value.code == 1
-    assert e.type == SystemExit
 
 
 EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT = '''Name:    pi@raspberrypi
