@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d07d5e2bd005a0045969de4ed2427a1edc17c0fee0bde853aef1437da16b31ec"
+            "sha256": "beffcba766af29a6a313c019cc98ab27e61c6dd433d02df0917fdb3808b90379"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -50,6 +50,26 @@
             "markers": "python_version >= '3.10'",
             "version": "==1.24.1"
         },
+        "opencv-contrib-python": {
+            "hashes": [
+                "sha256:1a48c2f24440cfd6e49c84dbe39c39feff5efbc90be8299c76e7141973d403b6",
+                "sha256:2b8e3a1a7af31ebed28487d161ca4be0edd0b0e241667c6e9c842ac683313b2f",
+                "sha256:2f0c32b0f2f55255632a44bdcfa185f88c7fb6d2616869942aff9d5a39df4997",
+                "sha256:35e9a3809da10a47189c06d4d78b8e7821b9a3578dec8cbddf6ee1675bd83557",
+                "sha256:3a00e12546e5578f6bb7ed408c37fcfea533d74e9691cfaf40926f6b43295577",
+                "sha256:6d1c993811f92ddd7919314ada7b9be1f23db1c73f1384915c834dee8549c0b9",
+                "sha256:7a08f9d1f9dd52de63a7bb448ab7d6d4a1a85b767c2358501d968d1e4d95098d",
+                "sha256:7a75f1775790106e54bcfb101c0e00e1f801a57d9baebc82d0b6758fc83a4ca0",
+                "sha256:86f4b60b9536948f16d2170ba3a9b22d3955a957dc61a9bc56e53692c6db2c7e",
+                "sha256:9829e6efedde1d1b8419c5bd4d62d289ecbf44ae35b843c6da9e3cbcba1a9a8a",
+                "sha256:abc6adfa8694f71a4caffa922b279bd9d96954a37eee40b147f613c64310b411",
+                "sha256:b4033a164b2e2ea0049ba8c1194dab82dca680953ac36f33d1cc2c060906555f",
+                "sha256:e3967b1f3d74b8c70be724dbc07921faec87e8806cc87b2db5e7057815d6a08c",
+                "sha256:e770e9f653a0e5e72b973adb8213fae2df4642730ba1faf31e73a54287a4d5d4"
+            ],
+            "index": "pypi",
+            "version": "==4.7.0.68"
+        },
         "opencv-python": {
             "hashes": [
                 "sha256:3a00e12546e5578f6bb7ed408c37fcfea533d74e9691cfaf40926f6b43295577",
@@ -60,7 +80,7 @@
                 "sha256:abc6adfa8694f71a4caffa922b279bd9d96954a37eee40b147f613c64310b411",
                 "sha256:e770e9f653a0e5e72b973adb8213fae2df4642730ba1faf31e73a54287a4d5d4"
             ],
-            "index": "pypi",
+            "markers": "python_version >= '3.6'",
             "version": "==4.7.0.68"
         },
         "pillow": {

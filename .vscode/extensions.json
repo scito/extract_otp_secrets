@@ -1,7 +1,7 @@
 {
     "recommendations": [
         "ms-python.python",
-        "mms-python.isort",
+        "ms-python.isort",
         "tamasfe.even-better-toml",
     ]
 }

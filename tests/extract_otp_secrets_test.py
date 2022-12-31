@@ -583,6 +583,18 @@ def test_img_qr_reader_from_file_happy_path(capsys: pytest.CaptureFixture[str]) 
 
 
 @pytest.mark.qreader
+def test_img_qr_reader_by_parameter(capsys: pytest.CaptureFixture[str], qr_mode: str) -> None:
+    # Act
+    extract_otp_secrets.main(['--qr', qr_mode, 'tests/data/test_googleauth_export.png'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
+    assert captured.err == ''
+
+
+@pytest.mark.qreader
 def test_extract_multiple_files_and_mixed(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     extract_otp_secrets.main([

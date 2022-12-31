@@ -113,7 +113,7 @@ Otps = List[Otp]
 # PYTHON > 3.9: OtpUrls = list[OtpUrl]
 OtpUrls = List[OtpUrl]
 
-QRMode = Enum('QRMode', ['QREADER', 'DEEP_QREADER', 'CV2'], start=0)
+QRMode = Enum('QRMode', ['QREADER', 'DEEP_QREADER', 'ZBAR', 'CV2', 'WECHAT'], start=0)
 
 
 # Constants
@@ -159,7 +159,7 @@ python extract_otp_secrets.py = < example_export.png"""
 b) image file containing a QR code or = for stdin for an image containing a QR code""", nargs='*' if qreader_available else '+')
     if qreader_available:
         arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, nargs=1, metavar=('NUMBER'))
-        arg_parser.add_argument('--qr', '-Q', help=f'initial QR reader for camera (default: {QRMode.QREADER.name})', type=str, choices=[mode.name for mode in QRMode], default=QRMode.QREADER.name)
+        arg_parser.add_argument('--qr', '-Q', help=f'QR reader (default: {QRMode.ZBAR.name})', type=str, choices=[mode.name for mode in QRMode], default=QRMode.ZBAR.name)
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
@@ -175,6 +175,9 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
     verbose = args.verbose if args.verbose else 0
     quiet = True if args.quiet else False
     if verbose: print(f"QReader installed: {qreader_available}")
+    if qreader_available:
+        if verbose > 1: print(f"CV2 version: {cv2.__version__}")
+        if verbose: print(f"QR reading mode: {args.qr}\n")
 
     return args
 
@@ -202,35 +205,47 @@ def extract_otps_from_camera(args: Args) -> Otps:
     otps: Otps = []
 
     qr_mode = QRMode[args.qr]
-    if verbose: print(f"QR reading mode: {qr_mode}")
 
     cam = cv2.VideoCapture(args.camera)
-    window_name = "Extract OTP Secret Keys: Capture QR Codes from Camera"
+    window_name = "Extract OTP Secrets: Capture QR Codes from Camera"
     cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 
-    decoder = QReader()
+    qreader = QReader()
+    cv2_qr = cv2.QRCodeDetector()
+    cv2_qr_wechat = cv2.wechat_qrcode.WeChatQRCode()
     while True:
         success, img = cam.read()
+        new_otps_count = 0
         if not success:
             eprint("ERROR: Failed to capture image")
             break
         if qr_mode in [QRMode.QREADER, QRMode.DEEP_QREADER]:
-            bbox, found = decoder.detect(img)
+            bbox, found = qreader.detect(img)
             if qr_mode == QRMode.DEEP_QREADER:
-                otp_url = decoder.detect_and_decode(img)
+                otp_url = qreader.detect_and_decode(img, True)
             elif qr_mode == QRMode.QREADER:
-                otp_url = decoder.decode(img, bbox) if found else None
-            new_otps_count = 0
+                otp_url = qreader.decode(img, bbox) if found else None
             if otp_url:
                 new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
             if found:
                 cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), get_color(new_otps_count, otp_url), RECT_THICKNESS)
-        elif qr_mode == QRMode.CV2:
+        elif qr_mode == QRMode.ZBAR:
             for qrcode in zbar.decode(img):
                 otp_url = qrcode.data.decode('utf-8')
                 pts = numpy.array([qrcode.polygon], numpy.int32)
                 pts = pts.reshape((-1, 1, 2))
                 new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+                cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
+        elif qr_mode in [QRMode.CV2, QRMode.WECHAT]:
+            if QRMode.CV2:
+                otp_url, raw_pts, _ = cv2_qr.detectAndDecode(img)
+            else:
+                otp_url, raw_pts = cv2_qr_wechat.detectAndDecode(img)
+            if raw_pts is not None:
+                if otp_url:
+                    new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+                pts = numpy.array([raw_pts], numpy.int32)
+                pts = pts.reshape((-1, 1, 2))
                 cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
         else:
             assert False, f"ERROR: Wrong QReader mode {qr_mode.name}"
@@ -265,7 +280,6 @@ def extract_otps_from_camera(args: Args) -> Otps:
     return otps
 
 
-# TODO write test
 def extract_otps_from_otp_url(otp_url: str, otp_urls: OtpUrls, otps: Otps, args: Args) -> int:
     '''Returns -1 if opt_url was already added.'''
     if otp_url and verbose: print(otp_url)
@@ -288,7 +302,7 @@ def extract_otps_from_files(args: Args) -> Otps:
     for infile in args.infile:
         if verbose: print(f"Processing infile {infile}")
         files_count += 1
-        for line in get_otp_urls_from_file(infile):
+        for line in get_otp_urls_from_file(infile, args):
             if verbose: print(line)
             if line.startswith('#') or line == '': continue
             urls_count += 1
@@ -297,7 +311,7 @@ def extract_otps_from_files(args: Args) -> Otps:
     return otps
 
 
-def get_otp_urls_from_file(filename: str) -> OtpUrls:
+def get_otp_urls_from_file(filename: str, args: Args) -> OtpUrls:
     # stdin stream cannot be rewinded, thus distinguish, use - for utf-8 stdin and = for binary image stdin
     if filename != '=':
         check_file_exists(filename)
@@ -307,7 +321,7 @@ def get_otp_urls_from_file(filename: str) -> OtpUrls:
 
     # could not process text file, try reading as image
     if filename != '-' and qreader_available:
-        return convert_img_to_otp_url(filename)
+        return convert_img_to_otp_url(filename, args)
 
     return []
 
@@ -372,7 +386,7 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count:
     return new_otps_count
 
 
-def convert_img_to_otp_url(filename: str) -> OtpUrls:
+def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
     if verbose: print(f"Reading image {filename}")
     try:
         if filename != '=':
@@ -396,12 +410,35 @@ def convert_img_to_otp_url(filename: str) -> OtpUrls:
         if img is None:
             abort(f"\nERROR: Unable to open file for reading.\ninput file: {filename}")
 
-        decoded_text = QReader().detect_and_decode(img)
-        if decoded_text is None:
+        qr_mode = QRMode[args.qr]
+        otp_urls: OtpUrls = []
+        if qr_mode == QRMode.QREADER:
+            # otp_url = QReader().detect_and_decode(img, False)  # broken
+            qreader = QReader()
+            bbox, found = qreader.detect(img)
+            if found:
+                otp_url = qreader.decode(img, bbox)
+                otp_urls.append(otp_url)
+        elif qr_mode == QRMode.DEEP_QREADER:
+            otp_url = QReader().detect_and_decode(img, True)
+            otp_urls.append(otp_url)
+        elif qr_mode == QRMode.CV2:
+            otp_url, _, _ = cv2.QRCodeDetector().detectAndDecode(img)
+            otp_urls.append(otp_url)
+        elif qr_mode == QRMode.WECHAT:
+            otp_url, _ = cv2.wechat_qrcode.WeChatQRCode().detectAndDecode(img)
+            otp_urls += list(otp_url)
+        elif qr_mode == QRMode.ZBAR:
+            qrcodes = zbar.decode(img)
+            otp_urls += [qrcode.data.decode('utf-8') for qrcode in qrcodes]
+        else:
+            assert False, f"ERROR: Wrong QReader mode {qr_mode.name}"
+
+        if len(otp_urls) == 0:
             abort(f"\nERROR: Unable to read QR Code from file.\ninput file: {filename}")
     except Exception as e:
         abort(f"\nERROR: Encountered exception '{e}'.\ninput file: {filename}")
-    return [decoded_text]
+    return otp_urls
 
 
 # PYTHON >= 3.10 use: pb.MigrationPayload | None
