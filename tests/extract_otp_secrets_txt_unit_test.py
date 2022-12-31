@@ -171,7 +171,7 @@ Type:    totp
         self.assertEqual(count_files_in_dir('testout/qr'), 6)
 
     def test_extract_verbose(self) -> None:
-        if sys.implementation.name == 'pypy' or sys.platform.startswith("win"):
+        if sys.implementation.name == 'pypy':
             self.skipTest("Avoid encoding problems")
         out = io.StringIO()
         with redirect_stdout(out):

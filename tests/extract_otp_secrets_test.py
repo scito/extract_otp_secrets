@@ -36,6 +36,10 @@ from utils import (file_exits, quick_and_dirty_workaround_encoding_problem,
 qreader_available: bool = extract_otp_secrets.qreader_available
 
 
+# Quickfix comment
+#@pytest.mark.skipif(sys.platform.startswith("win") or not qreader_available or sys.implementation.name == 'pypy', reason="Quickfix")
+
+
 def test_extract_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     extract_otp_secrets.main(['example_export.txt'])
@@ -91,7 +95,6 @@ def test_extract_stdin_empty(capsys: pytest.CaptureFixture[str], monkeypatch: py
     assert captured.err == 'WARN: stdin is empty\n'
 
 
-# @pytest.mark.skipif(not qreader_available, reason='Test if cv2 and qreader are not available.')
 def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> None:
     if qreader_available:
         # Act
@@ -351,7 +354,6 @@ def test_normalize_bytes() -> None:
         'Before\\\\302\\\\277\\\\303\nname: enc: \\302\\277\\303\\244\\303\\204\\303\\251\\303\\211?\nAfter') == 'Before\\\\302\\\\277\\\\303\nname: enc: ¿äÄéÉ?\nAfter'
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Avoid encoding problems")
 def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
     # Act
     extract_otp_secrets.main(['-v', 'example_export.txt'])

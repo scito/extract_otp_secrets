@@ -335,7 +335,7 @@ def get_otp_urls_from_file(filename: str, args: Args) -> OtpUrls:
 
 def read_lines_from_text_file(filename: str) -> list[str]:
     if verbose: print(f"Reading lines of {filename}")
-    finput = fileinput.input(filename)
+    finput = fileinput.input(filename, encoding='utf-8')
     try:
         lines = []
         for line in (line.strip() for line in finput):
