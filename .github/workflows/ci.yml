@@ -47,7 +47,7 @@ jobs:
         run: |
           mypy --install-types --non-interactive src/*.py tests/*.py
           mypy --strict src/*.py tests/*.py
-        if: matrix.python-version == '3.x'
+        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
       - name: Test with pytest
         run: pytest
         if: (matrix.python-version != '3.x' || matrix.platform != 'ubuntu-latest')
