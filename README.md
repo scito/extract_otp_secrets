@@ -286,6 +286,11 @@ python -m extract_otp_secrets
 ```
 
 ```
+
+https://stackoverflow.com/questions/13685920/install-specific-git-commit-with-pip
+-e for egg
+pip install -e git+<https://github.com/myrepo.git#egg=packagename>
+
 # pip install -e git+https://github.com/scito/extract_otp_secret_keys@$(git ls-remote  git@github.com:scito/extract_otp_secret_keys@support_img_read.git | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
 pip3.11 install -e git+https://github.com/scito/extract_otp_secret_keys.git@$(git ls-remote git@github.com:scito/extract_otp_secret_keys.git | grep support_img_read | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
 python -m extract_otp_secrets

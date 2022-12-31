@@ -351,6 +351,7 @@ def test_normalize_bytes() -> None:
         'Before\\\\302\\\\277\\\\303\nname: enc: \\302\\277\\303\\244\\303\\204\\303\\251\\303\\211?\nAfter') == 'Before\\\\302\\\\277\\\\303\nname: enc: ¿äÄéÉ?\nAfter'
 
 
+@pytest.mark.skip(sys.platform.startswith("win"), reason="Avoid encoding problems")
 def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
     # Act
     extract_otp_secrets.main(['-v', 'example_export.txt'])
