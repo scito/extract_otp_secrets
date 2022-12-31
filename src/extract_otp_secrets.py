@@ -54,13 +54,13 @@ import sys
 import urllib.parse as urlparse
 from enum import Enum
 from operator import add
-from typing import Any, Final, List, Optional, TextIO, Tuple, Union
+from typing import Any, List, Optional, TextIO, Tuple, Union
 
 try:
-    from typing import TypedDict
+    from typing import TypedDict, Final
 except ImportError:
     # PYTHON < 3.8: compatibility
-    from typing_extensions import TypedDict
+    from typing_extensions import TypedDict, Final
 
 from qrcode import QRCode  # type: ignore
 
@@ -92,11 +92,6 @@ Exception: {e}""")
     FONT_LINE_STYLE: Final[int] = cv2.LINE_AA
     RECT_THICKNESS: Final[int] = 5
     # PYTHON <= 3.7: must use () for assignments
-    # START_POS_TEXT: Final[Point] = 5, 20
-    # NORMAL_COLOR: Final[ColorBGR] = 255, 0, 255
-    # SUCCESS_COLOR: Final[ColorBGR] = 0, 255, 0
-    # FAILURE_COLOR: Final[ColorBGR] = 0, 0, 255
-    # FONT_DY: Final[Tuple[int, int]] = 0, cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
     START_POS_TEXT: Final[Tuple[Point]] = (5, 20)
     NORMAL_COLOR: Final[Tuple[ColorBGR]] = (255, 0, 255)
     SUCCESS_COLOR: Final[Tuple[ColorBGR]] = (0, 255, 0)
