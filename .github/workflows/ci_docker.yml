@@ -28,7 +28,7 @@ jobs:
           sudo apt-get install -y libzbar0
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
-          pip install .
+          pip install -r requirements.txt
           pytest
 
       - name: Set up QEMU
