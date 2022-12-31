@@ -175,7 +175,7 @@ Type:    totp
             self.skipTest("Avoid encoding problems")
         out = io.StringIO()
         with redirect_stdout(out):
-            extract_otp_secrets.main(['-v', 'example_export.txt'])
+            extract_otp_secrets.main(['-n', '-v', 'example_export.txt'])
         actual_output = out.getvalue()
 
         expected_output = read_file_to_str('tests/data/print_verbose_output.txt')

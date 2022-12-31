@@ -23,6 +23,7 @@ import io
 import os
 import pathlib
 import sys
+import colorama
 
 import pytest
 from pytest_mock import MockerFixture
@@ -54,7 +55,7 @@ def test_extract_stdout(capsys: pytest.CaptureFixture[str]) -> None:
 def test_extract_non_existent_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secrets.main(['non_existent_file.txt'])
+        extract_otp_secrets.main(['-n', 'non_existent_file.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -86,25 +87,25 @@ def test_extract_stdin_empty(capsys: pytest.CaptureFixture[str], monkeypatch: py
     monkeypatch.setattr('sys.stdin', io.StringIO())
 
     # Act
-    extract_otp_secrets.main(['-'])
+    extract_otp_secrets.main(['-n', '-'])
 
     # Assert
     captured = capsys.readouterr()
 
     assert captured.out == ''
-    assert captured.err == 'WARN: stdin is empty\n'
+    assert captured.err == '\nWARN: stdin is empty\n'
 
 
 def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> None:
     if qreader_available:
         # Act
         with pytest.raises(SystemExit) as e:
-            extract_otp_secrets.main(['tests/data/empty_file.txt'])
+            extract_otp_secrets.main(['-n', 'tests/data/empty_file.txt'])
 
         # Assert
         captured = capsys.readouterr()
 
-        expected_stderr = 'WARN: tests/data/empty_file.txt is empty\n\nERROR: Unable to open file for reading.\ninput file: tests/data/empty_file.txt\n'
+        expected_stderr = '\nWARN: tests/data/empty_file.txt is empty\n\nERROR: Unable to open file for reading.\ninput file: tests/data/empty_file.txt\n'
 
         assert captured.err == expected_stderr
         assert captured.out == ''
@@ -127,13 +128,13 @@ def test_extract_stdin_img_empty(capsys: pytest.CaptureFixture[str], monkeypatch
     monkeypatch.setattr('sys.stdin', io.BytesIO())
 
     # Act
-    extract_otp_secrets.main(['='])
+    extract_otp_secrets.main(['-n', '='])
 
     # Assert
     captured = capsys.readouterr()
 
     assert captured.out == ''
-    assert captured.err == 'WARN: stdin is empty\n'
+    assert captured.err == '\nWARN: stdin is empty\n'
 
 
 def test_extract_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
@@ -354,9 +355,10 @@ def test_normalize_bytes() -> None:
         'Before\\\\302\\\\277\\\\303\nname: enc: \\302\\277\\303\\244\\303\\204\\303\\251\\303\\211?\nAfter') == 'Before\\\\302\\\\277\\\\303\nname: enc: ¿äÄéÉ?\nAfter'
 
 
+# Generate verbose output: python3.11 src/extract_otp_secrets.py example_export.txt -v -n > tests/data/print_verbose_output.txt
 def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
     # Act
-    extract_otp_secrets.main(['-v', 'example_export.txt'])
+    extract_otp_secrets.main(['-n', '-v', 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -442,7 +444,7 @@ def test_extract_no_arguments(capsys: pytest.CaptureFixture[str], mocker: Mocker
 def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as e:
         # Act
-        extract_otp_secrets.main(['-v', '-q', 'example_export.txt'])
+        extract_otp_secrets.main(['-n', '-v', '-q', 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -457,7 +459,7 @@ def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
 def test_wrong_data(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as e:
         # Act
-        extract_otp_secrets.main(['tests/data/test_export_wrong_data.txt'])
+        extract_otp_secrets.main(['-n', 'tests/data/test_export_wrong_data.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -475,7 +477,7 @@ data=XXXX
 
 def test_wrong_content(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secrets.main(['tests/data/test_export_wrong_content.txt'])
+    extract_otp_secrets.main(['-n', 'tests/data/test_export_wrong_content.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -497,7 +499,7 @@ url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy ei
 
 def test_one_wrong_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secrets.main(['tests/data/test_export_wrong_content.txt', 'example_export.txt'])
+    extract_otp_secrets.main(['-n', 'tests/data/test_export_wrong_content.txt', 'example_export.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -517,13 +519,35 @@ url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy ei
     assert captured.err == expected_stderr
 
 
+def test_one_wrong_file_colored(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['tests/data/test_export_wrong_content.txt', 'example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stderr = f'''{colorama.Fore.RED}
+WARN: input is not a otpauth-migration:// url
+source: tests/data/test_export_wrong_content.txt
+input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+Maybe a wrong file was given{colorama.Fore.RESET}
+{colorama.Fore.RED}
+ERROR: could not parse query parameter in input url
+source: tests/data/test_export_wrong_content.txt
+url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.{colorama.Fore.RESET}
+'''
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
+    assert captured.err == expected_stderr
+
+
 def test_one_wrong_line(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
     # Arrange
     monkeypatch.setattr('sys.stdin',
                         io.StringIO(read_file_to_str('tests/data/test_export_wrong_content.txt') + read_file_to_str('example_export.txt')))
 
     # Act
-    extract_otp_secrets.main(['-'])
+    extract_otp_secrets.main(['-n', '-'])
 
     # Assert
     captured = capsys.readouterr()
@@ -545,7 +569,7 @@ url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy ei
 
 def test_wrong_prefix(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secrets.main(['tests/data/test_export_wrong_prefix.txt'])
+    extract_otp_secrets.main(['-n', 'tests/data/test_export_wrong_prefix.txt'])
 
     # Assert
     captured = capsys.readouterr()
@@ -655,12 +679,12 @@ def test_img_qr_reader_from_stdin_wrong_symbol(capsys: pytest.CaptureFixture[str
 
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secrets.main(['-'])
+        extract_otp_secrets.main(['-n', '-'])
 
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = '\nBinary input was given in stdin, please use = instead of - as infile argument for images.\n'
+    expected_stderr = '\nERROR: Binary input was given in stdin, please use = instead of - as infile argument for images.\n'
 
     assert captured.err == expected_stderr
     assert captured.out == ''
@@ -675,7 +699,7 @@ def test_extract_stdin_stdout_wrong_symbol(capsys: pytest.CaptureFixture[str], m
 
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secrets.main(['='])
+        extract_otp_secrets.main(['-n', '='])
 
     # Assert
     captured = capsys.readouterr()
@@ -692,7 +716,7 @@ def test_extract_stdin_stdout_wrong_symbol(capsys: pytest.CaptureFixture[str], m
 def test_img_qr_reader_no_qr_code_in_image(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secrets.main(['tests/data/lena_std.tif'])
+        extract_otp_secrets.main(['-n', 'tests/data/lena_std.tif'])
 
     # Assert
     captured = capsys.readouterr()
@@ -709,7 +733,7 @@ def test_img_qr_reader_no_qr_code_in_image(capsys: pytest.CaptureFixture[str]) -
 def test_img_qr_reader_nonexistent_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     with pytest.raises(SystemExit) as e:
-        extract_otp_secrets.main(['nonexistent.bmp'])
+        extract_otp_secrets.main(['-n', 'nonexistent.bmp'])
 
     # Assert
     captured = capsys.readouterr()
@@ -724,7 +748,7 @@ def test_img_qr_reader_nonexistent_file(capsys: pytest.CaptureFixture[str]) -> N
 
 def test_non_image_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
-    extract_otp_secrets.main(['tests/data/text_masquerading_as_image.jpeg'])
+    extract_otp_secrets.main(['-n', 'tests/data/text_masquerading_as_image.jpeg'])
 
     # Assert
     captured = capsys.readouterr()

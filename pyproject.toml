@@ -37,6 +37,7 @@ dependencies = [
   "opencv-contrib-python<=4.7.0; sys_platform == 'darwin'",
   "opencv-contrib-python; sys_platform != 'darwin'",
   "typing_extensions; python_version<='3.7'",
+  "colorama",
 ]
 description = "Extract two-factor authentication (2FA, TFA, OTP) secret keys from export QR codes of 'Google Authenticator' app"
 dynamic = ["version"]

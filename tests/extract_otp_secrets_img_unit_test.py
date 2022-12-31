@@ -40,7 +40,7 @@ class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_no_qr_code_in_image(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secrets.main(['tests/data/lena_std.tif'])
+                extract_otp_secrets.main(['-n', 'tests/data/lena_std.tif'])
 
         expected_output = ['', 'ERROR: Unable to read QR Code from file.', 'input file: tests/data/lena_std.tif']
 
@@ -50,7 +50,7 @@ class TestQRImageExtract(unittest.TestCase):
     def test_img_qr_reader_nonexistent_file(self) -> None:
         with Capturing() as actual_output:
             with self.assertRaises(SystemExit) as context:
-                extract_otp_secrets.main(['nonexistent.bmp'])
+                extract_otp_secrets.main(['-n', 'nonexistent.bmp'])
 
         expected_output = ['', 'ERROR: Input file provided is non-existent or not a file.', 'input file: nonexistent.bmp']
 
@@ -59,7 +59,7 @@ class TestQRImageExtract(unittest.TestCase):
 
     def test_img_qr_reader_non_image_file(self) -> None:
         with Capturing() as actual_output:
-            extract_otp_secrets.main(['tests/data/text_masquerading_as_image.jpeg'])
+            extract_otp_secrets.main(['-n', 'tests/data/text_masquerading_as_image.jpeg'])
 
         expected_output = [
             '',

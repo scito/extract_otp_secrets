@@ -65,6 +65,7 @@ else:
 from qrcode import QRCode  # type: ignore
 
 import protobuf_generated_python.google_auth_pb2 as pb
+import colorama
 
 try:
     import cv2  # type: ignore
@@ -123,6 +124,7 @@ CAMERA: Final[str] = 'camera'
 # Global variable declaration
 verbose: int = 0
 quiet: bool = False
+colored: bool = True
 
 
 def sys_main() -> None:
@@ -134,12 +136,16 @@ def main(sys_args: list[str]) -> None:
     sys.stdout.close = lambda: None  # type: ignore
     # set encoding to utf-8, needed for Windows
     try:
-        sys.stdout.reconfigure(encoding='utf-8')  # type: ignore
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
     except AttributeError:  # '_io.StringIO' object has no attribute 'reconfigure'
         # StringIO in tests do not have all attributes, ignore it
         pass
 
     args = parse_args(sys_args)
+
+    if colored:
+        colorama.just_fix_windows_console()
 
     otps = extract_otps(args)
     write_csv(args, otps)
@@ -148,7 +154,7 @@ def main(sys_args: list[str]) -> None:
 
 
 def parse_args(sys_args: list[str]) -> Args:
-    global verbose, quiet
+    global verbose, quiet, colored
     description_text = "Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app."
     if qreader_available:
         description_text += "\nIf no infiles are provided, the QR codes are interactively captured from the camera."
@@ -165,13 +171,14 @@ python extract_otp_secrets.py = < example_export.png"""
     arg_parser.add_argument('infile', help="""a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
 b) image file containing a QR code or = for stdin for an image containing a QR code""", nargs='*' if qreader_available else '+')
     if qreader_available:
-        arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, type=int, nargs=1, metavar=('NUMBER'))
+        arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, type=int, metavar=('NUMBER'))
         arg_parser.add_argument('--qr', '-Q', help=f'QR reader (default: {QRMode.ZBAR.name})', type=str, choices=[mode.name for mode in QRMode], default=QRMode.ZBAR.name)
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
     arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
+    arg_parser.add_argument('--no-color', '-n', help='do not use ANSI colors in console output', action='store_true')
     output_group = arg_parser.add_mutually_exclusive_group()
     output_group.add_argument('--verbose', '-v', help='verbose output', action='count')
     output_group.add_argument('--quiet', '-q', help='no stdout output, except output set by -', action='store_true')
@@ -181,6 +188,7 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
 
     verbose = args.verbose if args.verbose else 0
     quiet = True if args.quiet else False
+    colored = not args.no_color
     if verbose: print(f"QReader installed: {qreader_available}")
     if qreader_available:
         if verbose > 1: print(f"CV2 version: {cv2.__version__}")
@@ -213,7 +221,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
 
     qr_mode = QRMode[args.qr]
 
-    cam = cv2.VideoCapture(args.camera[0])
+    cam = cv2.VideoCapture(args.camera)
     window_name = "Extract OTP Secrets: Capture QR Codes from Camera"
     cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 
@@ -224,7 +232,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
         success, img = cam.read()
         new_otps_count = 0
         if not success:
-            eprint("ERROR: Failed to capture image")
+            log_error("Failed to capture image")
             break
         if qr_mode in [QRMode.QREADER, QRMode.DEEP_QREADER]:
             bbox, found = qreader.detect(img)
@@ -255,7 +263,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
                 pts = pts.reshape((-1, 1, 2))
                 cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
         else:
-            assert False, f"ERROR: Wrong QReader mode {qr_mode.name}"
+            assert False, f"Wrong QReader mode {qr_mode.name}"
 
         cv2.putText(img, f"Mode: {qr_mode.name} (Hit space to change)", START_POS_TEXT, FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
         cv2.putText(img, "Hit ESC to quit", tuple(map(add, START_POS_TEXT, FONT_DY)), FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
@@ -341,14 +349,14 @@ def read_lines_from_text_file(filename: str) -> list[str]:
         for line in (line.strip() for line in finput):
             if verbose: print(line)
             if is_binary(line):
-                abort("\nBinary input was given in stdin, please use = instead of - as infile argument for images.")
+                abort("Binary input was given in stdin, please use = instead of - as infile argument for images.")
             # unfortunately yield line leads to random test fails
             lines.append(line)
         if not lines:
-            eprint(f"WARN: {filename.replace('-', 'stdin')} is empty")
+            log_warn(f"{filename.replace('-', 'stdin')} is empty")
     except UnicodeDecodeError:
         if filename == '-':
-            abort("\nERROR: Unable to open text file form stdin. "
+            abort("Unable to open text file form stdin. "
                   "In case you want read an image file from stdin, you must use '=' instead of '-'.")
         else:  # The file is probably an image, process below
             return []
@@ -367,7 +375,7 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count:
     # pylint: disable=no-member
     for raw_otp in payload.otp_parameters:
         new_otps_count += 1
-        if verbose: print(f"\n{len(otps) + 1}. Secret Key")
+        if verbose: print(f"\n{len(otps) + 1}. Secret")
         secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
         if verbose: print('OTP enum type:', get_enum_name_by_number(raw_otp, 'type'))
         otp_type = get_otp_type_str_from_code(raw_otp.type)
@@ -405,17 +413,17 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
                 # Workaround for pytest, since pytest cannot monkeypatch sys.stdin.buffer
                 stdin = sys.stdin.read()  # type: ignore # Workaround for pytest fixtures
             if not stdin:
-                eprint("WARN: stdin is empty")
+                log_warn("stdin is empty")
             try:
                 img_array = numpy.frombuffer(stdin, dtype='uint8')
             except TypeError as e:
-                abort(f"\nERROR: Cannot read binary stdin buffer. Exception: {e}")
+                abort(f"Cannot read binary stdin buffer. Exception: {e}")
             if not img_array.size:
                 return []
             img = cv2.imdecode(img_array, cv2.IMREAD_UNCHANGED)
 
         if img is None:
-            abort(f"\nERROR: Unable to open file for reading.\ninput file: {filename}")
+            abort(f"Unable to open file for reading.\ninput file: {filename}")
 
         qr_mode = QRMode[args.qr]
         otp_urls: OtpUrls = []
@@ -432,12 +440,12 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
             qrcodes = zbar.decode(img)
             otp_urls += [qrcode.data.decode('utf-8') for qrcode in qrcodes]
         else:
-            assert False, f"ERROR: Wrong QReader mode {qr_mode.name}"
+            assert False, f"Wrong QReader mode {qr_mode.name}"
 
         if len(otp_urls) == 0:
-            abort(f"\nERROR: Unable to read QR Code from file.\ninput file: {filename}")
+            abort(f"Unable to read QR Code from file.\ninput file: {filename}")
     except Exception as e:
-        abort(f"\nERROR: Encountered exception '{e}'.\ninput file: {filename}")
+        abort(f"Encountered exception '{e}'.\ninput file: {filename}")
     return otp_urls
 
 
@@ -446,10 +454,10 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.M
     if not otp_url.startswith('otpauth-migration://'):
         msg = f"input is not a otpauth-migration:// url\nsource: {source}\ninput: {otp_url}"
         if source == CAMERA:
-            eprint(f"\nERROR: {msg}")
+            log_error(f"{msg}")
             return None
         else:
-            eprint(f"\nWARN: {msg}\nMaybe a wrong file was given")
+            log_warn(f"{msg}\nMaybe a wrong file was given")
     parsed_url = urlparse.urlparse(otp_url)
     if verbose > 2: print(f"\nDEBUG: parsed_url={parsed_url}")
     try:
@@ -458,7 +466,7 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.M
         params = {}
     if verbose > 2: print(f"\nDEBUG: querystring params={params}")
     if 'data' not in params:
-        eprint(f"\nERROR: could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}")
+        log_error(f"could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}")
         return None
     data_base64 = params['data'][0]
     if verbose > 2: print(f"\nDEBUG: data_base64={data_base64}")
@@ -469,7 +477,7 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.M
     try:
         payload.ParseFromString(data)
     except Exception:
-        abort(f"\nERROR: Cannot decode otpauth-migration migration payload.\n"
+        abort(f"Cannot decode otpauth-migration migration payload.\n"
               f"data={data_base64}")
     if verbose:
         print(f"\n{i}. Payload Line", payload, sep='\n')
@@ -620,7 +628,7 @@ def open_file_or_stdout_for_csv(filename: str) -> TextIO:
 
 def check_file_exists(filename: str) -> None:
     if filename != '-' and not os.path.isfile(filename):
-        abort(f"\nERROR: Input file provided is non-existent or not a file."
+        abort(f"Input file provided is non-existent or not a file."
               f"\ninput file: {filename}")
 
 
@@ -632,13 +640,21 @@ def is_binary(line: str) -> bool:
         return True
 
 
+def log_warn(msg: str) -> None:
+    eprint(f"{colorama.Fore.RED if colored else ''}\nWARN: {msg}{colorama.Fore.RESET if colored else ''}")
+
+
+def log_error(msg: str) -> None:
+    eprint(f"{colorama.Fore.RED if colored else ''}\nERROR: {msg}{colorama.Fore.RESET if colored else ''}")
+
+
 def eprint(*args: Any, **kwargs: Any) -> None:
     '''Print to stderr.'''
     print(*args, file=sys.stderr, **kwargs)
 
 
-def abort(*args: Any, **kwargs: Any) -> None:
-    eprint(*args, **kwargs)
+def abort(msg: str) -> None:
+    log_error(msg)
     sys.exit(1)
 
 

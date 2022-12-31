@@ -6,3 +6,4 @@ opencv-contrib-python<=4.7.0; sys_platform == 'darwin'
 opencv-contrib-python; sys_platform != 'darwin'
 pyzbar
 typing_extensions; python_version<='3.7'
+colorama
