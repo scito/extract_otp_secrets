@@ -54,10 +54,10 @@ jobs:
           # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
           tags: |
-            scit0/extract_otp_secrets_only_txt:latest
-            ghcr.io/scito/extract_otp_secrets_only_txt:latest
-            scit0/extract_otp_secrets:latest-no-qreader
-            ghcr.io/scito/extract_otp_secrets:latest-no-qreader
+            # scit0/extract_otp_secrets_only_txt:latest
+            # ghcr.io/scito/extract_otp_secrets_only_txt:latest
+            scit0/extract_otp_secrets:latest-only-txt
+            ghcr.io/scito/extract_otp_secrets:latest-only-txt
           # build on feature branches, push only on master branch
           # TODO push: ${{ github.ref == 'refs/heads/master' }}
           push: true
