@@ -8,7 +8,7 @@
             "name": "Python: extract_otp_secrets.py",
             "type": "python",
             "request": "launch",
-            "program": "extract_otp_secrets.py",
+            "program": "src/extract_otp_secrets.py",
             "args": [
                 "example_export.txt"
             ],
@@ -18,7 +18,7 @@
             "name": "Python: extract_otp_secrets.py stdin pic",
             "type": "python",
             "request": "launch",
-            "program": "extract_otp_secrets.py",
+            "program": "src/extract_otp_secrets.py",
             "args": [
                 "-",
                 "<",
@@ -27,12 +27,11 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python: extract_otp_secrets.py -C",
+            "name": "Python: extract_otp_secrets.py capture",
             "type": "python",
             "request": "launch",
-            "program": "extract_otp_secrets.py",
+            "program": "src/extract_otp_secrets.py",
             "args": [
-                "-v",
             ],
             "console": "integratedTerminal"
         },
