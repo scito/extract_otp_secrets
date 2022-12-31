@@ -108,6 +108,29 @@ For a detailed installation documentation of [pyzbar](https://github.com/Natural
 
 The zbar DLLs are included with the Windows Python wheels. On other operating systems, you will need to install the zbar shared library.
 
+##### Windows error message
+
+If you see an ugly ImportError when importing [pyzbar](https://pypi.org/project/pyzbar/) on Windows you will most likely need the [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). Install vcredist_x64.exe if using 64-bit Python, vcredist_x86.exe if using 32-bit Python.
+
+```
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 58, in load
+    dependencies, libzbar = load_objects(Path(''))
+                            ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 50, in load_objects
+    deps = [
+           ^
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 51, in <listcomp>
+    cdll.LoadLibrary(str(directory.joinpath(dep)))
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.496.0_x64__qbz5n2kfra8p0\Lib\ctypes\__init__.py", line 454, in LoadLibrary
+    return self._dlltype(name)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.496.0_x64__qbz5n2kfra8p0\Lib\ctypes\__init__.py", line 376, in __init__
+    self._handle = _dlopen(self._name, mode)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependencies). Try using the full path with constructor syntax.
+```
+
 #### Linux (Debian, Ubuntu, ...)
 
     sudo apt-get install libzbar0

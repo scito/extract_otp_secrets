@@ -165,7 +165,7 @@ python extract_otp_secrets.py = < example_export.png"""
     arg_parser.add_argument('infile', help="""a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
 b) image file containing a QR code or = for stdin for an image containing a QR code""", nargs='*' if qreader_available else '+')
     if qreader_available:
-        arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, nargs=1, metavar=('NUMBER'))
+        arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, type=int, nargs=1, metavar=('NUMBER'))
         arg_parser.add_argument('--qr', '-Q', help=f'QR reader (default: {QRMode.ZBAR.name})', type=str, choices=[mode.name for mode in QRMode], default=QRMode.ZBAR.name)
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
@@ -213,7 +213,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
 
     qr_mode = QRMode[args.qr]
 
-    cam = cv2.VideoCapture(args.camera)
+    cam = cv2.VideoCapture(args.camera[0])
     window_name = "Extract OTP Secrets: Capture QR Codes from Camera"
     cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 
