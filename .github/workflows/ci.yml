@@ -1,5 +1,8 @@
 name: tests
 
+# https://docs.github.com/de/actions/using-workflows/workflow-syntax-for-github-actions
+# https://docs.github.com/en/actions/using-workflows
+
 on:
   push:
   pull_request:

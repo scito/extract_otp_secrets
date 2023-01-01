@@ -1,5 +1,7 @@
 FROM python:3.11-slim-bullseye
 
+# https://docs.docker.com/engine/reference/builder/
+
 # For debugging
 # docker build . -t extract_otp_secrets --pull --build-arg RUN_TESTS=false
 # docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets
@@ -12,7 +14,11 @@ COPY . .
 
 ARG RUN_TESTS=true
 
-RUN apt-get update && apt-get install -y libzbar0 libsm6 python3-opencv nano \
+RUN apt-get update && apt-get install -y \
+        libzbar0 \
+        libsm6 \
+        python3-opencv \
+    && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir -r requirements.txt \
     && if [ "$RUN_TESTS" = "true" ]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi
 

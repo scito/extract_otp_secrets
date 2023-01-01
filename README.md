@@ -108,6 +108,8 @@ For a detailed installation documentation of [pyzbar](https://github.com/Natural
 
 The zbar DLLs are included with the Windows Python wheels. On other operating systems, you will need to install the zbar shared library.
 
+TODO Write installation, not error message
+
 ##### Windows error message
 
 If you see an ugly ImportError when importing [pyzbar](https://pypi.org/project/pyzbar/) on Windows you will most likely need the [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). Install vcredist_x64.exe if using 64-bit Python, vcredist_x86.exe if using 32-bit Python.
@@ -196,8 +198,8 @@ FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependenc
     * JSON
     * Dedicated CSV for KeePass
     * QR code images
-* Supports reading from stdin and writing to stdout
-* Reads QR codes images: (See [OpenCV docu](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
+* Supports reading from stdin and writing to stdout, thus pipes can be used
+* Reads QR codes images: (See [OpenCV docu](https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
     * Portable Network Graphics - *.png
     * WebP - *.webp
     * JPEG files - *.jpeg, *.jpg, *.jpe
@@ -205,11 +207,7 @@ FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependenc
     * Windows bitmaps - *.bmp, *.dib
     * JPEG 2000 files - *.jp2
     * Portable image format - *.pbm, *.pgm, *.ppm *.pxm, *.pnm
-    * Sun rasters - *.sr, *.ras
-    * OpenEXR Image files - *.exr
-    * Radiance HDR - *.hdr, *.pic
-    * Raster and Vector geospatial data supported by GDAL
-* Errors and warnings are written to stderr
+* Errors and warnings are written to stderr and these are printed in red color on all platforms
 * Many ways to run the script:
     * Native Python
     * pipenv
@@ -224,6 +222,7 @@ FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependenc
     * Windows
 * Uses UTF-8 on all platforms
 * Supports Python >= 3.7
+* Written in modern Python using type hints and following best practices
 * All these features are backed by tests ran nightly
 * All functionality in one Python script: extract_otp_secrets.py (except protobuf generated code in protobuf_generated_python)
 
@@ -297,14 +296,14 @@ https://github.com/nipunn1313/mypy-protobuf
 ### pip
 
 ```
-pip install git+https://github.com/scito/extract_otp_secret_keys
+pip install -U git+https://github.com/scito/extract_otp_secret_keys
 python -m extract_otp_secrets
 ```
 
 #### For development
 
 ```
-pip install git+https://github.com/scito/extract_otp_secret_keys@support_img_read
+pip install -U git+https://github.com/scito/extract_otp_secret_keys.git@support_img_read
 python -m extract_otp_secrets
 ```
 
@@ -312,9 +311,9 @@ python -m extract_otp_secrets
 
 https://stackoverflow.com/questions/13685920/install-specific-git-commit-with-pip
 -e for egg
-pip install -e git+<https://github.com/myrepo.git#egg=packagename>
+pip install -U -e git+<https://github.com/myrepo.git#egg=packagename>
 
-# pip install -e git+https://github.com/scito/extract_otp_secret_keys@$(git ls-remote  git@github.com:scito/extract_otp_secret_keys@support_img_read.git | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
+# pip install -U -e git+https://github.com/scito/extract_otp_secret_keys@$(git ls-remote  git@github.com:scito/extract_otp_secret_keys@support_img_read.git | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
 pip3.11 install -e git+https://github.com/scito/extract_otp_secret_keys.git@$(git ls-remote git@github.com:scito/extract_otp_secret_keys.git | grep support_img_read | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
 python -m extract_otp_secrets
 ```
@@ -329,7 +328,7 @@ python -m extract_otp_secrets example_export.txt
 ### local pip
 
 ```
-pip install -e .
+pip install -U -e .
 ```
 
 ### pipenv
@@ -362,8 +361,8 @@ Alternatively, you can use a python virtual env for the dependencies:
 
     python -m venv venv
     . venv/bin/activate
-    pip install -r requirements-dev.txt
-    pip install -r requirements.txt
+    pip install -U -r requirements-dev.txt
+    pip install -U -r requirements.txt
 
 The requirements\*.txt files contain all the dependencies (also the optional ones).
 To leave the python virtual env just call `deactivate`.
@@ -444,6 +443,8 @@ Run tests:
 python -m unittest
 ```
 
+Note the `pytest`s are preferred and more complete. For each unittest there is also a test in `pytest`.
+
 ### VSCode Setup
 
 Setup for running the tests in VSCode.
@@ -458,7 +459,7 @@ Setup for running the tests in VSCode.
 ### Build
 
 ```
-pip install -e .
+pip install -U -e .
 python src/extract_otp_secrets.py
 
 pip wheel .
@@ -483,6 +484,7 @@ pip install -U -r requirements.txt
 * [Android OTP Extractor](https://github.com/puddly/android-otp-extractor) can extract your tokens from popular Android OTP apps and export them in a standard format or just display them as QR codes for easy importing. [Requires a _rooted_ Android phone.]
 * [Python QReader](https://github.com/Eric-Canas/QReader)
 * [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar)
+* [OpenCV](https://docs.opencv.org/4.x/) (CV2) Open Source Computer Vision library with [opencv-python](https://github.com/opencv/opencv-python)
 
 ***
 
