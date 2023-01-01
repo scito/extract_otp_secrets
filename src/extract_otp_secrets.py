@@ -656,14 +656,15 @@ def next_qr_mode(qr_mode: QRMode) -> QRMode:
     return QRMode((qr_mode.value + 1) % len(QRMode))
 
 
-def log_warn(msg: str, exception: BaseException = None) -> None:
-    exception_text = f"\nException: "
+# workaround for PYTHON <= 3.9 use: BaseException | None
+def log_warn(msg: str, exception: Optional[BaseException] = None) -> None:
+    exception_text = "\nException: "
     eprint(f"{colorama.Fore.RED if colored else ''}\nWARN: {msg}{(exception_text + str(exception)) if exception else ''}{colorama.Fore.RESET if colored else ''}")
 
 
-
-def log_error(msg: str, exception: BaseException = None) -> None:
-    exception_text = f"\nException: "
+# workaround for PYTHON <= 3.9 use: BaseException | None
+def log_error(msg: str, exception: Optional[BaseException] = None) -> None:
+    exception_text = "\nException: "
     eprint(f"{colorama.Fore.RED if colored else ''}\nERROR: {msg}{(exception_text + str(exception)) if exception else ''}{colorama.Fore.RESET if colored else ''}")
 
 
@@ -671,8 +672,8 @@ def eprint(*args: Any, **kwargs: Any) -> None:
     '''Print to stderr.'''
     print(*args, file=sys.stderr, **kwargs)
 
-
-def abort(msg: str, exception: BaseException = None) -> None:
+# workaround for PYTHON <= 3.9 use: BaseException | None
+def abort(msg: str, exception: Optional[BaseException] = None) -> None:
     log_error(msg, exception)
     sys.exit(1)
 
