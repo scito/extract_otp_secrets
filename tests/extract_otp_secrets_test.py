@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # for compatibility with PYTHON < 3.11
+from __future__ import annotations  # workaround for PYTHON <= 3.10
 import io
 import os
 import pathlib
@@ -356,6 +356,7 @@ def test_normalize_bytes() -> None:
 
 
 # Generate verbose output: python3.11 src/extract_otp_secrets.py example_export.txt -v -n > tests/data/print_verbose_output.txt
+# workaround for PYTHON <= 3.10
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="fileinput.input encoding exists since PYTHON 3.10")
 def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
     # Act

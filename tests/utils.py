@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # for compatibility with PYTHON < 3.11
+from __future__ import annotations  # workaround for PYTHON <= 3.10
 import csv
 import glob
 import io
@@ -27,12 +27,12 @@ from typing import BinaryIO, Any, Union, List
 
 
 # Types
-# PYTHON < 3.10: Workaround for str | pathlib.Path
+# workaround for PYTHON <= 3.9: Workaround for str | pathlib.Path
 PathLike = Union[str, pathlib.Path]
 
 
 # Ref. https://stackoverflow.com/a/16571630
-# PYTHON 3.11: class Capturing(list[Any]):
+# workaround for PYTHON <= 3.10: class Capturing(list[Any]):
 class Capturing(List[Any]):
     '''Capture stdout and stderr
 Usage:

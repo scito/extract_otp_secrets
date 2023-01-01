@@ -41,7 +41,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # for compatibility with PYTHON < 3.11
+from __future__ import annotations  # workaround for PYTHON <= 3.10
 
 import argparse
 import base64
@@ -56,7 +56,7 @@ from enum import Enum
 from operator import add
 from typing import Any, List, Optional, TextIO, Tuple, Union
 
-# PYTHON < 3.8: compatibility
+# workaround for PYTHON <= 3.7: compatibility
 if sys.version_info >= (3, 8):
     from typing import Final, TypedDict
 else:
@@ -82,7 +82,7 @@ See in README.md for the installation of the libzbar0.
 Exception: {e}""")
 
     # Types
-    # PYTHON > 3.9: Final[tuple[int]]
+    # workaround for PYTHON <= 3.9: Final[tuple[int]]
     ColorBGR = Tuple[int, int, int]  # RGB Color specified as Blue, Green, Red
     Point = Tuple[int, int]
 
@@ -92,7 +92,7 @@ Exception: {e}""")
     FONT_THICKNESS: Final[int] = 1
     FONT_LINE_STYLE: Final[int] = cv2.LINE_AA
     RECT_THICKNESS: Final[int] = 5
-    # PYTHON <= 3.7: must use () for assignments
+    # workaround for PYTHON <= 3.7: must use () for assignments
     START_POS_TEXT: Final[Point] = (5, 20)
     NORMAL_COLOR: Final[ColorBGR] = (255, 0, 255)
     SUCCESS_COLOR: Final[ColorBGR] = (0, 255, 0)
@@ -103,16 +103,16 @@ Exception: {e}""")
 except ImportError:
     qreader_available = False
 
-# Workaround for PYTHON < 3.10: Union[int, None] used instead of int | None
+# Workaround for PYTHON <= 3.9: Union[int, None] used instead of int | None
 
 # Types
 Args = argparse.Namespace
 OtpUrl = str
-# PYTHON > 3.7: Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': int | None, 'url': OtpUrl})
+# workaround for PYTHON <= 3.7: Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': int | None, 'url': OtpUrl})
 Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': Union[int, None], 'url': OtpUrl})
-# PYTHON > 3.9: Otps = list[Otp]
+# workaround for PYTHON <= 3.9: Otps = list[Otp]
 Otps = List[Otp]
-# PYTHON > 3.9: OtpUrls = list[OtpUrl]
+# workaround for PYTHON <= 3.9: OtpUrls = list[OtpUrl]
 OtpUrls = List[OtpUrl]
 
 QRMode = Enum('QRMode', ['QREADER', 'DEEP_QREADER', 'ZBAR', 'CV2', 'WECHAT'], start=0)
@@ -351,7 +351,7 @@ def get_otp_urls_from_file(filename: str, args: Args) -> OtpUrls:
 
 def read_lines_from_text_file(filename: str) -> list[str]:
     if verbose: print(f"Reading lines of {filename}")
-    # PYTHON >= 3.10 support encoding
+    # workaround for PYTHON <= 3.9 support encoding
     if sys.version_info >= (3, 10):
         finput = fileinput.input(filename, encoding='utf-8')
     else:
@@ -461,7 +461,7 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
     return otp_urls
 
 
-# PYTHON >= 3.10 use: pb.MigrationPayload | None
+# workaround for PYTHON <= 3.9 use: pb.MigrationPayload | None
 def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.MigrationPayload]:
     if not otp_url.startswith('otpauth-migration://'):
         msg = f"input is not a otpauth-migration:// url\nsource: {source}\ninput: {otp_url}"
@@ -474,7 +474,7 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.M
     if verbose > 2: print(f"\nDEBUG: parsed_url={parsed_url}")
     try:
         params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
-    except Exception:  # Necessary for PYTHON < 3.11
+    except Exception:  # workaround for PYTHON <= 3.10
         params = {}
     if verbose > 2: print(f"\nDEBUG: querystring params={params}")
     if 'data' not in params:
