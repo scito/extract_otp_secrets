@@ -57,7 +57,7 @@ cd extract_otp_secret_keys
 
 ## Program help: arguments and options
 
-<pre>usage: extract_otp_secrets.py [-h] [--camera NUMBER] [--qr {QREADER,DEEP_QREADER,ZBAR,CV2,WECHAT}] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--verbose | --quiet] [infile ...]
+<pre>usage: extract_otp_secrets.py [-h] [--camera NUMBER] [--qr {QREADER,DEEP_QREADER,ZBAR,CV2,CV2_WECHAT}] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--no-color] [--verbose | --quiet] [infile ...]
 
 Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app.
 If no infiles are provided, the QR codes are interactively captured from the camera.
@@ -69,13 +69,14 @@ positional arguments:
 options:
   -h, --help                    show this help message and exit
   --camera NUMBER, -C NUMBER    camera number of system (default camera: 0)
-  --qr {QREADER,DEEP_QREADER,ZBAR,CV2,WECHAT}, -Q {QREADER,DEEP_QREADER,ZBAR,CV2,WECHAT}
+  --qr {QREADER,DEEP_QREADER,ZBAR,CV2,CV2_WECHAT}, -Q {QREADER,DEEP_QREADER,ZBAR,CV2,CV2_WECHAT}
                                 QR reader (default: ZBAR)
   --json FILE, -j FILE          export json file or - for stdout
   --csv FILE, -c FILE           export csv file or - for stdout
   --keepass FILE, -k FILE       export totp/hotp csv file(s) for KeePass, - for stdout
   --printqr, -p                 print QR code(s) as text to the terminal (requires qrcode module)
   --saveqr DIR, -s DIR          save QR code(s) as images to the given folder (requires qrcode module)
+  --no-color, -n                do not use ANSI colors in console output
   --verbose, -v                 verbose output
   --quiet, -q                   no stdout output, except output set by -
 

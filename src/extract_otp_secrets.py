@@ -253,7 +253,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
         success, img = cam.read()
         new_otps_count = 0
         if not success:
-            log_error("Failed to capture image")
+            log_error("Failed to capture image from camera")
             break
         try:
             if qr_mode in [QRMode.QREADER, QRMode.DEEP_QREADER]:
@@ -281,10 +281,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
                         new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
                     cv2_draw_box(img, raw_pts, get_color(new_otps_count, otp_url))
             else:
-                assert False, f"Wrong QReader mode {qr_mode.name}"
-        except AssertionError as e:
-            # Exceptions not to log, but to pass further
-            raise e
+                abort(f"Invalid QReader mode: {qr_mode.name}")
         except Exception as e:
             log_error(f'An error occured during QR detection and decoding for QR reader {qr_mode}. Changed to the next QR reader.', e)
             qr_mode = next_qr_mode(qr_mode)
