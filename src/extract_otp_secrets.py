@@ -265,9 +265,13 @@ def extract_otps_from_camera(args: Args) -> Otps:
                     cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
             else:
                 assert False, f"Wrong QReader mode {qr_mode.name}"
+        except AssertionError as e:
+            # Exceptions not to log, but to pass further
+            raise e
         except Exception as e:
             log_error(f'An error occured during QR detection and decoding for QR reader {qr_mode}. Changed to the next QR reader.', e)
             qr_mode = next_qr_mode(qr_mode)
+            continue
 
         cv2.putText(img, f"Mode: {qr_mode.name} (Hit space to change)", START_POS_TEXT, FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
         cv2.putText(img, "Hit ESC to quit", tuple(map(add, START_POS_TEXT, FONT_DY)), FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
