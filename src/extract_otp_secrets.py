@@ -1,5 +1,6 @@
 # TODO rewrite
-# Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of "Google Authenticator" app
+
+# Extract two-factor authentication (2FA, TFA) secrets from export QR codes of "Google Authenticator" app
 #
 # Usage:
 # 1. Export the QR codes from "Google Authenticator" app
@@ -159,9 +160,9 @@ def main(sys_args: list[str]) -> None:
 
 def parse_args(sys_args: list[str]) -> Args:
     global verbose, quiet, colored
-    description_text = "Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app."
+    description_text = "Extracts one time password (OTP) / two-factor authentication (2FA) secrets from export QR codes, e.g. from Google Authenticator app."
     if qreader_available:
-        description_text += "\nIf no infiles are provided, the QR codes are interactively captured from the camera."
+        description_text += "\nIf no infiles are provided, the QR codes a GUI window starts and QR codes can interactively be captured from the system camera."
     example_text = """examples:
 python extract_otp_secrets.py
 python extract_otp_secrets.py example_*.txt

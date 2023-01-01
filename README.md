@@ -1,28 +1,28 @@
-# Extract TOTP/HOTP secret keys from Google Authenticator
+# Extract TOTP/HOTP two-factor authentication secrets
 
-[![CI tests](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml)
+[![CI tests](https://github.com/scito/extract_otp_secrets/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secrets/actions/workflows/ci.yml)
 ![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
-[![CI docker](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci_docker.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci_docker.yml)
+[![CI docker](https://github.com/scito/extract_otp_secrets/actions/workflows/ci_docker.yml/badge.svg)](https://github.com/scito/extract_otp_secrets/actions/workflows/ci_docker.yml)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/protobuf)
-[![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/scito/extract_otp_secret_keys)](https://github.com/scito/extract_otp_secret_keys/blob/master/Pipfile.lock)
+[![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/scito/extract_otp_secrets)](https://github.com/scito/extract_otp_secrets/blob/master/Pipfile.lock)
 ![protobuf version](https://img.shields.io/badge/protobuf-4.21.12-informational)
-[![License](https://img.shields.io/github/license/scito/extract_otp_secret_keys)](https://github.com/scito/extract_otp_secret_keys/blob/master/LICENSE)
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/scito/extract_otp_secret_keys?sort=semver&label=version)](https://github.com/scito/extract_otp_secret_keys/tags)
+[![License](https://img.shields.io/github/license/scito/extract_otp_secrets)](https://github.com/scito/extract_otp_secrets/blob/master/LICENSE)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/scito/extract_otp_secrets?sort=semver&label=version)](https://github.com/scito/extract_otp_secrets/tags)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
 ---
 
 TODO add src/
-TODO rename extract_otp_secret_keys
+TODO mention renaming extract_otp_secrets
 
-Extract two-factor authentication (2FA, TFA, OTP) secret keys from export QR codes of "Google Authenticator" app.
-The QR codes can captured from the camera in a GUI, imported from images or from text files containing the QR code data.
-The secret and otp values can be printed and exported to json or csv, as well as printed or saved as PNG images.
+Extract one time passwords (OTP) / two-factor authentication (2FA, TFA) secrets from export QR codes from 2FA authentication apps such as "Google Authenticator".
+The QR codes can be captured from the system camera, imported from images or from text files containing the QR code data.
+The secret and otp values can be printed and exported to json or csv, as well as printed or saved to PNG images.
 
 ## Installation
 
-git clone https://github.com/scito/extract_otp_secret_keys.git
-cd extract_otp_secret_keys
+git clone https://github.com/scito/extract_otp_secrets.git
+cd extract_otp_secrets
 
 ## Usage
 
@@ -62,8 +62,8 @@ cd extract_otp_secret_keys
 
 <pre>usage: extract_otp_secrets.py [-h] [--camera NUMBER] [--qr {ZBAR,QREADER,QREADER_DEEP,CV2,CV2_WECHAT}] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--no-color] [--verbose | --quiet] [infile ...]
 
-Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app.
-If no infiles are provided, the QR codes are interactively captured from the camera.
+Extracts one time password (OTP) / two-factor authentication (2FA) secrets from export QR codes, e.g. from Google Authenticator app.
+If no infiles are provided, the QR codes a GUI window starts and QR codes can interactively be captured from the system camera.
 
 positional arguments:
   infile                        a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
@@ -280,14 +280,14 @@ https://github.com/nipunn1313/mypy-protobuf
 ### pip
 
 ```
-pip install -U git+https://github.com/scito/extract_otp_secret_keys
+pip install -U git+https://github.com/scito/extract_otp_secrets
 python -m extract_otp_secrets
 ```
 
 #### For development
 
 ```
-pip install -U git+https://github.com/scito/extract_otp_secret_keys.git@support_img_read
+pip install -U git+https://github.com/scito/extract_otp_secrets.git@support_img_read
 python -m extract_otp_secrets
 ```
 
@@ -297,15 +297,15 @@ https://stackoverflow.com/questions/13685920/install-specific-git-commit-with-pi
 -e for egg
 pip install -U -e git+<https://github.com/myrepo.git#egg=packagename>
 
-# pip install -U -e git+https://github.com/scito/extract_otp_secret_keys@$(git ls-remote  git@github.com:scito/extract_otp_secret_keys@support_img_read.git | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
-pip3.11 install -e git+https://github.com/scito/extract_otp_secret_keys.git@$(git ls-remote git@github.com:scito/extract_otp_secret_keys.git | grep support_img_read | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
+# pip install -U -e git+https://github.com/scito/extract_otp_secrets@$(git ls-remote  git@github.com:scito/extract_otp_secrets@support_img_read.git | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
+pip3.11 install -e git+https://github.com/scito/extract_otp_secrets.git@$(git ls-remote git@github.com:scito/extract_otp_secrets.git | grep support_img_read | head -1 | awk '{print $1;}')#egg=extract_otp_secrets
 python -m extract_otp_secrets
 ```
 
 #### Example
 
 ```
-wget https://raw.githubusercontent.com/scito/extract_otp_secret_keys/master/example_export.txt
+wget https://raw.githubusercontent.com/scito/extract_otp_secrets/master/example_export.txt
 python -m extract_otp_secrets example_export.txt
 ```
 

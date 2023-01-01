@@ -39,16 +39,16 @@ dependencies = [
   "typing_extensions; python_version<='3.7'",
   "colorama>=0.4.6",
 ]
-description = "Extract two-factor authentication (2FA, TFA, OTP) secret keys from export QR codes of 'Google Authenticator' app"
+description = "Extracts one time password (OTP) / two-factor authentication (2FA) secrets from export QR codes, e.g. from Google Authenticator app."
 dynamic = ["version"]
-keywords = ["python", "security", "json", "otp", "csv", "protobuf", "qrcode", "two-factor", "totp", "google-authenticator", "recovery", "proto3", "mfa", "two-factor-authentication", "tfa", "qr-codes", "otpauth", "2fa", "security-tools"]
+keywords = ["python", "security", "json", "otp", "csv", "protobuf", "qrcode", "two-factor", "totp", "google-authenticator", "recovery", "proto3", "mfa", "two-factor-authentication", "tfa", "qr-codes", "otpauth", "2fa", "security-tools", "cv2"]
 license = {text = "GNU General Public License v3 (GPLv3)"}
 readme = "README.md"
 authors = [{name = "scito", email = "info@scito.ch"}]
 maintainers = [{name = "scito", email = "info@scito.ch"}]
 requires-python = ">=3.7, <4"
 scripts = {extract_otp_secrets = "extract_otp_secrets:sys_main"}
-urls = {Project-URL = "https://github.com/scito/extract_otp_secret_keys", Bug-Reports = "https://github.com/scito/extract_otp_secret_keys/issues", Source = "https://github.com/scito/extract_otp_secret_keys" }
+urls = {Project-URL = "https://github.com/scito/extract_otp_secrets", Bug-Reports = "https://github.com/scito/extract_otp_secrets/issues", Source = "https://github.com/scito/extract_otp_secrets" }
 
 # [tool.setuptools]
 # Still in beta, once it is stable move config from setup.cfg to pyproject.toml
