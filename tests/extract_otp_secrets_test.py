@@ -466,13 +466,20 @@ def test_wrong_data(capsys: pytest.CaptureFixture[str]) -> None:
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = '''
+    first_expected_stderr = '''
 ERROR: Cannot decode otpauth-migration migration payload.
 data=XXXX
 Exception: Error parsing message
 '''
 
-    assert captured.err == expected_stderr
+    # Alpine Linux prints this exception message
+    second_expected_stderr = '''
+ERROR: Cannot decode otpauth-migration migration payload.
+data=XXXX
+Exception: unpack requires a buffer of 4 bytes
+'''
+
+    assert captured.err == first_expected_stderr or captured.err == second_expected_stderr
     assert captured.out == ''
     assert e.value.code == 1
     assert e.type == SystemExit
