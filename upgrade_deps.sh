@@ -307,7 +307,8 @@ TOTAL_COVERAGE=$(cat $COVERAGE_OUT | grep 'TOTAL' | perl -ne 'print "$&" if /\b(
 if $build_docker; then
     # Build docker
 
-    cmd="docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull"
+    # Build Dockerfile_only_txt (Alpine)
+    cmd="docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull --build-arg RUN_TESTS=false"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -323,7 +324,8 @@ if $build_docker; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="docker build . -t extract_otp_secrets --pull"
+    # Build extract_otp_secrets (Debian)
+    cmd="docker build . -t extract_otp_secrets --pull --build-arg RUN_TESTS=false"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -339,7 +341,7 @@ if $build_docker; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="docker image prune || echo 'No docker image pruning'"
+    cmd="docker image prune -f || echo 'No docker image pruned'"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 fi
