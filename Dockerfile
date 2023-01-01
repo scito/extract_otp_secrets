@@ -19,7 +19,8 @@ RUN apt-get update && apt-get install -y \
         libsm6 \
         python3-opencv \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir -U -r \
+        requirements.txt \
     && if [ "$RUN_TESTS" = "true" ]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi
 
 WORKDIR /files

@@ -26,7 +26,7 @@ RUN apk add --no-cache \
         zlib-dev \
         jpeg-dev \
     ; fi \
-    && pip install --no-cache-dir \
+    && pip install --no-cache-dir -U \
         protobuf \
         qrcode \
         Pillow \
