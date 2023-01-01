@@ -34,6 +34,8 @@ cd extract_otp_secret_keys
 
     python extract_otp_secrets.py
 
+![CV2 Capture from camera screenshot](cv2_capture_screenshot.png)
+
 ### With builtin QR decoder from image files
 
 1. Open "Google Authenticator" app on the mobile phone
