@@ -477,6 +477,10 @@ pip wheel --no-deps .
 pip install -U -r requirements.txt
 ```
 
+## Issues
+
+https://github.com/opencv/opencv/issues/23072
+
 ## Related projects
 
 * [ZBar](https://github.com/mchehab/zbar) is an open source software suite for reading bar codes from various sources, including webcams.

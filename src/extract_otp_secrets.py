@@ -234,36 +234,40 @@ def extract_otps_from_camera(args: Args) -> Otps:
         if not success:
             log_error("Failed to capture image")
             break
-        if qr_mode in [QRMode.QREADER, QRMode.DEEP_QREADER]:
-            bbox, found = qreader.detect(img)
-            if qr_mode == QRMode.DEEP_QREADER:
-                otp_url = qreader.detect_and_decode(img, True)
-            elif qr_mode == QRMode.QREADER:
-                otp_url = qreader.decode(img, bbox) if found else None
-            if otp_url:
-                new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
-            if found:
-                cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), get_color(new_otps_count, otp_url), RECT_THICKNESS)
-        elif qr_mode == QRMode.ZBAR:
-            for qrcode in zbar.decode(img):
-                otp_url = qrcode.data.decode('utf-8')
-                pts = numpy.array([qrcode.polygon], numpy.int32)
-                pts = pts.reshape((-1, 1, 2))
-                new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
-                cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
-        elif qr_mode in [QRMode.CV2, QRMode.WECHAT]:
-            if QRMode.CV2:
-                otp_url, raw_pts, _ = cv2_qr.detectAndDecode(img)
-            else:
-                otp_url, raw_pts = cv2_qr_wechat.detectAndDecode(img)
-            if raw_pts is not None:
+        try:
+            if qr_mode in [QRMode.QREADER, QRMode.DEEP_QREADER]:
+                bbox, found = qreader.detect(img)
+                if qr_mode == QRMode.DEEP_QREADER:
+                    otp_url = qreader.detect_and_decode(img, True)
+                elif qr_mode == QRMode.QREADER:
+                    otp_url = qreader.decode(img, bbox) if found else None
                 if otp_url:
                     new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
-                pts = numpy.array([raw_pts], numpy.int32)
-                pts = pts.reshape((-1, 1, 2))
-                cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
-        else:
-            assert False, f"Wrong QReader mode {qr_mode.name}"
+                if found:
+                    cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), get_color(new_otps_count, otp_url), RECT_THICKNESS)
+            elif qr_mode == QRMode.ZBAR:
+                for qrcode in zbar.decode(img):
+                    otp_url = qrcode.data.decode('utf-8')
+                    pts = numpy.array([qrcode.polygon], numpy.int32)
+                    pts = pts.reshape((-1, 1, 2))
+                    new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+                    cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
+            elif qr_mode in [QRMode.CV2, QRMode.WECHAT]:
+                if QRMode.CV2:
+                    otp_url, raw_pts, _ = cv2_qr.detectAndDecode(img)
+                else:
+                    otp_url, raw_pts = cv2_qr_wechat.detectAndDecode(img)
+                if raw_pts is not None:
+                    if otp_url:
+                        new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+                    pts = numpy.array([raw_pts], numpy.int32)
+                    pts = pts.reshape((-1, 1, 2))
+                    cv2.polylines(img, [pts], True, get_color(new_otps_count, otp_url), RECT_THICKNESS)
+            else:
+                assert False, f"Wrong QReader mode {qr_mode.name}"
+        except Exception as e:
+            log_error(f'An error occured during QR detection and decoding for QR reader {qr_mode}. Changed to the next QR reader.', e)
+            qr_mode = next_qr_mode(qr_mode)
 
         cv2.putText(img, f"Mode: {qr_mode.name} (Hit space to change)", START_POS_TEXT, FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
         cv2.putText(img, "Hit ESC to quit", tuple(map(add, START_POS_TEXT, FONT_DY)), FONT, FONT_SCALE, NORMAL_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
@@ -283,7 +287,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
             # ESC or Enter or q pressed
             break
         elif key == 32:
-            qr_mode = QRMode((qr_mode.value + 1) % len(QRMode))
+            qr_mode = next_qr_mode(qr_mode)
             if verbose: print(f"QR reading mode: {qr_mode}")
         if cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) < 1:
             # Window close clicked
@@ -358,10 +362,10 @@ def read_lines_from_text_file(filename: str) -> list[str]:
             lines.append(line)
         if not lines:
             log_warn(f"{filename.replace('-', 'stdin')} is empty")
-    except UnicodeDecodeError:
+    except UnicodeDecodeError as e:
         if filename == '-':
             abort("Unable to open text file form stdin. "
-                  "In case you want read an image file from stdin, you must use '=' instead of '-'.")
+                  "In case you want read an image file from stdin, you must use '=' instead of '-'.", e)
         else:  # The file is probably an image, process below
             return []
     finally:
@@ -421,7 +425,7 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
             try:
                 img_array = numpy.frombuffer(stdin, dtype='uint8')
             except TypeError as e:
-                abort(f"Cannot read binary stdin buffer. Exception: {e}")
+                abort(f"Cannot read binary stdin buffer.", e)
             if not img_array.size:
                 return []
             img = cv2.imdecode(img_array, cv2.IMREAD_UNCHANGED)
@@ -449,7 +453,7 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
         if len(otp_urls) == 0:
             abort(f"Unable to read QR Code from file.\ninput file: {filename}")
     except Exception as e:
-        abort(f"Encountered exception '{e}'.\ninput file: {filename}")
+        abort(f"Encountered exception\ninput file: {filename}", e)
     return otp_urls
 
 
@@ -480,9 +484,9 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.M
     payload = pb.MigrationPayload()
     try:
         payload.ParseFromString(data)
-    except Exception:
+    except Exception as e:
         abort(f"Cannot decode otpauth-migration migration payload.\n"
-              f"data={data_base64}")
+              f"data={data_base64}", e)
     if verbose:
         print(f"\n{i}. Payload Line", payload, sep='\n')
 
@@ -644,12 +648,19 @@ def is_binary(line: str) -> bool:
         return True
 
 
-def log_warn(msg: str) -> None:
-    eprint(f"{colorama.Fore.RED if colored else ''}\nWARN: {msg}{colorama.Fore.RESET if colored else ''}")
+def next_qr_mode(qr_mode: QRMode) -> QRMode:
+    return QRMode((qr_mode.value + 1) % len(QRMode))
 
 
-def log_error(msg: str) -> None:
-    eprint(f"{colorama.Fore.RED if colored else ''}\nERROR: {msg}{colorama.Fore.RESET if colored else ''}")
+def log_warn(msg: str, exception: BaseException = None) -> None:
+    exception_text = f"\nException: "
+    eprint(f"{colorama.Fore.RED if colored else ''}\nWARN: {msg}{(exception_text + str(exception)) if exception else ''}{colorama.Fore.RESET if colored else ''}")
+
+
+
+def log_error(msg: str, exception: BaseException = None) -> None:
+    exception_text = f"\nException: "
+    eprint(f"{colorama.Fore.RED if colored else ''}\nERROR: {msg}{(exception_text + str(exception)) if exception else ''}{colorama.Fore.RESET if colored else ''}")
 
 
 def eprint(*args: Any, **kwargs: Any) -> None:
@@ -657,8 +668,8 @@ def eprint(*args: Any, **kwargs: Any) -> None:
     print(*args, file=sys.stderr, **kwargs)
 
 
-def abort(msg: str) -> None:
-    log_error(msg)
+def abort(msg: str, exception: BaseException = None) -> None:
+    log_error(msg, exception)
     sys.exit(1)
 
 

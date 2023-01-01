@@ -468,6 +468,7 @@ def test_wrong_data(capsys: pytest.CaptureFixture[str]) -> None:
     expected_stderr = '''
 ERROR: Cannot decode otpauth-migration migration payload.
 data=XXXX
+Exception: Error parsing message
 '''
 
     assert captured.err == expected_stderr
@@ -705,7 +706,7 @@ def test_extract_stdin_stdout_wrong_symbol(capsys: pytest.CaptureFixture[str], m
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = "\nERROR: Cannot read binary stdin buffer. Exception: a bytes-like object is required, not 'str'\n"
+    expected_stderr = "\nERROR: Cannot read binary stdin buffer.\nException: a bytes-like object is required, not 'str'\n"
 
     assert captured.err == expected_stderr
     assert captured.out == ''
