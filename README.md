@@ -1,8 +1,8 @@
 # Extract TOTP/HOTP secret keys from Google Authenticator
 
-[![CI Status](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml)
+[![CI tests](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci.yml)
 ![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
-[![docker](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci_docker.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci_docker.yml)
+[![CI docker](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci_docker.yml/badge.svg)](https://github.com/scito/extract_otp_secret_keys/actions/workflows/ci_docker.yml)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/protobuf)
 [![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/scito/extract_otp_secret_keys)](https://github.com/scito/extract_otp_secret_keys/blob/master/Pipfile.lock)
 ![protobuf version](https://img.shields.io/badge/protobuf-4.21.12-informational)
@@ -16,7 +16,8 @@ TODO add src/
 TODO rename extract_otp_secret_keys
 
 Extract two-factor authentication (2FA, TFA, OTP) secret keys from export QR codes of "Google Authenticator" app.
-The secret and otp values can be printed and exported to json or csv. The QR codes can be printed or saved as PNG images.
+The QR codes can captured from the camera in a GUI, imported from images or from text files containing the QR code data.
+The secret and otp values can be printed and exported to json or csv, as well as printed or saved as PNG images.
 
 ## Installation
 
@@ -25,7 +26,7 @@ cd extract_otp_secret_keys
 
 ## Usage
 
-### Capture QR codes from camera
+### Capture QR codes from camera (since v2.0.0)
 
 1. Open "Google Authenticator" app on the mobile phone
 2. Export the QR codes from "Google Authenticator" app
@@ -36,7 +37,7 @@ cd extract_otp_secret_keys
 
 ![CV2 Capture from camera screenshot](cv2_capture_screenshot.png)
 
-### With builtin QR decoder from image files
+### With builtin QR decoder from image files (since v2.0.0)
 
 1. Open "Google Authenticator" app on the mobile phone
 2. Export the QR codes from "Google Authenticator" app
@@ -59,7 +60,7 @@ cd extract_otp_secret_keys
 
 ## Program help: arguments and options
 
-<pre>usage: extract_otp_secrets.py [-h] [--camera NUMBER] [--qr {QREADER,DEEP_QREADER,ZBAR,CV2,CV2_WECHAT}] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--no-color] [--verbose | --quiet] [infile ...]
+<pre>usage: extract_otp_secrets.py [-h] [--camera NUMBER] [--qr {ZBAR,QREADER,QREADER_DEEP,CV2,CV2_WECHAT}] [--json FILE] [--csv FILE] [--keepass FILE] [--printqr] [--saveqr DIR] [--no-color] [--verbose | --quiet] [infile ...]
 
 Extracts one time password (OTP) secret keys from QR codes, e.g. from Google Authenticator app.
 If no infiles are provided, the QR codes are interactively captured from the camera.
@@ -71,7 +72,7 @@ positional arguments:
 options:
   -h, --help                    show this help message and exit
   --camera NUMBER, -C NUMBER    camera number of system (default camera: 0)
-  --qr {QREADER,DEEP_QREADER,ZBAR,CV2,CV2_WECHAT}, -Q {QREADER,DEEP_QREADER,ZBAR,CV2,CV2_WECHAT}
+  --qr {ZBAR,QREADER,QREADER_DEEP,CV2,CV2_WECHAT}, -Q {ZBAR,QREADER,QREADER_DEEP,CV2,CV2_WECHAT}
                                 QR reader (default: ZBAR)
   --json FILE, -j FILE          export json file or - for stdout
   --csv FILE, -c FILE           export csv file or - for stdout
@@ -102,39 +103,10 @@ For protobuf versions 3.14.0 or similar or Python 3.6, use the extract_otp_secre
 
 ### Shared libs installation for reading QR code images
 
-For reading QR code images the zbar library must be installed.
-If you do not extract directly from images, you do not need to install the zbar shared library.
+For reading QR code images the zbar library must be installed for `ZBAR` QR reader.
+If you do not extract directly from images or using catpuring from camera, you do not need to install the zbar shared library.
 
 For a detailed installation documentation of [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar#installation).
-
-#### Windows
-
-The zbar DLLs are included with the Windows Python wheels. On other operating systems, you will need to install the zbar shared library.
-
-TODO Write installation, not error message
-
-##### Windows error message
-
-If you see an ugly ImportError when importing [pyzbar](https://pypi.org/project/pyzbar/) on Windows you will most likely need the [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). Install vcredist_x64.exe if using 64-bit Python, vcredist_x86.exe if using 32-bit Python.
-
-```
-Traceback (most recent call last):
-  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 58, in load
-    dependencies, libzbar = load_objects(Path(''))
-                            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 50, in load_objects
-    deps = [
-           ^
-  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 51, in <listcomp>
-    cdll.LoadLibrary(str(directory.joinpath(dep)))
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.496.0_x64__qbz5n2kfra8p0\Lib\ctypes\__init__.py", line 454, in LoadLibrary
-    return self._dlltype(name)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.496.0_x64__qbz5n2kfra8p0\Lib\ctypes\__init__.py", line 376, in __init__
-    self._handle = _dlopen(self._name, mode)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependencies). Try using the full path with constructor syntax.
-```
 
 #### Linux (Debian, Ubuntu, ...)
 
@@ -151,6 +123,10 @@ FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependenc
 #### Mac OS X
 
     brew install zbar
+
+#### Windows
+
+The zbar DLLs are included with the Windows Python wheels. However, you might need to install [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). Install vcredist_x64.exe if using 64-bit Python, vcredist_x86.exe if using 32-bit Python.
 
 ## Examples
 
@@ -193,7 +169,12 @@ FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependenc
 
 * Free and open source
 * Supports Google Authenticator exports (and compatible apps like Aegis Authenticator)
-* Captures the the QR codes directly from the camera using QR code detection (based on OpenCV)
+* Captures the the QR codes directly from the camera using different QR code readers (based on OpenCV)
+    * ZBAR: fast and reliable, good for images and video capture (default/recommended) [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar)
+    * QREADER: fast [QReader](https://github.com/Eric-Canas/QReader)
+    * QREADER_DEEP: slow, not good for camera [QReader](https://github.com/Eric-Canas/QReader)
+    * CV2: fast [QRCodeDetector](https://docs.opencv.org/4.x/de/dc3/classcv_1_1QRCodeDetector.html)
+    * CV2_WECHAT: fast [WeChatQRCode](https://docs.opencv.org/4.x/dd/d63/group__wechat__qrcode.html)
 * Supports TOTP and HOTP
 * Generates QR codes
 * Exports to various formats:
@@ -390,6 +371,8 @@ docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets example_export.txt
 docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets example_export.png
 ```
 
+TODO link to docker/github repos
+
 docker run --rm -v "$(pwd)":/files:ro -i extract_otp_secrets = < example_export.png
 docker run --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets
 docker run --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secrets
@@ -409,6 +392,17 @@ docker pull scit0/extract_otp_secrets_only_txt
 
 docker pull ghcr.io/scito/extract_otp_secrets
 docker pull ghcr.io/scito/extract_otp_secrets_only_txt
+
+### Docker examples
+
+
+docker run --pull always --rm -v \"$(pwd)\":/files:ro scit0/extract_otp_secrets example_export.png
+
+docker run --pull always --rm -i -v \"$(pwd)\":/files:ro scit0/extract_otp_secrets_only_txt - < example_export.txt
+
+cat example_export.txt | docker run --pull always --rm -i -v \"$(pwd)\":/files:ro scit0/extract_otp_secrets_only_txt - -c - > example_out.csv
+
+docker run --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secrets
 
 ## Tests
 
@@ -483,6 +477,35 @@ pip install -U -r requirements.txt
 ## Issues
 
 https://github.com/opencv/opencv/issues/23072
+
+## Problems and Troubleshooting
+
+### Windows error message
+
+If you see an ugly ImportError on Windows you will most likely need the [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). Install vcredist_x64.exe if using 64-bit Python, vcredist_x86.exe if using 32-bit Python.
+
+This library shared library is required by [pyzbar](https://pypi.org/project/pyzbar/).
+
+```
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 58, in load
+    dependencies, libzbar = load_objects(Path(''))
+                            ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 50, in load_objects
+    deps = [
+           ^
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyzbar\zbar_library.py", line 51, in <listcomp>
+    cdll.LoadLibrary(str(directory.joinpath(dep)))
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.496.0_x64__qbz5n2kfra8p0\Lib\ctypes\__init__.py", line 454, in LoadLibrary
+    return self._dlltype(name)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.496.0_x64__qbz5n2kfra8p0\Lib\ctypes\__init__.py", line 376, in __init__
+    self._handle = _dlopen(self._name, mode)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependencies). Try using the full path with constructor syntax.
+```
+
+
 
 ## Related projects
 

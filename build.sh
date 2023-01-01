@@ -82,6 +82,7 @@ interactive=true
 ignore_version_check=true
 clean=false
 build_docker=true
+run_gui=true
 
 while test $# -gt 0; do
     case $1 in
@@ -94,6 +95,7 @@ while test $# -gt 0; do
             echo "-a                      Automatic mode"
             echo "-C                      Ignore version check"
             echo "-D                      No docker build"
+            echo "-G                      No not run gui"
             echo "-c                      Clean"
             echo "-h, --help              Help"
             quit
@@ -108,6 +110,10 @@ while test $# -gt 0; do
             ;;
         -D)
             build_docker=false
+            shift
+            ;;
+        -G)
+            run_gui=false
             shift
             ;;
         -c)
@@ -204,7 +210,7 @@ fi
 
 # Upgrade pip requirements
 
-cmd="sudo pip install --upgrade pip"
+cmd="sudo pip install -U pip"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -266,7 +272,7 @@ eval "$cmd"
 
 # pip install
 
-cmd="$PIP install -e ."
+cmd="$PIP install -U -e ."
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -324,6 +330,7 @@ if $build_docker; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
+
     # Build extract_otp_secrets (Debian)
     cmd="docker build . -t extract_otp_secrets --pull --build-arg RUN_TESTS=false"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
@@ -333,7 +340,11 @@ if $build_docker; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - < example_export.txt"
+    cmd="cat mple_export.txt | docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - -c - > example_output.csv"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets = < example_export.png"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -344,10 +355,20 @@ if $build_docker; then
     cmd="docker image prune -f || echo 'No docker image pruned'"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
+
+    if $run_gui; then
+        cmd="docker run --pull always --rm -v "$(pwd)":/files:ro --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets &"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    fi
+    eval "$cmd"
 fi
 
-cmd="$PYTHON src/extract_otp_secrets.py &"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+if $run_gui; then
+    cmd="$PYTHON src/extract_otp_secrets.py &"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+fi
+
+echo -e "${greenBold}Sucessful${reset}"
 
 quit

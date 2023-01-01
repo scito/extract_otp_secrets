@@ -1,3 +1,4 @@
+# TODO rewrite
 # Extract two-factor authentication (2FA, TFA) secret keys from export QR codes of "Google Authenticator" app
 #
 # Usage:
@@ -118,7 +119,7 @@ Otps = List[Otp]
 # workaround for PYTHON <= 3.9: OtpUrls = list[OtpUrl]
 OtpUrls = List[OtpUrl]
 
-QRMode = Enum('QRMode', ['QREADER', 'DEEP_QREADER', 'ZBAR', 'CV2', 'CV2_WECHAT'], start=0)
+QRMode = Enum('QRMode', ['ZBAR', 'QREADER', 'QREADER_DEEP', 'CV2', 'CV2_WECHAT'], start=0)
 
 
 # Constants
@@ -256,9 +257,9 @@ def extract_otps_from_camera(args: Args) -> Otps:
             log_error("Failed to capture image from camera")
             break
         try:
-            if qr_mode in [QRMode.QREADER, QRMode.DEEP_QREADER]:
+            if qr_mode in [QRMode.QREADER, QRMode.QREADER_DEEP]:
                 found, bbox = qreader.detect(img)
-                if qr_mode == QRMode.DEEP_QREADER:
+                if qr_mode == QRMode.QREADER_DEEP:
                     otp_url = qreader.detect_and_decode(img, True)
                 elif qr_mode == QRMode.QREADER:
                     otp_url = qreader.decode(img, bbox) if found else None
@@ -448,8 +449,8 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
 
         qr_mode = QRMode[args.qr]
         otp_urls: OtpUrls = []
-        if qr_mode in [QRMode.QREADER, QRMode.DEEP_QREADER]:
-            otp_url = QReader().detect_and_decode(img, qr_mode == QRMode.DEEP_QREADER)
+        if qr_mode in [QRMode.QREADER, QRMode.QREADER_DEEP]:
+            otp_url = QReader().detect_and_decode(img, qr_mode == QRMode.QREADER_DEEP)
             otp_urls.append(otp_url)
         elif qr_mode == QRMode.CV2:
             otp_url, _, _ = cv2.QRCodeDetector().detectAndDecode(img)
