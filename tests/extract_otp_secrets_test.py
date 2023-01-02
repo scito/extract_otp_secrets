@@ -19,20 +19,24 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations  # workaround for PYTHON <= 3.10
+
 import io
 import os
 import pathlib
+import re
 import sys
-import colorama
+import time
 
+import colorama
 import pytest
 from pytest_mock import MockerFixture
-
-import extract_otp_secrets
-from utils import (file_exits, quick_and_dirty_workaround_encoding_problem,
+from utils import (count_files_in_dir, file_exits,
+                   quick_and_dirty_workaround_encoding_problem,
                    read_binary_file_as_stream, read_csv, read_csv_str,
                    read_file_to_str, read_json, read_json_str,
-                   replace_escaped_octal_utf8_bytes_with_str, count_files_in_dir)
+                   replace_escaped_octal_utf8_bytes_with_str)
+
+import extract_otp_secrets
 
 qreader_available: bool = extract_otp_secrets.qreader_available
 
@@ -355,17 +359,26 @@ def test_normalize_bytes() -> None:
         'Before\\\\302\\\\277\\\\303\nname: enc: \\302\\277\\303\\244\\303\\204\\303\\251\\303\\211?\nAfter') == 'Before\\\\302\\\\277\\\\303\nname: enc: ¿äÄéÉ?\nAfter'
 
 
-# Generate verbose output: python3.11 src/extract_otp_secrets.py example_export.txt -v -n > tests/data/print_verbose_output.txt
+# Generate verbose output:
+# for color in '' '-n'; do for level in '' '-v' '-vv' '-vvv'; do python3.11 src/extract_otp_secrets.py example_export.txt $color $level > tests/data/print_verbose_output$color$level.txt; done; done
 # workaround for PYTHON <= 3.10
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="fileinput.input encoding exists since PYTHON 3.10")
-def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
+@pytest.mark.parametrize("verbose_level", ['', '-v', '-vv', '-vvv'])
+@pytest.mark.parametrize("color", ['', '-n'])
+def test_extract_verbose(verbose_level: str, color: str, capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
+    args = ['example_export.txt']
+    if verbose_level:
+        args.append(verbose_level)
+    if color:
+        args.append(color)
     # Act
-    extract_otp_secrets.main(['-n', '-v', 'example_export.txt'])
+    extract_otp_secrets.main(args)
 
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = read_file_to_str('tests/data/print_verbose_output.txt')
+    expected_stdout = normalize_verbose_text(read_file_to_str(f'tests/data/print_verbose_output{color}{verbose_level}.txt'))
+    actual_stdout = normalize_verbose_text(captured.out)
 
     if not qreader_available:
         expected_stdout = expected_stdout.replace('QReader installed: True', 'QReader installed: False')
@@ -374,11 +387,14 @@ def test_extract_verbose(capsys: pytest.CaptureFixture[str], relaxed: bool) -> N
     if relaxed or sys.implementation.name == 'pypy':
         print('\nRelaxed mode\n')
 
-        assert replace_escaped_octal_utf8_bytes_with_str(captured.out) == replace_escaped_octal_utf8_bytes_with_str(expected_stdout)
-        assert quick_and_dirty_workaround_encoding_problem(captured.out) == quick_and_dirty_workaround_encoding_problem(expected_stdout)
+        assert replace_escaped_octal_utf8_bytes_with_str(actual_stdout) == replace_escaped_octal_utf8_bytes_with_str(expected_stdout)
+        assert quick_and_dirty_workaround_encoding_problem(actual_stdout) == quick_and_dirty_workaround_encoding_problem(expected_stdout)
     else:
-        assert captured.out == expected_stdout
+        assert actual_stdout == expected_stdout
     assert captured.err == ''
+
+def normalize_verbose_text(text: str) -> str:
+    return re.sub('^.+ version: .+$', '', text, flags=re.MULTILINE | re.IGNORECASE)
 
 
 def test_extract_debug(capsys: pytest.CaptureFixture[str]) -> None:
@@ -623,13 +639,17 @@ def test_img_qr_reader_from_file_happy_path(capsys: pytest.CaptureFixture[str]) 
 @pytest.mark.qreader
 def test_img_qr_reader_by_parameter(capsys: pytest.CaptureFixture[str], qr_mode: str) -> None:
     # Act
+    start_s = time.process_time()
     extract_otp_secrets.main(['--qr', qr_mode, 'tests/data/test_googleauth_export.png'])
+    elapsed_s = time.process_time() - start_s
 
     # Assert
     captured = capsys.readouterr()
 
     assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
     assert captured.err == ''
+
+    print(f"Elapsed time for {qr_mode}: {elapsed_s:.2f}s")
 
 
 @pytest.mark.qreader

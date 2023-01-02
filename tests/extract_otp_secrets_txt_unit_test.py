@@ -30,6 +30,10 @@ from utils import (Capturing, read_csv, read_file_to_str, read_json,
                    remove_dir_with_files, remove_file, count_files_in_dir)
 
 
+# Conditional skip example
+# if sys.implementation.name == 'pypy' or sys.platform.startswith("win") or sys.version_info < (3, 10):
+#             self.skipTest("Avoid encoding problems")
+
 class TestExtract(unittest.TestCase):
 
     def test_extract_csv(self) -> None:
@@ -169,18 +173,6 @@ Type:    totp
         self.assertTrue(os.path.isfile('testout/qr/5-hotpdemo.png'))
         self.assertTrue(os.path.isfile('testout/qr/6-encodingäÄéÉdemo.png'))
         self.assertEqual(count_files_in_dir('testout/qr'), 6)
-
-    def test_extract_verbose(self) -> None:
-        if sys.implementation.name == 'pypy' or sys.platform.startswith("win") or sys.version_info < (3, 10):
-            self.skipTest("Avoid encoding problems")
-        out = io.StringIO()
-        with redirect_stdout(out):
-            extract_otp_secrets.main(['-n', '-v', 'example_export.txt'])
-        actual_output = out.getvalue()
-
-        expected_output = read_file_to_str('tests/data/print_verbose_output.txt')
-
-        self.assertEqual(actual_output, expected_output)
 
     def test_extract_debug(self) -> None:
         out = io.StringIO()

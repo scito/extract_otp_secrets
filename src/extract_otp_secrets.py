@@ -54,7 +54,7 @@ import os
 import re
 import sys
 import urllib.parse as urlparse
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import Any, List, Optional, TextIO, Tuple, Union
 
 # workaround for PYTHON <= 3.7: compatibility
@@ -90,16 +90,26 @@ Exception: {e}""")
 
     # CV2 camera capture constants
     FONT: Final[int] = cv2.FONT_HERSHEY_PLAIN
-    FONT_SCALE: Final[int] = 1
+    FONT_SCALE: Final[float] = 1.3
     FONT_THICKNESS: Final[int] = 1
     FONT_LINE_STYLE: Final[int] = cv2.LINE_AA
+    FONT_COLOR: Final[ColorBGR] = (255, 0, 0)
     BOX_THICKNESS: Final[int] = 5
     # workaround for PYTHON <= 3.7: must use () for assignments
-    START_POS_TEXT: Final[Point] = (5, 20)
+    WINDOW_X: Final[int] = 0
+    WINDOW_Y: Final[int] = 1
+    WINDOW_WIDTH: Final[int] = 2
+    WINDOW_HEIGHT: Final[int] = 3
+    TEXT_WIDTH: Final[int] = 0
+    TEXT_HEIGHT: Final[int] = 1
+    BORDER: Final[int] = 5
+    START_Y: Final[int] = 20
+    START_POS_TEXT: Final[Point] = (BORDER, START_Y)
     NORMAL_COLOR: Final[ColorBGR] = (255, 0, 255)
     SUCCESS_COLOR: Final[ColorBGR] = (0, 255, 0)
     FAILURE_COLOR: Final[ColorBGR] = (0, 0, 255)
-    FONT_DY: Final[int] = cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][1] + 5
+    CHAR_DX: Final[int] = (lambda text: cv2.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS)[0][TEXT_WIDTH] // len(text))("28 QR codes capturedMMM")
+    FONT_DY: Final[int] = cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][TEXT_HEIGHT] + 5
     WINDOW_NAME: Final[str] = "Extract OTP Secrets: Capture QR Codes from Camera"
 
     TextPosition = Enum('TextPosition', ['LEFT', 'RIGHT'])
@@ -121,13 +131,14 @@ Otps = List[Otp]
 OtpUrls = List[OtpUrl]
 
 QRMode = Enum('QRMode', ['ZBAR', 'QREADER', 'QREADER_DEEP', 'CV2', 'CV2_WECHAT'], start=0)
+LogLevel = IntEnum('LogLevel', ['QUIET', 'NORMAL', 'VERBOSE', 'MORE_VERBOSE', 'DEBUG'], start=-1)
 
 
 # Constants
 CAMERA: Final[str] = 'camera'
 
 # Global variable declaration
-verbose: int = 0
+verbose: IntEnum = LogLevel.NORMAL
 quiet: bool = False
 colored: bool = True
 
@@ -160,9 +171,9 @@ def main(sys_args: list[str]) -> None:
 
 def parse_args(sys_args: list[str]) -> Args:
     global verbose, quiet, colored
-    description_text = "Extracts one time password (OTP) / two-factor authentication (2FA) secrets from export QR codes, e.g. from Google Authenticator app."
+    description_text = "Extracts one time password (OTP) secrets from export QR codes from two-factor authentication (2FA) apps"
     if qreader_available:
-        description_text += "\nIf no infiles are provided, the QR codes a GUI window starts and QR codes can interactively be captured from the system camera."
+        description_text += "\nIf no infiles are provided, a GUI window starts and QR codes are captured from the camera."
     example_text = """examples:
 python extract_otp_secrets.py
 python extract_otp_secrets.py example_*.txt
@@ -191,12 +202,12 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
     if args.csv == '-' or args.json == '-' or args.keepass == '-':
         args.quiet = args.q = True
 
-    verbose = args.verbose if args.verbose else 0
+    verbose = args.verbose if args.verbose else LogLevel.NORMAL
     quiet = True if args.quiet else False
     colored = not args.no_color
     if verbose: print(f"QReader installed: {qreader_available}")
     if qreader_available:
-        if verbose > 1: print(f"CV2 version: {cv2.__version__}")
+        if verbose >= LogLevel.VERBOSE: print(f"CV2 version: {cv2.__version__}")
         if verbose: print(f"QR reading mode: {args.qr}\n")
 
     return args
@@ -228,14 +239,17 @@ def cv2_draw_box(img: Any, raw_pts: Any, color: ColorBGR) -> Any:
 
 
 # TODO use cv2 types if available
-def cv2_print_text(img: Any, text: str, line_number: int, position: TextPosition, color: ColorBGR) -> None:
+def cv2_print_text(img: Any, text: str, line_number: int, position: TextPosition, color: ColorBGR, opposite_len: Optional[int] = None) -> None:
+    text_dim, _ = cv2.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS)
+    window_dim = cv2.getWindowImageRect(WINDOW_NAME)
+    out_text = text if not opposite_len or (actual_width := text_dim[TEXT_WIDTH] + opposite_len * CHAR_DX + 4 * BORDER) <= window_dim[WINDOW_WIDTH] else text[:(window_dim[WINDOW_WIDTH] - actual_width) // CHAR_DX] + '.'
+    text_dim, _ = cv2.getTextSize(out_text, FONT, FONT_SCALE, FONT_THICKNESS)
     if position == TextPosition.LEFT:
-        pos = START_POS_TEXT[0], START_POS_TEXT[1] + line_number * FONT_DY
+        pos = BORDER, START_Y + line_number * FONT_DY
     else:
-        window_dim = cv2.getWindowImageRect(WINDOW_NAME)
-        pos = window_dim[2] - cv2.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS)[0][0] - 5, START_POS_TEXT[1] + line_number * FONT_DY
+        pos = window_dim[WINDOW_WIDTH] - text_dim[TEXT_WIDTH] - BORDER, START_Y + line_number * FONT_DY
 
-    cv2.putText(img, text, pos, FONT, FONT_SCALE, color, FONT_THICKNESS, FONT_LINE_STYLE)
+    cv2.putText(img, out_text, pos, FONT, FONT_SCALE, color, FONT_THICKNESS, FONT_LINE_STYLE)
 
 
 def extract_otps_from_camera(args: Args) -> Otps:
@@ -289,23 +303,16 @@ def extract_otps_from_camera(args: Args) -> Otps:
             qr_mode = next_qr_mode(qr_mode)
             continue
 
-        cv2_print_text(img, f"Mode: {qr_mode.name} (Hit space to change)", 0, TextPosition.LEFT, NORMAL_COLOR)
-        cv2_print_text(img, "Hit ESC to quit", 1, TextPosition.LEFT, NORMAL_COLOR)
+        cv2_print_text(img, f"Mode: {qr_mode.name} (Hit space to change)", 0, TextPosition.LEFT, FONT_COLOR, 20)
+        cv2_print_text(img, "Hit ESC to quit", 1, TextPosition.LEFT, FONT_COLOR, 17)
 
-        cv2_print_text(img, f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured", 0, TextPosition.RIGHT, NORMAL_COLOR)
-        cv2_print_text(img, f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted", 1, TextPosition.RIGHT, NORMAL_COLOR)
+        cv2_print_text(img, f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured", 0, TextPosition.RIGHT, FONT_COLOR)
+        cv2_print_text(img, f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted", 1, TextPosition.RIGHT, FONT_COLOR)
 
         cv2.imshow(WINDOW_NAME, img)
 
-        key = cv2.waitKey(1) & 0xFF
-        if key == 27 or key == ord('q') or key == 13:
-            # ESC or Enter or q pressed
-            break
-        elif key == 32:
-            qr_mode = next_qr_mode(qr_mode)
-            if verbose: print(f"QR reading mode: {qr_mode}")
-        if cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
-            # Window close clicked
+        quit, qr_mode = cv2_handle_pressed_keys(qr_mode)
+        if quit:
             break
 
     cam.release()
@@ -314,9 +321,24 @@ def extract_otps_from_camera(args: Args) -> Otps:
     return otps
 
 
+def cv2_handle_pressed_keys(qr_mode: QRMode) -> Tuple[bool, QRMode]:
+    key = cv2.waitKey(1) & 0xFF
+    quit = False
+    if key == 27 or key == ord('q') or key == 13:
+        # ESC or Enter or q pressed
+        quit = True
+    elif key == 32:
+        qr_mode = next_qr_mode(qr_mode)
+        if verbose >= LogLevel.MORE_VERBOSE: print(f"QR reading mode: {qr_mode}")
+    if cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
+        # Window close clicked
+        quit = True
+    return quit, qr_mode
+
+
 def extract_otps_from_otp_url(otp_url: str, otp_urls: OtpUrls, otps: Otps, args: Args) -> int:
     '''Returns -1 if opt_url was already added.'''
-    if otp_url and verbose: print(otp_url)
+    if otp_url and verbose >= LogLevel.VERBOSE: print(otp_url)
     if not otp_url:
         return 0
     if otp_url not in otp_urls:
@@ -334,14 +356,14 @@ def extract_otps_from_files(args: Args) -> Otps:
     files_count = urls_count = otps_count = 0
     if verbose: print(f"Input files: {args.infile}")
     for infile in args.infile:
-        if verbose: print(f"Processing infile {infile}")
+        if verbose >= LogLevel.MORE_VERBOSE: log_verbose(f"Processing infile {infile}")
         files_count += 1
         for line in get_otp_urls_from_file(infile, args):
-            if verbose: print(line)
+            if verbose >= LogLevel.MORE_VERBOSE: log_verbose(line)
             if line.startswith('#') or line == '': continue
             urls_count += 1
             otps_count += extract_otp_from_otp_url(line, otps, urls_count, infile, args)
-    if verbose: print(f"{files_count} infile{'s'[:files_count != 1]} processed")
+    if verbose: print(f"Extracted {otps_count} otp{'s'[:otps_count != 1]} from {urls_count} otp url{'s'[:urls_count != 1]} by reading {files_count} infile{'s'[:files_count != 1]}")
     return otps
 
 
@@ -355,13 +377,13 @@ def get_otp_urls_from_file(filename: str, args: Args) -> OtpUrls:
 
     # could not process text file, try reading as image
     if filename != '-' and qreader_available:
-        return convert_img_to_otp_url(filename, args)
+        return convert_img_to_otp_urls(filename, args)
 
     return []
 
 
 def read_lines_from_text_file(filename: str) -> list[str]:
-    if verbose: print(f"Reading lines of {filename}")
+    if verbose >= LogLevel.DEBUG: print(f"Reading lines of {filename}")
     # workaround for PYTHON <= 3.9 support encoding
     if sys.version_info >= (3, 10):
         finput = fileinput.input(filename, encoding='utf-8')
@@ -370,7 +392,7 @@ def read_lines_from_text_file(filename: str) -> list[str]:
     try:
         lines = []
         for line in (line.strip() for line in finput):
-            if verbose: print(line)
+            if verbose >= LogLevel.DEBUG: log_verbose(line)
             if is_binary(line):
                 abort("Binary input was given in stdin, please use = instead of - as infile argument for images.")
             # unfortunately yield line leads to random test fails
@@ -400,7 +422,7 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count:
         new_otps_count += 1
         if verbose: print(f"\n{len(otps) + 1}. Secret")
         secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
-        if verbose: print('OTP enum type:', get_enum_name_by_number(raw_otp, 'type'))
+        if verbose >= LogLevel.DEBUG: log_debug('OTP enum type:', get_enum_name_by_number(raw_otp, 'type'))
         otp_type = get_otp_type_str_from_code(raw_otp.type)
         otp_url = build_otp_url(secret, raw_otp)
         otp: Otp = {
@@ -424,7 +446,7 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count:
     return new_otps_count
 
 
-def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
+def convert_img_to_otp_urls(filename: str, args: Args) -> OtpUrls:
     if verbose: print(f"Reading image {filename}")
     try:
         if filename != '=':
@@ -449,22 +471,7 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
             abort(f"Unable to open file for reading.\ninput file: {filename}")
 
         qr_mode = QRMode[args.qr]
-        otp_urls: OtpUrls = []
-        if qr_mode in [QRMode.QREADER, QRMode.QREADER_DEEP]:
-            otp_url = QReader().detect_and_decode(img, qr_mode == QRMode.QREADER_DEEP)
-            otp_urls.append(otp_url)
-        elif qr_mode == QRMode.CV2:
-            otp_url, _, _ = cv2.QRCodeDetector().detectAndDecode(img)
-            otp_urls.append(otp_url)
-        elif qr_mode == QRMode.CV2_WECHAT:
-            otp_url, _ = cv2.wechat_qrcode.WeChatQRCode().detectAndDecode(img)
-            otp_urls += list(otp_url)
-        elif qr_mode == QRMode.ZBAR:
-            qrcodes = zbar.decode(img)
-            otp_urls += [qrcode.data.decode('utf-8') for qrcode in qrcodes]
-        else:
-            assert False, f"Wrong QReader mode {qr_mode.name}"
-
+        otp_urls = decode_qr_img_otp_urls(img, qr_mode)
         if len(otp_urls) == 0:
             abort(f"Unable to read QR Code from file.\ninput file: {filename}")
     except Exception as e:
@@ -472,29 +479,45 @@ def convert_img_to_otp_url(filename: str, args: Args) -> OtpUrls:
     return otp_urls
 
 
+def decode_qr_img_otp_urls(img: Any, qr_mode: QRMode) -> OtpUrls:
+    otp_urls: OtpUrls = []
+    if qr_mode in [QRMode.QREADER, QRMode.QREADER_DEEP]:
+        otp_url = QReader().detect_and_decode(img, qr_mode == QRMode.QREADER_DEEP)
+        otp_urls.append(otp_url)
+    elif qr_mode == QRMode.CV2:
+        otp_url, _, _ = cv2.QRCodeDetector().detectAndDecode(img)
+        otp_urls.append(otp_url)
+    elif qr_mode == QRMode.CV2_WECHAT:
+        otp_url, _ = cv2.wechat_qrcode.WeChatQRCode().detectAndDecode(img)
+        otp_urls += list(otp_url)
+    elif qr_mode == QRMode.ZBAR:
+        qrcodes = zbar.decode(img)
+        otp_urls += [qrcode.data.decode('utf-8') for qrcode in qrcodes]
+    else:
+        assert False, f"Wrong QReader mode {qr_mode.name}"
+
+    return otp_urls
+
+
 # workaround for PYTHON <= 3.9 use: pb.MigrationPayload | None
 def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.MigrationPayload]:
-    if not otp_url.startswith('otpauth-migration://'):
-        msg = f"input is not a otpauth-migration:// url\nsource: {source}\ninput: {otp_url}"
-        if source == CAMERA:
-            log_error(f"{msg}")
-            return None
-        else:
-            log_warn(f"{msg}\nMaybe a wrong file was given")
+    '''Extracts the otp migration payload from an otp url. This function is the core of the this appliation.'''
+    if not is_opt_url(otp_url, source):
+        return None
     parsed_url = urlparse.urlparse(otp_url)
-    if verbose > 2: print(f"\nDEBUG: parsed_url={parsed_url}")
+    if verbose >= LogLevel.DEBUG: log_debug(f"parsed_url={parsed_url}")
     try:
         params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
     except Exception:  # workaround for PYTHON <= 3.10
         params = {}
-    if verbose > 2: print(f"\nDEBUG: querystring params={params}")
+    if verbose >= LogLevel.DEBUG: log_debug(f"querystring params={params}")
     if 'data' not in params:
         log_error(f"could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}")
         return None
     data_base64 = params['data'][0]
-    if verbose > 2: print(f"\nDEBUG: data_base64={data_base64}")
+    if verbose >= LogLevel.DEBUG: log_debug(f"data_base64={data_base64}")
     data_base64_fixed = data_base64.replace(' ', '+')
-    if verbose > 2: print(f"\nDEBUG: data_base64_fixed={data_base64_fixed}")
+    if verbose >= LogLevel.DEBUG: log_debug(f"data_base64_fixed={data_base64_fixed}")
     data = base64.b64decode(data_base64_fixed, validate=True)
     payload = pb.MigrationPayload()
     try:
@@ -502,10 +525,20 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.M
     except Exception as e:
         abort(f"Cannot decode otpauth-migration migration payload.\n"
               f"data={data_base64}", e)
-    if verbose:
-        print(f"\n{i}. Payload Line", payload, sep='\n')
+    if verbose >= LogLevel.DEBUG: log_debug(f"\n{i}. Payload Line", payload, sep='\n')
 
     return payload
+
+
+def is_opt_url(otp_url: str, source: str) -> bool:
+    if not otp_url.startswith('otpauth-migration://'):
+        msg = f"input is not a otpauth-migration:// url\nsource: {source}\ninput: {otp_url}"
+        if source == CAMERA:
+            log_warn(f"{msg}")
+            return False
+        else:
+            log_warn(f"{msg}\nMaybe a wrong file was given")
+    return True
 
 
 # https://stackoverflow.com/questions/40226049/find-enums-listed-in-python-descriptor-for-protobuf
@@ -580,38 +613,48 @@ def write_keepass_csv(args: Args, otps: Otps) -> None:
         has_hotp = has_otp_type(otps, 'hotp')
         otp_filename_totp = args.keepass if has_totp != has_hotp else add_pre_suffix(args.keepass, "totp")
         otp_filename_hotp = args.keepass if has_totp != has_hotp else add_pre_suffix(args.keepass, "hotp")
-        count_totp_entries = 0
-        count_hotp_entries = 0
         if has_totp:
-            with open_file_or_stdout_for_csv(otp_filename_totp) as outfile:
-                writer = csv.DictWriter(outfile, ["Title", "User Name", "TimeOtp-Secret-Base32", "Group"])
-                writer.writeheader()
-                for otp in otps:
-                    if otp['type'] == 'totp':
-                        writer.writerow({
-                            'Title': otp['issuer'],
-                            'User Name': otp['name'],
-                            'TimeOtp-Secret-Base32': otp['secret'] if otp['type'] == 'totp' else None,
-                            'Group': f"OTP/{otp['type'].upper()}"
-                        })
-                        count_totp_entries += 1
+            count_totp_entries = write_keepass_totp_csv(otp_filename_totp, otps)
         if has_hotp:
-            with open_file_or_stdout_for_csv(otp_filename_hotp) as outfile:
-                writer = csv.DictWriter(outfile, ["Title", "User Name", "HmacOtp-Secret-Base32", "HmacOtp-Counter", "Group"])
-                writer.writeheader()
-                for otp in otps:
-                    if otp['type'] == 'hotp':
-                        writer.writerow({
-                            'Title': otp['issuer'],
-                            'User Name': otp['name'],
-                            'HmacOtp-Secret-Base32': otp['secret'] if otp['type'] == 'hotp' else None,
-                            'HmacOtp-Counter': otp['counter'] if otp['type'] == 'hotp' else None,
-                            'Group': f"OTP/{otp['type'].upper()}"
-                        })
-                        count_hotp_entries += 1
+            count_hotp_entries = write_keepass_htop_csv(otp_filename_hotp, otps)
         if not quiet:
-            if count_totp_entries > 0: print(f"Exported {count_totp_entries} totp entrie{'s'[:count_totp_entries != 1]} to keepass csv file {otp_filename_totp}")
-            if count_hotp_entries > 0: print(f"Exported {count_hotp_entries} hotp entrie{'s'[:count_hotp_entries != 1]} to keepass csv file {otp_filename_hotp}")
+            if count_totp_entries: print(f"Exported {count_totp_entries} totp entrie{'s'[:count_totp_entries != 1]} to keepass csv file {otp_filename_totp}")
+            if count_hotp_entries: print(f"Exported {count_hotp_entries} hotp entrie{'s'[:count_hotp_entries != 1]} to keepass csv file {otp_filename_hotp}")
+
+
+def write_keepass_totp_csv(otp_filename: str, otps: Otps) -> int:
+    count_entries = 0
+    with open_file_or_stdout_for_csv(otp_filename) as outfile:
+        writer = csv.DictWriter(outfile, ["Title", "User Name", "TimeOtp-Secret-Base32", "Group"])
+        writer.writeheader()
+        for otp in otps:
+            if otp['type'] == 'totp':
+                writer.writerow({
+                    'Title': otp['issuer'],
+                    'User Name': otp['name'],
+                    'TimeOtp-Secret-Base32': otp['secret'] if otp['type'] == 'totp' else None,
+                    'Group': f"OTP/{otp['type'].upper()}"
+                })
+                count_entries += 1
+    return count_entries
+
+
+def write_keepass_htop_csv(otp_filename: str, otps: Otps) -> int:
+    count_entries = 0
+    with open_file_or_stdout_for_csv(otp_filename) as outfile:
+        writer = csv.DictWriter(outfile, ["Title", "User Name", "HmacOtp-Secret-Base32", "HmacOtp-Counter", "Group"])
+        writer.writeheader()
+        for otp in otps:
+            if otp['type'] == 'hotp':
+                writer.writerow({
+                    'Title': otp['issuer'],
+                    'User Name': otp['name'],
+                    'HmacOtp-Secret-Base32': otp['secret'] if otp['type'] == 'hotp' else None,
+                    'HmacOtp-Counter': otp['counter'] if otp['type'] == 'hotp' else None,
+                    'Group': f"OTP/{otp['type'].upper()}"
+                })
+                count_entries += 1
+    return count_entries
 
 
 def write_json(args: Args, otps: Otps) -> None:
@@ -668,20 +711,37 @@ def next_qr_mode(qr_mode: QRMode) -> QRMode:
 
 
 # workaround for PYTHON <= 3.9 use: BaseException | None
+def log_debug(*values: object, sep: Optional[str] = ' ') -> None:
+    if colored:
+        print(f"{colorama.Fore.CYAN}\nDEBUG: {str(values[0])}", *values[1:], colorama.Fore.RESET, sep)
+    else:
+        print(f"\nDEBUG: {str(values[0])}", *values[1:], sep)
+
+
+# workaround for PYTHON <= 3.9 use: BaseException | None
+def log_verbose(msg: str) -> None:
+    print(color(msg, colorama.Fore.CYAN))
+
+
+# workaround for PYTHON <= 3.9 use: BaseException | None
 def log_warn(msg: str, exception: Optional[BaseException] = None) -> None:
     exception_text = "\nException: "
-    eprint(f"{colorama.Fore.RED if colored else ''}\nWARN: {msg}{(exception_text + str(exception)) if exception else ''}{colorama.Fore.RESET if colored else ''}")
+    eprint(color(f"\nWARN: {msg}{(exception_text + str(exception)) if exception else ''}", colorama.Fore.RED))
 
 
 # workaround for PYTHON <= 3.9 use: BaseException | None
 def log_error(msg: str, exception: Optional[BaseException] = None) -> None:
     exception_text = "\nException: "
-    eprint(f"{colorama.Fore.RED if colored else ''}\nERROR: {msg}{(exception_text + str(exception)) if exception else ''}{colorama.Fore.RESET if colored else ''}")
+    eprint(color(f"\nERROR: {msg}{(exception_text + str(exception)) if exception else ''}", colorama.Fore.RED))
 
 
-def eprint(*args: Any, **kwargs: Any) -> None:
+def color(msg: str, color: Optional[str] = None) -> str:
+    return f"{color if colored and color else ''}{msg}{colorama.Fore.RESET if colored and color else ''}"
+
+
+def eprint(*values: object, **kwargs: Any) -> None:
     '''Print to stderr.'''
-    print(*args, file=sys.stderr, **kwargs)
+    print(*values, file=sys.stderr, **kwargs)
 
 
 # workaround for PYTHON <= 3.9 use: BaseException | None

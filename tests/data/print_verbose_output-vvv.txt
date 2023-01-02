@@ -1,0 +1,223 @@
+QReader installed: True
+CV2 version: 4.7.0
+QR reading mode: ZBAR
+
+Input files: ['example_export.txt']
+[36mProcessing infile example_export.txt[39m
+Reading lines of example_export.txt
+[36m# 2FA example from https://www.raspberrypi.org/blog/setting-up-two-factor-authentication-on-your-raspberry-pi/[39m
+[36m[39m
+[36m# Secret key: 7KSQL2JTUDIS5EF65KLMRQIIGY[39m
+[36m# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi[39m
+[36motpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B[39m
+[36m[39m
+[36m# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY[39m
+[36motpauth-migration://offline?data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACEAEYASAAKLzjp5n4%2F%2F%2F%2F%2FwE%3D[39m
+[36m[39m
+[36m# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi[39m
+[36m# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY[39m
+[36motpauth-migration://offline?data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACCjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACiQ7OOa%2Bf%2F%2F%2F%2F8B[39m
+[36m[39m
+[36m# otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4[39m
+[36motpauth-migration://offline?data=CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAEwATgEEAEYASAAKNuv15j6%2F%2F%2F%2F%2FwE%3D[39m
+[36m[39m
+[36m# otpauth://totp/encoding%3A%20%C2%BF%C3%A4%C3%84%C3%A9%C3%89%3F%20%28demo%29?secret=7KSQL2JTUDIS5EF65KLMRQIIGY[39m
+[36m# Name: "encoding: ¿äÄéÉ? (demo)"[39m
+[36motpauth-migration://offline?data=CjYKEPqlBekzoNEukL7qlsjBCDYSHGVuY29kaW5nOiDCv8Okw4TDqcOJPyAoZGVtbykgASgBMAIQARgBIAAorfCurv%2F%2F%2F%2F%2F%2FAQ%3D%3D[39m
+[36m# 2FA example from https://www.raspberrypi.org/blog/setting-up-two-factor-authentication-on-your-raspberry-pi/[39m
+[36m[39m
+[36m# Secret key: 7KSQL2JTUDIS5EF65KLMRQIIGY[39m
+[36m# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi[39m
+[36motpauth-migration://offline?data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B[39m
+[36m
+DEBUG: parsed_url=ParseResult(scheme='otpauth-migration', netloc='offline', path='', params='', query='data=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK%2B%2F%2F%2F%2F%2F8B', fragment='') [39m  
+[36m
+DEBUG: querystring params={'data': ['CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK+/////8B']} [39m  
+[36m
+DEBUG: data_base64=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK+/////8B [39m  
+[36m
+DEBUG: data_base64_fixed=CjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACjr4JKK+/////8B [39m  
+[36m
+DEBUG: 
+1. Payload Line otp_parameters {
+  secret: "\372\245\005\3513\240\321.\220\276\352\226\310\301\0106"
+  name: "pi@raspberrypi"
+  issuer: "raspberrypi"
+  algorithm: ALGO_SHA1
+  digits: 1
+  type: OTP_TOTP
+}
+version: 1
+batch_size: 1
+batch_id: -1320898453
+ [39m 
+
+
+1. Secret
+[36m
+DEBUG: OTP enum type: OTP_TOTP [39m  
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
+otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+
+[36m[39m
+[36m# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY[39m
+[36motpauth-migration://offline?data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACEAEYASAAKLzjp5n4%2F%2F%2F%2F%2FwE%3D[39m
+[36m
+DEBUG: parsed_url=ParseResult(scheme='otpauth-migration', netloc='offline', path='', params='', query='data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACEAEYASAAKLzjp5n4%2F%2F%2F%2F%2FwE%3D', fragment='') [39m  
+[36m
+DEBUG: querystring params={'data': ['CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACEAEYASAAKLzjp5n4/////wE=']} [39m  
+[36m
+DEBUG: data_base64=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACEAEYASAAKLzjp5n4/////wE= [39m  
+[36m
+DEBUG: data_base64_fixed=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACEAEYASAAKLzjp5n4/////wE= [39m  
+[36m
+DEBUG: 
+2. Payload Line otp_parameters {
+  secret: "\372\245\005\3513\240\321.\220\276\352\226\310\301\0106"
+  name: "pi@raspberrypi"
+  algorithm: ALGO_SHA1
+  digits: 1
+  type: OTP_TOTP
+}
+version: 1
+batch_size: 1
+batch_id: -2094403140
+ [39m 
+
+
+2. Secret
+[36m
+DEBUG: OTP enum type: OTP_TOTP [39m  
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+
+[36m[39m
+[36m# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi[39m
+[36m# otpauth://totp/pi@raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY[39m
+[36motpauth-migration://offline?data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACCjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACiQ7OOa%2Bf%2F%2F%2F%2F8B[39m
+[36m
+DEBUG: parsed_url=ParseResult(scheme='otpauth-migration', netloc='offline', path='', params='', query='data=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACCjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACiQ7OOa%2Bf%2F%2F%2F%2F8B', fragment='') [39m  
+[36m
+DEBUG: querystring params={'data': ['CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACCjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACiQ7OOa+f////8B']} [39m  
+[36m
+DEBUG: data_base64=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACCjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACiQ7OOa+f////8B [39m  
+[36m
+DEBUG: data_base64_fixed=CigKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpIAEoATACCjUKEPqlBekzoNEukL7qlsjBCDYSDnBpQHJhc3BiZXJyeXBpGgtyYXNwYmVycnlwaSABKAEwAhABGAEgACiQ7OOa+f////8B [39m  
+[36m
+DEBUG: 
+3. Payload Line otp_parameters {
+  secret: "\372\245\005\3513\240\321.\220\276\352\226\310\301\0106"
+  name: "pi@raspberrypi"
+  algorithm: ALGO_SHA1
+  digits: 1
+  type: OTP_TOTP
+}
+otp_parameters {
+  secret: "\372\245\005\3513\240\321.\220\276\352\226\310\301\0106"
+  name: "pi@raspberrypi"
+  issuer: "raspberrypi"
+  algorithm: ALGO_SHA1
+  digits: 1
+  type: OTP_TOTP
+}
+version: 1
+batch_size: 1
+batch_id: -1822886384
+ [39m 
+
+
+3. Secret
+[36m
+DEBUG: OTP enum type: OTP_TOTP [39m  
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+
+
+4. Secret
+[36m
+DEBUG: OTP enum type: OTP_TOTP [39m  
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
+otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+
+[36m[39m
+[36m# otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4[39m
+[36motpauth-migration://offline?data=CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAEwATgEEAEYASAAKNuv15j6%2F%2F%2F%2F%2FwE%3D[39m
+[36m
+DEBUG: parsed_url=ParseResult(scheme='otpauth-migration', netloc='offline', path='', params='', query='data=CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAEwATgEEAEYASAAKNuv15j6%2F%2F%2F%2F%2FwE%3D', fragment='') [39m  
+[36m
+DEBUG: querystring params={'data': ['CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAEwATgEEAEYASAAKNuv15j6/////wE=']} [39m  
+[36m
+DEBUG: data_base64=CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAEwATgEEAEYASAAKNuv15j6/////wE= [39m  
+[36m
+DEBUG: data_base64_fixed=CiUKEPqlBekzoNEukL7qlsjBCDYSCWhvdHAgZGVtbyABKAEwATgEEAEYASAAKNuv15j6/////wE= [39m  
+[36m
+DEBUG: 
+4. Payload Line otp_parameters {
+  secret: "\372\245\005\3513\240\321.\220\276\352\226\310\301\0106"
+  name: "hotp demo"
+  algorithm: ALGO_SHA1
+  digits: 1
+  type: OTP_HOTP
+  counter: 4
+}
+version: 1
+batch_size: 1
+batch_id: -1558849573
+ [39m 
+
+
+5. Secret
+[36m
+DEBUG: OTP enum type: OTP_HOTP [39m  
+Name:    hotp demo
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    hotp
+Counter: 4
+otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4
+
+[36m[39m
+[36m# otpauth://totp/encoding%3A%20%C2%BF%C3%A4%C3%84%C3%A9%C3%89%3F%20%28demo%29?secret=7KSQL2JTUDIS5EF65KLMRQIIGY[39m
+[36m# Name: "encoding: ¿äÄéÉ? (demo)"[39m
+[36motpauth-migration://offline?data=CjYKEPqlBekzoNEukL7qlsjBCDYSHGVuY29kaW5nOiDCv8Okw4TDqcOJPyAoZGVtbykgASgBMAIQARgBIAAorfCurv%2F%2F%2F%2F%2F%2FAQ%3D%3D[39m
+[36m
+DEBUG: parsed_url=ParseResult(scheme='otpauth-migration', netloc='offline', path='', params='', query='data=CjYKEPqlBekzoNEukL7qlsjBCDYSHGVuY29kaW5nOiDCv8Okw4TDqcOJPyAoZGVtbykgASgBMAIQARgBIAAorfCurv%2F%2F%2F%2F%2F%2FAQ%3D%3D', fragment='') [39m  
+[36m
+DEBUG: querystring params={'data': ['CjYKEPqlBekzoNEukL7qlsjBCDYSHGVuY29kaW5nOiDCv8Okw4TDqcOJPyAoZGVtbykgASgBMAIQARgBIAAorfCurv//////AQ==']} [39m  
+[36m
+DEBUG: data_base64=CjYKEPqlBekzoNEukL7qlsjBCDYSHGVuY29kaW5nOiDCv8Okw4TDqcOJPyAoZGVtbykgASgBMAIQARgBIAAorfCurv//////AQ== [39m  
+[36m
+DEBUG: data_base64_fixed=CjYKEPqlBekzoNEukL7qlsjBCDYSHGVuY29kaW5nOiDCv8Okw4TDqcOJPyAoZGVtbykgASgBMAIQARgBIAAorfCurv//////AQ== [39m  
+[36m
+DEBUG: 
+5. Payload Line otp_parameters {
+  secret: "\372\245\005\3513\240\321.\220\276\352\226\310\301\0106"
+  name: "encoding: ¿äÄéÉ? (demo)"
+  algorithm: ALGO_SHA1
+  digits: 1
+  type: OTP_TOTP
+}
+version: 1
+batch_size: 1
+batch_id: -171198419
+ [39m 
+
+
+6. Secret
+[36m
+DEBUG: OTP enum type: OTP_TOTP [39m  
+Name:    encoding: ¿äÄéÉ? (demo)
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+otpauth://totp/encoding%3A%20%C2%BF%C3%A4%C3%84%C3%A9%C3%89%3F%20%28demo%29?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+
+Extracted 6 otps from 5 otp urls by reading 1 infile
