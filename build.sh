@@ -78,7 +78,7 @@ VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest |
 BASEVERSION=4
 echo
 
-interactive=true
+interactive=false
 ignore_version_check=true
 clean=false
 build_docker=true
@@ -92,7 +92,7 @@ while test $# -gt 0; do
             echo "$0 [options]"
             echo
             echo "Options:"
-            echo "-a                      Automatic mode"
+            echo "-i                      Interactive"
             echo "-C                      Ignore version check"
             echo "-D                      No docker build"
             echo "-G                      No not run gui"
@@ -101,7 +101,7 @@ while test $# -gt 0; do
             quit
             ;;
         -a)
-            interactive=false
+            interactive=true
             shift
             ;;
         -C)
@@ -250,23 +250,25 @@ $PIPENV run python --version
 
 # Lint
 
-cmd="$FLAKE8 . --count --select=E9,F63,F7,F82 --show-source --statistics"
+LINT_OUT_FILE="tests/reports/flake8_results.txt"
+cmd="$FLAKE8 . --count --select=E9,F63,F7,F82 --show-source --statistics | tee $LINT_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$FLAKE8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --statistics --exclude=.git,__pycache__,docs/source/conf.py,old,build,dist,protobuf_generated_python"
+cmd="$FLAKE8 . --count --exit-zero --max-complexity=10 --max-line-length=200 --statistics --exclude=.git,__pycache__,docs/source/conf.py,old,build,dist,protobuf_generated_python | tee -a $LINT_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 # Type checking
 
+TYPE_CHECK_OUT_FILE="tests/reports/mypy_results.txt"
 cmd="$MYPY --install-types --non-interactive src/*.py tests/*.py"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 # change to src as python -m mypy adds the current dir Python sys.path
 # execute in a subshell in order not to loose the exit code and not to change the dir in the currrent shell
-cmd="$MYPY --strict src/*.py tests/*.py"
+cmd="$MYPY --strict src/*.py tests/*.py | tee $TYPE_CHECK_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -294,8 +296,8 @@ cmd="$PYTHON src/extract_otp_secrets.py - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-COVERAGE_OUT="tests/reports/pytest-coverage.txt"
-cmd="mkdir -p tests/reports; pytest --cov=extract_otp_secrets_test --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT"
+COVERAGE_OUT_FILE="tests/reports/pytest-coverage.txt"
+cmd="mkdir -p tests/reports; pytest --cov=extract_otp_secrets_test --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -308,7 +310,7 @@ eval "$cmd"
 # https://github.com/marketplace/actions/pytest-coverage-comment
 # Coverage-95%25-yellowgreen
 echo -e "Update code coverage in README.md"
-TOTAL_COVERAGE=$(cat $COVERAGE_OUT | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
+TOTAL_COVERAGE=$(cat $COVERAGE_OUT_FILE | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
 
 if $build_docker; then
     # Build docker
@@ -369,6 +371,12 @@ if $run_gui; then
     eval "$cmd"
 fi
 
-echo -e "${greenBold}Sucessful${reset}"
+echo -e "\n${blueBold}#### Results ####${reset}"
+
+cmd="cat $TYPE_CHECK_OUT_FILE $LINT_OUT_FILE $COVERAGE_OUT_FILE"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+echo -e "\n${greenBold}Sucessful${reset}"
 
 quit
