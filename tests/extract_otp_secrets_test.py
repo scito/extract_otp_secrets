@@ -413,8 +413,8 @@ def test_extract_verbose(verbose_level: str, color: str, capsys: pytest.CaptureF
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = normalize_verbose_text(read_file_to_str(f'tests/data/print_verbose_output{color}{verbose_level}.txt'), actual_relaxed := relaxed or sys.implementation.name == 'pypy')
-    actual_stdout = normalize_verbose_text(captured.out, actual_relaxed)
+    expected_stdout = normalize_verbose_text(read_file_to_str(f'tests/data/print_verbose_output{color}{verbose_level}.txt'), relaxed or sys.implementation.name == 'pypy')
+    actual_stdout = normalize_verbose_text(captured.out, relaxed or sys.implementation.name == 'pypy')
 
     assert actual_stdout == expected_stdout
     assert captured.err == ''
