@@ -1,28 +1,15 @@
-# TODO rewrite
-
-# Extract two-factor authentication (2FA, TFA) secrets from export QR codes of "Google Authenticator" app
+# Extract one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps such as "Google Authenticator"
 #
-# Usage:
-# 1. Export the QR codes from "Google Authenticator" app
-# 2. Read QR codes with QR code reader (e.g. with a second device)
-# 3. Save the captured QR codes in a text file. Save each QR code on a new line. (The captured QR codes look like "otpauth-migration://offline?data=...")
-# 4. Call this script with the file as input:
-#    python extract_otp_secrets.py example_export.txt
+# For more information, see README.md
 #
-# Requirement:
-# The protobuf package of Google for proto3 is required for running this script.
-# pip install protobuf
-#
-# Optional:
-# For printing QR codes, the qrcode module is required
-# pip install qrcode
+# Source code available on https://github.com/scito/extract_otp_secrets
 #
 # Technical background:
-# The export QR code of "Google Authenticator" contains the URL "otpauth-migration://offline?data=...".
+# The export QR code from "Google Authenticator" contains the URL "otpauth-migration://offline?data=...".
 # The data parameter is a base64 encoded proto3 message (Google Protocol Buffers).
 #
 # Command for regeneration of Python code from proto3 message definition file (only necessary in case of changes of the proto3 message definition):
-# protoc --python_out=generated_python google_auth.proto
+# protoc --plugin=protoc-gen-mypy=path/to/protoc-gen-mypy --python_out=src/protobuf_generated_python --mypy_out=src/protobuf_generated_python --proto_path=src google_auth.proto
 #
 # References:
 # Proto3 documentation: https://developers.google.com/protocol-buffers/docs/pythontutorial

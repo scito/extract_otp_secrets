@@ -147,7 +147,7 @@ echo -e "\nProtoc remote version $VERSION\n"
 echo -e "Protoc local version: $OLDVERSION\n"
 
 if $clean; then
-    cmd="rm -r dist/ build/ *.whl pytest.xml pytest-coverage.txt .coverage tests/reports || true; find . -name '*.pyc' -type f -delete; find . -name '__pycache__' -type d -exec rm -r {} \; || true; find . -name '*.egg-info' -type d -exec rm -r {} \; || true; find . -name '*_cache' -type d -exec rm -r {} \; || true"
+    cmd="rm -r dist/ build/ *.whl pytest.xml pytest-coverage.txt .coverage tests/reports || true; find . -name '*.pyc' -type f -delete; find . -name '__pycache__' -type d -exec rm -r {} \; || true; find . -name '*.egg-info' -type d -exec rm -r {} \; || true; find . -name '*_cache' -type d -exec rm -r {} \; || true; mkdir -p tests/reports;"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -200,7 +200,7 @@ if [ "$OLDVERSION" != "$VERSION" ] || ! $ignore_version_check; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="$BIN/$DEST/bin/protoc --plugin=protoc-gen-mypy=$HOME/.local/bin/protoc-gen-mypy --python_out=protobuf_generated_python --mypy_out=protobuf_generated_python src/google_auth.proto"
+    cmd="$BIN/$DEST/bin/protoc --plugin=protoc-gen-mypy=$HOME/.local/bin/protoc-gen-mypy --python_out=src/protobuf_generated_python --mypy_out=src/protobuf_generated_python --proto_path=src google_auth.proto"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -311,7 +311,7 @@ if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";
 eval "$cmd"
 
 COVERAGE_OUT_FILE="tests/reports/pytest-coverage.txt"
-cmd="mkdir -p tests/reports; pytest --cov=extract_otp_secrets_test --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT_FILE"
+cmd="pytest --cov=extract_otp_secrets_test --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
