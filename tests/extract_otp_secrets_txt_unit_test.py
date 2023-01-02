@@ -19,20 +19,21 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations  # workaround for PYTHON <= 3.10
+
 import io
 import os
-import sys
 import unittest
 from contextlib import redirect_stdout
 
-import extract_otp_secrets
-from utils import (Capturing, read_csv, read_file_to_str, read_json,
-                   remove_dir_with_files, remove_file, count_files_in_dir)
+from utils import (Capturing, count_files_in_dir, read_csv, read_file_to_str,
+                   read_json, remove_dir_with_files, remove_file)
 
+import extract_otp_secrets
 
 # Conditional skip example
 # if sys.implementation.name == 'pypy' or sys.platform.startswith("win") or sys.version_info < (3, 10):
 #             self.skipTest("Avoid encoding problems")
+
 
 class TestExtract(unittest.TestCase):
 

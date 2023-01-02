@@ -83,6 +83,7 @@ ignore_version_check=true
 clean=false
 build_docker=true
 run_gui=true
+generate_result_files=false
 
 while test $# -gt 0; do
     case $1 in
@@ -97,6 +98,7 @@ while test $# -gt 0; do
             echo "-D                      No docker build"
             echo "-G                      No not run gui"
             echo "-c                      Clean"
+            echo "-r                      Generate result files"
             echo "-h, --help              Help"
             quit
             ;;
@@ -114,6 +116,10 @@ while test $# -gt 0; do
             ;;
         -G)
             run_gui=false
+            shift
+            ;;
+        -r)
+            generate_result_files=true
             shift
             ;;
         -c)
@@ -285,6 +291,14 @@ eval "$cmd"
 cmd="extract_otp_secrets - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
+
+# Generate results files
+
+if $generate_result_files; then
+    cmd="for color in '' '-n'; do for level in '' '-v' '-vv' '-vvv'; do $PYTHON src/extract_otp_secrets.py example_export.txt $color $level > tests/data/print_verbose_output$color$level.txt; done; done"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+fi
 
 # Test
 

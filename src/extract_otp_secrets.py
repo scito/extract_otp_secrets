@@ -242,7 +242,9 @@ def cv2_draw_box(img: Any, raw_pts: Any, color: ColorBGR) -> Any:
 def cv2_print_text(img: Any, text: str, line_number: int, position: TextPosition, color: ColorBGR, opposite_len: Optional[int] = None) -> None:
     text_dim, _ = cv2.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS)
     window_dim = cv2.getWindowImageRect(WINDOW_NAME)
-    out_text = text if not opposite_len or (actual_width := text_dim[TEXT_WIDTH] + opposite_len * CHAR_DX + 4 * BORDER) <= window_dim[WINDOW_WIDTH] else text[:(window_dim[WINDOW_WIDTH] - actual_width) // CHAR_DX] + '.'
+    out_text = text \
+        if not opposite_len or (actual_width := text_dim[TEXT_WIDTH] + opposite_len * CHAR_DX + 4 * BORDER) <= window_dim[WINDOW_WIDTH] \
+        else text[:(window_dim[WINDOW_WIDTH] - actual_width) // CHAR_DX] + '.'
     text_dim, _ = cv2.getTextSize(out_text, FONT, FONT_SCALE, FONT_THICKNESS)
     if position == TextPosition.LEFT:
         pos = BORDER, START_Y + line_number * FONT_DY

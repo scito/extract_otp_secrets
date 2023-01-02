@@ -393,6 +393,7 @@ def test_extract_verbose(verbose_level: str, color: str, capsys: pytest.CaptureF
         assert actual_stdout == expected_stdout
     assert captured.err == ''
 
+
 def normalize_verbose_text(text: str) -> str:
     return re.sub('^.+ version: .+$', '', text, flags=re.MULTILINE | re.IGNORECASE)
 
