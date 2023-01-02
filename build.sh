@@ -385,12 +385,13 @@ if $run_gui; then
     eval "$cmd"
 fi
 
-echo -e "\n${blueBold}#### Results ####${reset}"
+line=$(printf '#%.0s' $(eval echo {1..$(( ($COLUMNS - 10) / 2))}))
+echo -e "\n${blueBold}$line RESULTS $line${reset}"
 
 cmd="cat $TYPE_CHECK_OUT_FILE $LINT_OUT_FILE $COVERAGE_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-echo -e "\n${greenBold}Sucessful${reset}"
+echo -e "\n${greenBold}SUCCESS${reset}"
 
 quit

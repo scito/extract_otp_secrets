@@ -171,7 +171,7 @@ def main(sys_args: list[str]) -> None:
 
 def parse_args(sys_args: list[str]) -> Args:
     global verbose, quiet, colored
-    description_text = "Extracts one time password (OTP) secrets from export QR codes from two-factor authentication (2FA) apps"
+    description_text = "Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps"
     if qreader_available:
         description_text += "\nIf no infiles are provided, a GUI window starts and QR codes are captured from the camera."
     example_text = """examples:
@@ -186,18 +186,19 @@ python extract_otp_secrets.py = < example_export.png"""
                                          epilog=example_text)
     arg_parser.add_argument('infile', help="""a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
 b) image file containing a QR code or = for stdin for an image containing a QR code""", nargs='*' if qreader_available else '+')
+    arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
+    arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
+    arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
+    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
+    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
     if qreader_available:
         arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, type=int, metavar=('NUMBER'))
         arg_parser.add_argument('--qr', '-Q', help=f'QR reader (default: {QRMode.ZBAR.name})', type=str, choices=[mode.name for mode in QRMode], default=QRMode.ZBAR.name)
-    arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
-    arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
-    arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
-    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
-    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
+    arg_parser.add_argument('-i', '--ignore', help='ignore duplicate otps', action='store_true')
     arg_parser.add_argument('--no-color', '-n', help='do not use ANSI colors in console output', action='store_true')
     output_group = arg_parser.add_mutually_exclusive_group()
-    output_group.add_argument('--verbose', '-v', help='verbose output', action='count')
-    output_group.add_argument('--quiet', '-q', help='no stdout output, except output set by -', action='store_true')
+    output_group.add_argument('-v', '--verbose', help='verbose output', action='count')
+    output_group.add_argument('-q', '--quiet', help='no stdout output, except output set by -', action='store_true')
     args = arg_parser.parse_args(sys_args)
     if args.csv == '-' or args.json == '-' or args.keepass == '-':
         args.quiet = args.q = True
@@ -421,7 +422,6 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count:
     new_otps_count = 0
     # pylint: disable=no-member
     for raw_otp in payload.otp_parameters:
-        new_otps_count += 1
         if verbose: print(f"\n{len(otps) + 1}. Secret")
         secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
         if verbose >= LogLevel.DEBUG: log_debug('OTP enum type:', get_enum_name_by_number(raw_otp, 'type'))
@@ -435,15 +435,19 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count:
             "counter": raw_otp.counter if raw_otp.type == 1 else None,
             "url": otp_url
         }
-        otps.append(otp)
-        if not quiet:
-            print_otp(otp)
-        if args.printqr:
-            print_qr(args, otp_url)
-        if args.saveqr:
-            save_qr(otp, args, len(otps))
-        if not quiet:
-            print()
+        if otp not in otps or not args.ignore:
+            otps.append(otp)
+            new_otps_count += 1
+            if not quiet:
+                print_otp(otp)
+            if args.printqr:
+                print_qr(args, otp_url)
+            if args.saveqr:
+                save_qr(otp, args, len(otps))
+            if not quiet:
+                print()
+        elif args.ignore and not quiet:
+            eprint(f"Ignored duplicate otp: {otp['name']}", f" / {otp['issuer']}\n" if otp['issuer'] else '\n', sep='')
 
     return new_otps_count
 
@@ -613,8 +617,11 @@ def write_keepass_csv(args: Args, otps: Otps) -> None:
     if args.keepass and len(otps) > 0:
         has_totp = has_otp_type(otps, 'totp')
         has_hotp = has_otp_type(otps, 'hotp')
-        otp_filename_totp = args.keepass if has_totp != has_hotp else add_pre_suffix(args.keepass, "totp")
-        otp_filename_hotp = args.keepass if has_totp != has_hotp else add_pre_suffix(args.keepass, "hotp")
+        if args.keepass != '-':
+            otp_filename_totp = args.keepass if has_totp != has_hotp else add_pre_suffix(args.keepass, "totp")
+            otp_filename_hotp = args.keepass if has_totp != has_hotp else add_pre_suffix(args.keepass, "hotp")
+        else:
+            otp_filename_totp = otp_filename_hotp = '-'
         if has_totp:
             count_totp_entries = write_keepass_totp_csv(otp_filename_totp, otps)
         if has_hotp:

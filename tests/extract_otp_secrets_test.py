@@ -26,6 +26,7 @@ import pathlib
 import re
 import sys
 import time
+from typing import Optional
 
 import colorama
 import pytest
@@ -354,6 +355,43 @@ def test_extract_saveqr(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Pa
     assert count_files_in_dir(tmp_path) == 6
 
 
+def test_extract_ignored_duplicates(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-i', 'example_export.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    expected_stdout = '''Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Issuer:  raspberrypi
+Type:    totp
+
+Name:    pi@raspberrypi
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+
+Name:    hotp demo
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    hotp
+Counter: 4
+
+Name:    encoding: ¿äÄéÉ? (demo)
+Secret:  7KSQL2JTUDIS5EF65KLMRQIIGY
+Type:    totp
+
+'''
+
+    expected_stderr = '''Ignored duplicate otp: pi@raspberrypi
+
+Ignored duplicate otp: pi@raspberrypi / raspberrypi
+
+'''
+
+    assert captured.out == expected_stdout
+    assert captured.err == expected_stderr
+
+
 def test_normalize_bytes() -> None:
     assert replace_escaped_octal_utf8_bytes_with_str(
         'Before\\\\302\\\\277\\\\303\nname: enc: \\302\\277\\303\\244\\303\\204\\303\\251\\303\\211?\nAfter') == 'Before\\\\302\\\\277\\\\303\nname: enc: ¿äÄéÉ?\nAfter'
@@ -421,7 +459,7 @@ def test_extract_help(capsys: pytest.CaptureFixture[str]) -> None:
     captured = capsys.readouterr()
 
     assert len(captured.out) > 0
-    assert "-h, --help" in captured.out and "--verbose, -v" in captured.out
+    assert "-h, --help" in captured.out and "-v, --verbose" in captured.out
     assert captured.err == ''
     assert e.type == SystemExit
     assert e.value.code == 0
@@ -469,10 +507,39 @@ def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
     captured = capsys.readouterr()
 
     assert len(captured.err) > 0
-    assert 'error: argument --quiet/-q: not allowed with argument --verbose/-v' in captured.err
+    assert 'error: argument -q/--quiet: not allowed with argument -v/--verbose' in captured.err
     assert captured.out == ''
     assert e.value.code == 2
     assert e.type == SystemExit
+
+
+@pytest.mark.parametrize("parameter,parameter_value,stdout_expected,stderr_expected", [
+    ('-c', 'outfile', False, False),
+    ('-c', '-', True, False),
+    ('-k', 'outfile', False, False),
+    ('-k', '-', True, False),
+    ('-j', 'outfile', False, False),
+    ('-s', 'outfile', False, False),
+    ('-j', '-', True, False),
+    ('-i', None, False, False),
+    ('-p', None, True, False),
+    ('-Q', 'CV2', False, False),
+    ('-n', None, False, False),
+])
+def test_quiet(parameter: str, parameter_value: Optional[str], stdout_expected: bool, stderr_expected: bool, capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
+    args = ['-q', 'example_export.txt', 'example_export.png', parameter]
+    if parameter_value == 'outfile':
+        args.append(str(tmp_path / parameter_value))
+    elif parameter_value:
+        args.append(parameter_value)
+    # Act
+    extract_otp_secrets.main(args)
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert (captured.out == '' and not stdout_expected) or (len(captured.out) > 0 and stdout_expected)
+    assert (captured.err == '' and not stderr_expected) or (len(captured.err) > 0 and stderr_expected)
 
 
 def test_wrong_data(capsys: pytest.CaptureFixture[str]) -> None:

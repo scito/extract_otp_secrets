@@ -198,7 +198,7 @@ Type:    totp
         actual_output = out.getvalue()
 
         self.assertGreater(len(actual_output), 0)
-        self.assertTrue("-h, --help" in actual_output and "--verbose, -v" in actual_output)
+        self.assertTrue("-h, --help" in actual_output and "-v, --verbose" in actual_output)
 
     def test_extract_help_2(self) -> None:
         out = io.StringIO()
@@ -209,7 +209,7 @@ Type:    totp
         actual_output = out.getvalue()
 
         self.assertGreater(len(actual_output), 0)
-        self.assertTrue("-h, --help" in actual_output and "--verbose, -v" in actual_output)
+        self.assertTrue("-h, --help" in actual_output and "-v, --verbose" in actual_output)
         self.assertEqual(context.exception.code, 0)
 
     def test_extract_help_3(self) -> None:
@@ -218,7 +218,7 @@ Type:    totp
                 extract_otp_secrets.main(['-h'])
 
         self.assertGreater(len(actual_output), 0)
-        self.assertTrue("-h, --help" in "\n".join(actual_output) and "--verbose, -v" in "\n".join(actual_output))
+        self.assertTrue("-h, --help" in "\n".join(actual_output) and "-v, --verbose" in "\n".join(actual_output))
         self.assertEqual(context.exception.code, 0)
 
     def setUp(self) -> None:
