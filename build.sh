@@ -315,6 +315,12 @@ cmd="extract_otp_secrets - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
+# Build wheel
+
+cmd="$PIP wheel .
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
 # Generate results files
 
 if $generate_result_files; then

@@ -216,6 +216,7 @@ python extract_otp_secrets.py = < example_export.png</pre>
     * Windows
 * Uses UTF-8 on all platforms
 * Supports Python >= 3.7
+* Provides a debug mode (-d) for analyzing import problems
 * Written in modern Python using type hints and following best practices
 * All these features are backed by tests ran nightly
 * All functionality in one Python script: src/extract_otp_secrets.py (except protobuf generated code in protobuf_generated_python)
