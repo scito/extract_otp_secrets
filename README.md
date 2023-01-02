@@ -29,9 +29,13 @@ This script/project was renamed from extract_otp_secret_keys to extract_otp_secr
 git clone https://github.com/scito/extract_otp_secrets.git
 cd extract_otp_secrets
 pip install -U -r requirements.txt
+
+python src/extract_otp_secrets.py example_export.txt
 ```
 
-### Installation of shared libraries for ZBAR QR reader
+In case this script is not starting properly, the debug mode can be activated by adding parameter `-d` in the command line.
+
+### Installation of shared system libraries
 
 For reading QR codes with `ZBAR` QR reader, the zbar library must be installed.
 If you do not use the `ZBAR` QR reader, you do not need to install the zbar shared library. Note: The `ZBAR` QR reader is the showed for me the best results and is thus default QR Reader.
@@ -56,7 +60,13 @@ For a detailed installation documentation of [pyzbar](https://github.com/Natural
 
 #### Windows
 
-The zbar DLLs are included with the Windows Python wheels. However, you might need additionally to install [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). Install `vcredist_x64.exe` if using 64-bit Python, `vcredist_x86.exe` if using 32-bit Python.
+##### zbar
+
+The zbar DLLs are included with the Windows Python wheels. However, you might need additionally to install [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). Install `vcredist_x64.exe` if using 64-bit Python, `vcredist_x86.exe` if using 32-bit Python. For more information see [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar)
+
+##### OpenCV
+
+OpenCV requires [Visual C++ redistributable 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145). For more information see [opencv-python](https://pypi.org/project/opencv-python/)
 
 ## Usage
 
@@ -94,7 +104,9 @@ The zbar DLLs are included with the Windows Python wheels. However, you might ne
 
 ## Program help: arguments and options
 
-<pre>Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps
+<pre>usage: extract_otp_secrets.py [-h] [--csv FILE] [--keepass FILE] [--json FILE] [--printqr] [--saveqr DIR] [--camera NUMBER] [--qr {ZBAR,QREADER,QREADER_DEEP,CV2,CV2_WECHAT}] [-i] [--no-color] [-d | -v | -q] [infile ...]
+
+Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps
 If no infiles are provided, a GUI window starts and QR codes are captured from the camera.
 
 positional arguments:
@@ -113,6 +125,7 @@ options:
                                 QR reader (default: ZBAR)
   -i, --ignore                  ignore duplicate otps
   --no-color, -n                do not use ANSI colors in console output
+  -d, --debug                   enter debug mode, do checks and quit
   -v, --verbose                 verbose output
   -q, --quiet                   no stdout output, except output set by -
 
@@ -460,6 +473,7 @@ docker build . -t extract_otp_secrets_only_txt --pull -f Dockerfile_only_txt --b
 ```
 
 Run tests in docker container:
+
 ```bash
 docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secrets
 ```

@@ -55,6 +55,8 @@ from qrcode import QRCode  # type: ignore
 import protobuf_generated_python.google_auth_pb2 as pb
 import colorama
 
+debug_mode = '-d' in sys.argv[1:] or '--debug' in sys.argv[1:]
+
 try:
     import cv2  # type: ignore # TODO use cv2 types if available
 
@@ -64,11 +66,12 @@ try:
         import pyzbar.pyzbar as zbar  # type: ignore
         from qreader import QReader  # type: ignore
     except ImportError as e:
-        raise SystemExit(f"""
+        print(f"""
 ERROR: Cannot import QReader module. This problem is probably due to the missing zbar shared library.
 On Linux and macOS libzbar0 must be installed.
 See in README.md for the installation of the libzbar0.
-Exception: {e}""")
+Exception: {e}\n""", file=sys.stderr)
+        raise e
 
     # Types
     # workaround for PYTHON <= 3.9: Final[tuple[int]]
@@ -102,8 +105,10 @@ Exception: {e}""")
     TextPosition = Enum('TextPosition', ['LEFT', 'RIGHT'])
 
     qreader_available = True
-except ImportError:
+except ImportError as e:
     qreader_available = False
+    if debug_mode:
+        raise e
 
 # Workaround for PYTHON <= 3.9: Union[int, None] used instead of int | None
 
@@ -150,6 +155,9 @@ def main(sys_args: list[str]) -> None:
     if colored:
         colorama.just_fix_windows_console()
 
+    if args.debug:
+        sys.exit(0 if do_debug_checks() else 1)
+
     otps = extract_otps(args)
     write_csv(args, otps)
     write_keepass_csv(args, otps)
@@ -184,15 +192,19 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
     arg_parser.add_argument('-i', '--ignore', help='ignore duplicate otps', action='store_true')
     arg_parser.add_argument('--no-color', '-n', help='do not use ANSI colors in console output', action='store_true')
     output_group = arg_parser.add_mutually_exclusive_group()
+    output_group.add_argument('-d', '--debug', help='enter debug mode, do checks and quit', action='count')
     output_group.add_argument('-v', '--verbose', help='verbose output', action='count')
     output_group.add_argument('-q', '--quiet', help='no stdout output, except output set by -', action='store_true')
     args = arg_parser.parse_args(sys_args)
+    colored = not args.no_color
     if args.csv == '-' or args.json == '-' or args.keepass == '-':
         args.quiet = args.q = True
 
     verbose = args.verbose if args.verbose else LogLevel.NORMAL
+    if args.debug:
+        verbose = LogLevel.DEBUG
+        log_debug('Debug mode start')
     quiet = True if args.quiet else False
-    colored = not args.no_color
     if verbose: print(f"QReader installed: {qreader_available}")
     if qreader_available:
         if verbose >= LogLevel.VERBOSE: print(f"CV2 version: {cv2.__version__}")
@@ -704,6 +716,16 @@ def is_binary(line: str) -> bool:
 
 def next_qr_mode(qr_mode: QRMode) -> QRMode:
     return QRMode((qr_mode.value + 1) % len(QRMode))
+
+
+def do_debug_checks() -> bool:
+    log_debug('Do debug checks')
+    log_debug('Try: import cv2')
+    import cv2  # noqa: F401 # This is only a debug import
+    log_debug('Try: import numpy as np')
+    import numpy as np  # noqa: F401 # This is only a debug import
+    print(color('\nDebug checks passed', colorama.Fore.GREEN))
+    return True
 
 
 # workaround for PYTHON <= 3.9 use: BaseException | None

@@ -230,30 +230,6 @@ cmd="$PIP install --use-pep517 -U -r requirements-dev.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-cmd="$PIP install -U pipenv"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="sudo $PIP install --use-pep517 -U -r requirements.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="sudo $PIP install --use-pep517 -U -r requirements-dev.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="sudo $PIP install -U pipenv"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-$PIPENV --version
-
-cmd="$PIPENV update && $PIPENV --rm && $PIPENV install"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-$PIPENV run python --version
-
 # Lint
 
 LINT_OUT_FILE="tests/reports/flake8_results.txt"
@@ -278,7 +254,54 @@ cmd="$MYPY --strict src/*.py tests/*.py | tee $TYPE_CHECK_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-# pip install
+# Test
+
+cmd="$PYTHON src/extract_otp_secrets.py example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="$PYTHON src/extract_otp_secrets.py - < example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+COVERAGE_OUT_FILE="tests/reports/pytest-coverage.txt"
+cmd="pytest --cov=extract_otp_secrets_test --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT_FILE"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+# Pipenv
+
+cmd="$PIP install -U pipenv"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+$PIPENV --version
+
+cmd="$PIPENV update && $PIPENV --rm && $PIPENV install"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+$PIPENV run python --version
+
+cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+# sudo pip
+
+cmd="sudo $PIP install --use-pep517 -U -r requirements.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="sudo $PIP install --use-pep517 -U -r requirements-dev.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="sudo $PIP install -U pipenv"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+# pip -e install (must be after other pip installs in order to have this environment for development)
 
 cmd="$PIP install -U -e ."
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
@@ -299,25 +322,6 @@ if $generate_result_files; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 fi
-
-# Test
-
-cmd="$PYTHON src/extract_otp_secrets.py example_export.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="$PYTHON src/extract_otp_secrets.py - < example_export.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-COVERAGE_OUT_FILE="tests/reports/pytest-coverage.txt"
-cmd="pytest --cov=extract_otp_secrets_test --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT_FILE"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
 
 # Update Code Coverage in README.md
 
@@ -356,7 +360,7 @@ if $build_docker; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="cat mple_export.txt | docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - -c - > example_output.csv"
+    cmd="cat example_export.txt | docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - -c - > example_output.csv"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -373,10 +377,10 @@ if $build_docker; then
     eval "$cmd"
 
     if $run_gui; then
-        cmd="docker run --pull always --rm -v "$(pwd)":/files:ro --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets &"
+        cmd="docker run --rm -v "$(pwd)":/files:ro --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets &"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
     fi
-    eval "$cmd"
 fi
 
 if $run_gui; then

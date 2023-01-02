@@ -15,9 +15,10 @@ COPY . .
 ARG RUN_TESTS=true
 
 RUN apt-get update && apt-get install -y \
+        libgl1 \
+        libglib2.0-0 \
         libsm6 \
         libzbar0 \
-        python3-opencv \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir -U -r \
         requirements.txt \
