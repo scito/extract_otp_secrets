@@ -31,11 +31,9 @@ from typing import Optional
 import colorama
 import pytest
 from pytest_mock import MockerFixture
-from utils import (count_files_in_dir, file_exits,
-                   quick_and_dirty_workaround_encoding_problem,
-                   read_binary_file_as_stream, read_csv, read_csv_str,
-                   read_file_to_str, read_json, read_json_str,
-                   replace_escaped_octal_utf8_bytes_with_str)
+from utils import (count_files_in_dir, file_exits, read_binary_file_as_stream,
+                   read_csv, read_csv_str, read_file_to_str, read_json,
+                   read_json_str, replace_escaped_octal_utf8_bytes_with_str)
 
 import extract_otp_secrets
 
@@ -415,25 +413,23 @@ def test_extract_verbose(verbose_level: str, color: str, capsys: pytest.CaptureF
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = normalize_verbose_text(read_file_to_str(f'tests/data/print_verbose_output{color}{verbose_level}.txt'))
-    actual_stdout = normalize_verbose_text(captured.out)
+    expected_stdout = normalize_verbose_text(read_file_to_str(f'tests/data/print_verbose_output{color}{verbose_level}.txt'), actual_relaxed := relaxed or sys.implementation.name == 'pypy')
+    actual_stdout = normalize_verbose_text(captured.out, actual_relaxed)
 
-    if not qreader_available:
-        expected_stdout = expected_stdout.replace('QReader installed: True', 'QReader installed: False')
-        expected_stdout = expected_stdout.replace('QR reading mode: ZBAR\n\n', '')
-
-    if relaxed or sys.implementation.name == 'pypy':
-        print('\nRelaxed mode\n')
-
-        assert replace_escaped_octal_utf8_bytes_with_str(actual_stdout) == replace_escaped_octal_utf8_bytes_with_str(expected_stdout)
-        assert quick_and_dirty_workaround_encoding_problem(actual_stdout) == quick_and_dirty_workaround_encoding_problem(expected_stdout)
-    else:
-        assert actual_stdout == expected_stdout
+    assert actual_stdout == expected_stdout
     assert captured.err == ''
 
 
-def normalize_verbose_text(text: str) -> str:
-    return re.sub('^.+ version: .+$', '', text, flags=re.MULTILINE | re.IGNORECASE)
+def normalize_verbose_text(text: str, relaxed: bool) -> str:
+    normalized = re.sub('^.+ version: .+$', '', text, flags=re.MULTILINE | re.IGNORECASE)
+    if not qreader_available:
+        normalized = normalized \
+            .replace('QReader installed: True', 'QReader installed: False') \
+            .replace('\nQR reading mode: ZBAR\n\n', '')
+    if relaxed:
+        print('\nRelaxed mode\n')
+        normalized = replace_escaped_octal_utf8_bytes_with_str(normalized)
+    return normalized
 
 
 def test_extract_debug(capsys: pytest.CaptureFixture[str]) -> None:
@@ -524,14 +520,20 @@ def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
     ('-i', None, False, False),
     ('-p', None, True, False),
     ('-Q', 'CV2', False, False),
+    ('-C', '0', False, False),
     ('-n', None, False, False),
 ])
 def test_quiet(parameter: str, parameter_value: Optional[str], stdout_expected: bool, stderr_expected: bool, capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
+    if parameter in ['-Q', '-C'] and not qreader_available:
+        return
+
+    # Arrange
     args = ['-q', 'example_export.txt', 'example_export.png', parameter]
     if parameter_value == 'outfile':
         args.append(str(tmp_path / parameter_value))
     elif parameter_value:
         args.append(parameter_value)
+
     # Act
     extract_otp_secrets.main(args)
 

@@ -9,11 +9,9 @@ name: docker
 on:
   # run it on push to the default repository branch
   push:
-  #  branches: [master]
-  # run it during pull request
-  pull_request:
+    branches: [master]
   schedule:
-    # Run weekly
+    # Run weekly on default branch
     - cron: '47 3 * * 6'
 
 jobs:
@@ -72,8 +70,7 @@ jobs:
             scit0/extract_otp_secrets:latest-only-txt
             ghcr.io/scito/extract_otp_secrets:latest-only-txt
           # build on feature branches, push only on master branch
-          # TODO push: ${{ github.ref == 'refs/heads/master' }}
-          push: true
+          push: ${{ github.ref == 'refs/heads/master' }}
           build-args: |
             RUN_TESTS=true
 
@@ -90,8 +87,7 @@ jobs:
             scit0/extract_otp_secrets:latest
             ghcr.io/scito/extract_otp_secrets:latest
           # build on feature branches, push only on master branch
-          # TODO push: ${{ github.ref == 'refs/heads/master' }}
-          push: true
+          push: ${{ github.ref == 'refs/heads/master' }}
 
       - name: Image digest
         run: |
