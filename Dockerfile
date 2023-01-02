@@ -15,8 +15,8 @@ COPY . .
 ARG RUN_TESTS=true
 
 RUN apt-get update && apt-get install -y \
-        libzbar0 \
         libsm6 \
+        libzbar0 \
         python3-opencv \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir -U -r \
