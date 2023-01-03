@@ -220,42 +220,6 @@ def extract_otps(args: Args) -> Otps:
         return extract_otps_from_files(args)
 
 
-def get_color(new_otps_count: int, otp_url: str) -> ColorBGR:
-    if new_otps_count:
-        return SUCCESS_COLOR
-    else:
-        if otp_url:
-            return FAILURE_COLOR
-        else:
-            return NORMAL_COLOR
-
-
-# TODO use cv2 types if available
-def cv2_draw_box(img: Any, raw_pts: Any, color: ColorBGR) -> Any:
-    pts = np.array([raw_pts], np.int32)
-    pts = pts.reshape((-1, 1, 2))
-    cv2.polylines(img, [pts], True, color, BOX_THICKNESS)
-    return pts
-
-
-# TODO use cv2 types if available
-def cv2_print_text(img: Any, text: str, line_number: int, position: TextPosition, color: ColorBGR, opposite_len: Optional[int] = None) -> None:
-    window_dim = cv2.getWindowImageRect(WINDOW_NAME)
-    out_text = text
-    if opposite_len:
-        text_dim, _ = cv2.getTextSize(out_text, FONT, FONT_SCALE, FONT_THICKNESS)
-        actual_width = text_dim[TEXT_WIDTH] + opposite_len * CHAR_DX + 4 * BORDER
-        if actual_width >= window_dim[WINDOW_WIDTH]:
-            out_text = out_text[:(window_dim[WINDOW_WIDTH] - actual_width) // CHAR_DX] + '.'
-    text_dim, _ = cv2.getTextSize(out_text, FONT, FONT_SCALE, FONT_THICKNESS)
-    if position == TextPosition.LEFT:
-        pos = BORDER, START_Y + line_number * FONT_DY
-    else:
-        pos = window_dim[WINDOW_WIDTH] - text_dim[TEXT_WIDTH] - BORDER, START_Y + line_number * FONT_DY
-
-    cv2.putText(img, out_text, pos, FONT, FONT_SCALE, color, FONT_THICKNESS, FONT_LINE_STYLE)
-
-
 def extract_otps_from_camera(args: Args) -> Otps:
     if verbose: print("Capture QR codes from camera")
     otp_urls: OtpUrls = []
@@ -323,6 +287,42 @@ def extract_otps_from_camera(args: Args) -> Otps:
     cv2.destroyAllWindows()
 
     return otps
+
+
+def get_color(new_otps_count: int, otp_url: str) -> ColorBGR:
+    if new_otps_count:
+        return SUCCESS_COLOR
+    else:
+        if otp_url:
+            return FAILURE_COLOR
+        else:
+            return NORMAL_COLOR
+
+
+# TODO use cv2 types if available
+def cv2_draw_box(img: Any, raw_pts: Any, color: ColorBGR) -> Any:
+    pts = np.array([raw_pts], np.int32)
+    pts = pts.reshape((-1, 1, 2))
+    cv2.polylines(img, [pts], True, color, BOX_THICKNESS)
+    return pts
+
+
+# TODO use cv2 types if available
+def cv2_print_text(img: Any, text: str, line_number: int, position: TextPosition, color: ColorBGR, opposite_len: Optional[int] = None) -> None:
+    window_dim = cv2.getWindowImageRect(WINDOW_NAME)
+    out_text = text
+    if opposite_len:
+        text_dim, _ = cv2.getTextSize(out_text, FONT, FONT_SCALE, FONT_THICKNESS)
+        actual_width = text_dim[TEXT_WIDTH] + opposite_len * CHAR_DX + 4 * BORDER
+        if actual_width >= window_dim[WINDOW_WIDTH]:
+            out_text = out_text[:(window_dim[WINDOW_WIDTH] - actual_width) // CHAR_DX] + '.'
+    text_dim, _ = cv2.getTextSize(out_text, FONT, FONT_SCALE, FONT_THICKNESS)
+    if position == TextPosition.LEFT:
+        pos = BORDER, START_Y + line_number * FONT_DY
+    else:
+        pos = window_dim[WINDOW_WIDTH] - text_dim[TEXT_WIDTH] - BORDER, START_Y + line_number * FONT_DY
+
+    cv2.putText(img, out_text, pos, FONT, FONT_SCALE, color, FONT_THICKNESS, FONT_LINE_STYLE)
 
 
 def cv2_handle_pressed_keys(qr_mode: QRMode) -> Tuple[bool, QRMode]:

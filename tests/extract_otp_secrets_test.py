@@ -26,7 +26,8 @@ import pathlib
 import re
 import sys
 import time
-from typing import Optional
+from enum import Enum
+from typing import Any, List, Optional, Tuple
 
 import colorama
 import pytest
@@ -36,6 +37,12 @@ from utils import (count_files_in_dir, file_exits, read_binary_file_as_stream,
                    read_json_str, replace_escaped_octal_utf8_bytes_with_str)
 
 import extract_otp_secrets
+
+try:
+    import cv2  # type: ignore
+except ImportError:
+    # ignore
+    pass
 
 qreader_available: bool = extract_otp_secrets.qreader_available
 
@@ -477,6 +484,89 @@ def test_extract_no_arguments(capsys: pytest.CaptureFixture[str], mocker: Mocker
         actual_csv = read_csv_str(captured.out)
 
         assert actual_csv == expected_csv
+        assert captured.err == ''
+    else:
+        # Act
+        with pytest.raises(SystemExit) as e:
+            extract_otp_secrets.main([])
+
+        # Assert
+        captured = capsys.readouterr()
+
+        expected_err_msg = 'error: the following arguments are required: infile'
+
+        assert expected_err_msg in captured.err
+        assert captured.out == ''
+        assert e.value.code == 2
+        assert e.type == SystemExit
+
+
+MockMode = Enum('MockMode', ['REPEAT_FIRST_ENDLESS', 'LOOP_LIST'])
+
+
+class MockCam:
+
+    read_counter: int = 0
+    read_files: List[str] = []
+    mock_mode: MockMode
+
+    def __init__(self, files: List[str] = ['example_export.png'], mock_mode: MockMode = MockMode.REPEAT_FIRST_ENDLESS):
+        self.read_files = files
+        self.image_mode = mock_mode
+
+    def read(self) -> Tuple[bool, Any]:
+        if self.image_mode == MockMode.REPEAT_FIRST_ENDLESS:
+            file = self.read_files[0]
+        elif self.image_mode == MockMode.LOOP_LIST:
+            file = self.read_files[self.read_counter]
+            self.read_counter += 1
+
+        if file:
+            img = cv2.imread(file)
+            return True, img
+        else:
+            return False, None
+
+    def release(self) -> None:
+        # ignore
+        pass
+
+
+@pytest.mark.parametrize("qr_reader", [
+    None,
+    'ZBAR',
+    'QREADER',
+    'QREADER_DEEP',
+    'CV2',
+    'CV2_WECHAT'
+])
+def test_extract_otps_from_camera(qr_reader: Optional[str], capsys: pytest.CaptureFixture[str], mocker: MockerFixture) -> None:
+    if qreader_available:
+        # Arrange
+        mockCam = MockCam()
+        mocker.patch('cv2.VideoCapture', return_value=mockCam)
+        mocker.patch('cv2.namedWindow')
+        mocker.patch('cv2.rectangle')
+        mocker.patch('cv2.polylines')
+        mocker.patch('cv2.imshow')
+        mocker.patch('cv2.getTextSize', return_value=([8, 200], False))
+        mocker.patch('cv2.putText')
+        mocker.patch('cv2.getWindowImageRect', return_value=[0, 0, 640, 480])
+        mocker.patch('cv2.waitKey', return_value=27)
+        mocker.patch('cv2.getWindowProperty', return_value=False)
+        mocker.patch('cv2.destroyAllWindows')
+
+        args = []
+        if qr_reader:
+            args.append('-Q')
+            args.append(qr_reader)
+        # Act
+        extract_otp_secrets.main(args)
+
+        # Assert
+        captured = capsys.readouterr()
+
+        assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
         assert captured.err == ''
     else:
         # Act
