@@ -518,10 +518,10 @@ FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependenc
 
 * [ZBar](https://github.com/mchehab/zbar) is an open source software suite for reading bar codes from various sources, including webcams.
 * [Aegis Authenticator](https://github.com/beemdevelopment/Aegis) is a free, secure and open source 2FA app for Android.
-* [Android OTP Extractor](https://github.com/puddly/android-otp-extractor) can extract your tokens from popular Android OTP apps and export them in a standard format or just display them as QR codes for easy importing. [Requires a _rooted_ Android phone.]
-* [Python QReader](https://github.com/Eric-Canas/QReader)
-* [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar)
+* [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar) is a good QR code reader Python module
 * [OpenCV](https://docs.opencv.org/4.x/) (CV2) Open Source Computer Vision library with [opencv-python](https://github.com/opencv/opencv-python)
+* [Python QReader](https://github.com/Eric-Canas/QReader) Python QR code readers
+* [Android OTP Extractor](https://github.com/puddly/android-otp-extractor) can extract your tokens from popular Android OTP apps and export them in a standard format or just display them as QR codes for easy importing. [Requires a _rooted_ Android phone.]
 
 ***
 
