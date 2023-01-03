@@ -2,8 +2,6 @@ from typing import Any
 
 import pytest
 
-from extract_otp_secrets import QRMode
-
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption("--relaxed", action='store_true', help="run tests in relaxed mode")
@@ -17,6 +15,7 @@ def relaxed(request: pytest.FixtureRequest) -> Any:
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     if "qr_mode" in metafunc.fixturenames:
-        number = 2 if metafunc.config.getoption("fast") else len(QRMode)
-        qr_modes = [mode.name for mode in QRMode]
+        all_qr_modes = ['ZBAR', 'QREADER', 'QREADER_DEEP', 'CV2', 'CV2_WECHAT']
+        number = 2 if metafunc.config.getoption("fast") else len(all_qr_modes)
+        qr_modes = [mode for mode in all_qr_modes]
         metafunc.parametrize("qr_mode", qr_modes[0:number])

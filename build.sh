@@ -317,7 +317,7 @@ eval "$cmd"
 
 # Build wheel
 
-cmd="$PIP wheel .
+cmd="$PIP wheel ."
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
