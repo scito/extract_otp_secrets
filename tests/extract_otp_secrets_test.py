@@ -225,6 +225,18 @@ def test_keepass_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path)
     assert captured.err == ''
 
 
+def test_keepass_empty(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
+    # Act
+    extract_otp_secrets.main(['-k', '-', 'tests/data/only_comments.txt'])
+
+    # Assert
+
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == ''
+
+
 def test_keepass_csv_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     '''Two csv files .totp and .htop are generated.'''
     # Act
