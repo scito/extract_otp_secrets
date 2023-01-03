@@ -2,6 +2,8 @@ name: tests
 
 # https://docs.github.com/de/actions/using-workflows/workflow-syntax-for-github-actions
 # https://docs.github.com/en/actions/using-workflows
+# https://docs.github.com/en/actions/learn-github-actions/contexts
+# https://docs.github.com/en/actions/learn-github-actions/expressions
 
 on:
   push:
@@ -65,4 +67,7 @@ jobs:
         with:
           pytest-coverage-path: ./pytest-coverage.txt
           junitxml-path: ./pytest.xml
-        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
+        if: |
+          matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
+          && !contains(github.ref, 'refs/tags/')
+

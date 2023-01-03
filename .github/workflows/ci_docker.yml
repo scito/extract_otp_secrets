@@ -2,6 +2,8 @@ name: docker
 
 # https://docs.github.com/de/actions/using-workflows/workflow-syntax-for-github-actions
 # https://docs.github.com/en/actions/using-workflows
+# https://docs.github.com/en/actions/learn-github-actions/contexts
+# https://docs.github.com/en/actions/learn-github-actions/expressions
 
 # How to setup: https://event-driven.io/en/how_to_buid_and_push_docker_image_with_github_actions/
 # How to run: https://aschmelyun.com/blog/using-docker-run-inside-of-github-actions/
