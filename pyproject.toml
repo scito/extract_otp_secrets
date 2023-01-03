@@ -29,15 +29,15 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
 ]
 dependencies = [
-  "protobuf",
-  "qrcode",
-  "Pillow",
-  "qreader",
-  "pyzbar",
-  "opencv-contrib-python<=4.7.0; sys_platform == 'darwin'",
-  "opencv-contrib-python; sys_platform != 'darwin'",
-  "typing_extensions; python_version<='3.7'",
   "colorama>=0.4.6",
+  "opencv-contrib-python; sys_platform != 'darwin'",
+  "opencv-contrib-python<=4.7.0; sys_platform == 'darwin'",
+  "Pillow",
+  "protobuf",
+  "pyzbar",
+  "qrcode",
+  "qreader",
+  "typing_extensions; python_version<='3.7'",
 ]
 description = "Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps such as 'Google Authenticator'"
 dynamic = ["version"]

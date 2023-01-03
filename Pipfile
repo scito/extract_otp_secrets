@@ -4,24 +4,26 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-protobuf = "*"
-qrcode = "*"
-pillow = "*"
-qreader = "*"
-opencv-contrib-python = "*"
 colorama = ">=0.4.6"
+opencv-contrib-python = "*"
 # for macOS: opencv-contrib-python = "<=4.7.0"
 # for PYTHON <= 3.7: typing_extensions = "*"
+pillow = "*"
+protobuf = "*"
+qrcode = "*"
+qreader = "*"
 
 [dev-packages]
-pytest = "*"
-pytest-mock = "*"
-pytest-cov = "*"
-wheel = "*"
+build = "*"
 flake8 = "*"
-pylint = "*"
 mypy = "*"
+mypy-protobuf = "*"
+pylint = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
 types-protobuf = "*"
+wheel = "*"
 
 [requires]
 python_version = "3.11"
