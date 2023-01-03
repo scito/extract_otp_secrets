@@ -1,10 +1,11 @@
+build
 flake8
 mypy
-types-protobuf
+mypy-protobuf
 pylint
 pytest
-pytest-mock
 pytest-cov
+pytest-mock
 setuptools
+types-protobuf
 wheel
-build

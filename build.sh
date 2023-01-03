@@ -138,6 +138,8 @@ PIPENV="$PYTHON -m pipenv"
 FLAKE8="$PYTHON -m flake8"
 MYPY="$PYTHON -m mypy"
 
+# sudo ln -s /usr/bin/python3.11 /usr/bin/python
+
 # Upgrade protoc
 
 DEST="protoc"
@@ -147,6 +149,26 @@ echo -e "\nProtoc remote version $VERSION\n"
 echo -e "Protoc local version: $OLDVERSION\n"
 
 if $clean; then
+    cmd="docker image prune -f || echo 'No docker image pruned'"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="$PIP uninstall -y extract-otp-secrets || echo nothing done"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="$PIP freeze | grep -v -E '^-e|^#' | xargs sudo $PIP uninstall -y || echo nothing done"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="$PIP freeze --user | grep -v -E '^-e|^#' | xargs $PIP uninstall -y || echo nothing done"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="$PIP freeze | cut -d \"@\" -f1 | xargs pip uninstall -y || echo Nothing to do"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
     cmd="rm -r dist/ build/ *.whl pytest.xml pytest-coverage.txt .coverage tests/reports || true; find . -name '*.pyc' -type f -delete; find . -name '__pycache__' -type d -exec rm -r {} \; || true; find . -name '*.egg-info' -type d -exec rm -r {} \; || true; find . -name '*_cache' -type d -exec rm -r {} \; || true; mkdir -p tests/reports;"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
@@ -159,6 +181,10 @@ if $clean; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 fi
+
+cmd="$PIP install --use-pep517 -U -r requirements-dev.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
 
 if [ "$OLDVERSION" != "$VERSION" ] || ! $ignore_version_check; then
     echo "Upgrade protoc from $OLDVERSION to $VERSION"
@@ -216,17 +242,13 @@ fi
 
 # Upgrade pip requirements
 
-cmd="sudo pip install -U pip"
+cmd="pip install -U pip"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
 $PIP --version
 
 cmd="$PIP install --use-pep517 -U -r requirements.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="$PIP install --use-pep517 -U -r requirements-dev.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -254,7 +276,21 @@ cmd="$MYPY --strict src/*.py tests/*.py | tee $TYPE_CHECK_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-# Test
+# pip -e install
+
+cmd="$PIP install -U -e ."
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="extract_otp_secrets example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="extract_otp_secrets - < example_export.txt"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+# Test (needs module)
 
 cmd="$PYTHON src/extract_otp_secrets.py example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
@@ -284,34 +320,6 @@ eval "$cmd"
 $PIPENV run python --version
 
 cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-# sudo pip
-
-cmd="sudo $PIP install --use-pep517 -U -r requirements.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="sudo $PIP install --use-pep517 -U -r requirements-dev.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="sudo $PIP install -U pipenv"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-# pip -e install (must be after other pip installs in order to have this environment for development)
-
-cmd="$PIP install -U -e ."
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="extract_otp_secrets example_export.txt"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-
-cmd="extract_otp_secrets - < example_export.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
@@ -378,10 +386,6 @@ if $build_docker; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="docker image prune -f || echo 'No docker image pruned'"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
-
     if $run_gui; then
         cmd="docker run --rm -v "$(pwd)":/files:ro --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets &"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
@@ -402,6 +406,7 @@ cmd="cat $TYPE_CHECK_OUT_FILE $LINT_OUT_FILE $COVERAGE_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-echo -e "\n${greenBold}SUCCESS${reset}"
+line=$(printf '#%.0s' $(eval echo {1..$(( ($COLUMNS - 10) / 2))}))
+echo -e "\n${greenBold}$line SUCCESS $line${reset}"
 
 quit
