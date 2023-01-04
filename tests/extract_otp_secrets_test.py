@@ -40,6 +40,7 @@ import extract_otp_secrets
 
 try:
     import cv2  # type: ignore
+    from extract_otp_secrets import SUCCESS_COLOR, FAILURE_COLOR, FONT, FONT_SCALE, FONT_COLOR, FONT_THICKNESS, FONT_LINE_STYLE
 except ImportError:
     # ignore
     pass
@@ -106,6 +107,20 @@ def test_extract_stdin_empty(capsys: pytest.CaptureFixture[str], monkeypatch: py
     assert captured.err == '\nWARN: stdin is empty\n'
 
 
+def test_extract_stdin_only_comments(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
+    # Arrange
+    monkeypatch.setattr('sys.stdin', io.StringIO("\n\n# comment 1\n\n\n#comment 2"))
+
+    # Act
+    extract_otp_secrets.main(['-n', '-'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == ''
+
+
 def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> None:
     if qreader_available:
         # Act
@@ -132,6 +147,17 @@ def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> No
         assert captured.out == ''
 
 
+def test_extract_only_comments_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-n', 'tests/data/only_comments.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.err == ''
+    assert captured.out == ''
+
+
 @pytest.mark.qreader
 def test_extract_stdin_img_empty(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
     # Arrange
@@ -145,6 +171,24 @@ def test_extract_stdin_img_empty(capsys: pytest.CaptureFixture[str], monkeypatch
 
     assert captured.out == ''
     assert captured.err == '\nWARN: stdin is empty\n'
+
+
+@pytest.mark.qreader
+def test_extract_stdin_img_garbage(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
+    # Arrange
+    monkeypatch.setattr('sys.stdin', io.BytesIO("garbage".encode('utf-8')))
+
+    # Act
+    with pytest.raises(SystemExit) as e:
+        extract_otp_secrets.main(['-n', '='])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == '\nERROR: Unable to open file for reading.\ninput file: =\n'
+    assert e.type == SystemExit
+    assert e.value.code == 1
 
 
 def test_extract_csv(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
@@ -179,6 +223,19 @@ def test_extract_csv_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     actual_csv = read_csv_str(captured.out)
 
     assert actual_csv == expected_csv
+    assert captured.err == ''
+
+
+def test_extract_csv_stdout_only_comments(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-c', '-', 'tests/data/only_comments.txt'])
+
+    # Assert
+    assert not file_exits('test_example_output.csv')
+
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
     assert captured.err == ''
 
 
@@ -304,6 +361,18 @@ def test_extract_json_stdout(capsys: pytest.CaptureFixture[str]) -> None:
     actual_json = read_json_str(captured.out)
 
     assert actual_json == expected_json
+    assert captured.err == ''
+
+
+def test_extract_json_stdout_only_comments(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-j', '-', 'tests/data/only_comments.txt'])
+
+    # Assert
+    assert not file_exits('test_example_output.json')
+    captured = capsys.readouterr()
+
+    assert captured.out == '[]'
     assert captured.err == ''
 
 
@@ -544,25 +613,36 @@ class MockCam:
         pass
 
 
-@pytest.mark.parametrize("qr_reader", [
-    None,
-    'ZBAR',
-    'QREADER',
-    'QREADER_DEEP',
-    'CV2',
-    'CV2_WECHAT'
+@pytest.mark.parametrize("qr_reader,file,success", [
+    (None, 'example_export.png', True),
+    ('ZBAR', 'example_export.png', True),
+    ('QREADER', 'example_export.png', True),
+    ('QREADER_DEEP', 'example_export.png', True),
+    ('CV2', 'example_export.png', True),
+    ('CV2_WECHAT', 'example_export.png', True),
+    (None, 'tests/data/qr_but_without_otp.png', False),
+    ('ZBAR', 'tests/data/qr_but_without_otp.png', False),
+    ('QREADER', 'tests/data/qr_but_without_otp.png', False),
+    ('QREADER_DEEP', 'tests/data/qr_but_without_otp.png', False),
+    ('CV2', 'tests/data/qr_but_without_otp.png', False),
+    ('CV2_WECHAT', 'tests/data/qr_but_without_otp.png', False),
+    (None, 'tests/data/lena_std.tif', None),
+    ('ZBAR', 'tests/data/lena_std.tif', None),
+    ('QREADER', 'tests/data/lena_std.tif', None),
+    ('QREADER_DEEP', 'tests/data/lena_std.tif', None),
+    ('CV2', 'tests/data/lena_std.tif', None),
+    ('CV2_WECHAT', 'tests/data/lena_std.tif', None),
 ])
-def test_extract_otps_from_camera(qr_reader: Optional[str], capsys: pytest.CaptureFixture[str], mocker: MockerFixture) -> None:
+def test_extract_otps_from_camera(qr_reader: Optional[str], file: str, success: bool, capsys: pytest.CaptureFixture[str], mocker: MockerFixture) -> None:
     if qreader_available:
         # Arrange
-        mockCam = MockCam()
+        mockCam = MockCam([file])
         mocker.patch('cv2.VideoCapture', return_value=mockCam)
         mocker.patch('cv2.namedWindow')
-        mocker.patch('cv2.rectangle')
-        mocker.patch('cv2.polylines')
+        mocked_polylines = mocker.patch('cv2.polylines')
         mocker.patch('cv2.imshow')
         mocker.patch('cv2.getTextSize', return_value=([8, 200], False))
-        mocker.patch('cv2.putText')
+        mocked_putText = mocker.patch('cv2.putText')
         mocker.patch('cv2.getWindowImageRect', return_value=[0, 0, 640, 480])
         mocker.patch('cv2.waitKey', return_value=27)
         mocker.patch('cv2.getWindowProperty', return_value=False)
@@ -578,8 +658,21 @@ def test_extract_otps_from_camera(qr_reader: Optional[str], capsys: pytest.Captu
         # Assert
         captured = capsys.readouterr()
 
-        assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
-        assert captured.err == ''
+        if success:
+            assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
+            assert captured.err == ''
+            mocked_polylines.assert_called_with(mocker.ANY, mocker.ANY, True, SUCCESS_COLOR, mocker.ANY)
+            mocked_putText.assert_called_with(mocker.ANY, "3 otps extracted", mocker.ANY, FONT, FONT_SCALE, FONT_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
+        elif success is None:
+            assert captured.out == ''
+            assert captured.err == ''
+            mocked_polylines.assert_not_called()
+            mocked_putText.assert_called_with(mocker.ANY, "0 otps extracted", mocker.ANY, FONT, FONT_SCALE, FONT_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
+        else:
+            assert captured.out == ''
+            assert captured.err != ''
+            mocked_polylines.assert_called_with(mocker.ANY, mocker.ANY, True, FAILURE_COLOR, mocker.ANY)
+            mocked_putText.assert_called_with(mocker.ANY, "0 otps extracted", mocker.ANY, FONT, FONT_SCALE, FONT_COLOR, FONT_THICKNESS, FONT_LINE_STYLE)
     else:
         # Act
         with pytest.raises(SystemExit) as e:

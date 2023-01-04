@@ -73,11 +73,6 @@ askContinueYn() {
 
 # Reference: https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
 
-echo "Checking Protoc version..."
-VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest | grep -E "<title>" | perl -pe's%.*Protocol Buffers v(\d+\.\d+(\.\d+)?).*%\1%')
-BASEVERSION=4
-echo
-
 interactive=false
 ignore_version_check=true
 clean=false
@@ -88,16 +83,16 @@ generate_result_files=false
 while test $# -gt 0; do
     case $1 in
         -h|--help)
-            echo "Upgrade Protoc"
+            echo "Build extract_otp_secrets project"
             echo
             echo "$0 [options]"
             echo
             echo "Options:"
-            echo "-i                      Interactive"
-            echo "-C                      Ignore version check"
-            echo "-D                      No docker build"
-            echo "-G                      No not run gui"
-            echo "-c                      Clean"
+            echo "-i                      Interactive mode, all steps must be confirmed"
+            echo "-C                      Ignore version check of protobuf/protoc"
+            echo "-D                      Do not build docker"
+            echo "-G                      Do not start extract_otp_secrets.py in GUI mode"
+            echo "-c                      Clean everything"
             echo "-r                      Generate result files"
             echo "-h, --help              Help"
             quit
@@ -144,10 +139,6 @@ MYPY="$PYTHON -m mypy"
 
 DEST="protoc"
 
-OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
-echo -e "\nProtoc remote version $VERSION\n"
-echo -e "Protoc local version: $OLDVERSION\n"
-
 if $clean; then
     cmd="docker image prune -f || echo 'No docker image pruned'"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
@@ -185,6 +176,16 @@ fi
 cmd="$PIP install --use-pep517 -U -r requirements-dev.txt"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
+
+
+echo -e "\n\nChecking Protoc version..."
+VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest | grep -E "<title>" | perl -pe's%.*Protocol Buffers v(\d+\.\d+(\.\d+)?).*%\1%')
+BASEVERSION=4
+echo
+
+OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
+echo -e "\nProtoc remote version $VERSION\n"
+echo -e "Protoc local version: $OLDVERSION\n"
 
 if [ "$OLDVERSION" != "$VERSION" ] || ! $ignore_version_check; then
     echo "Upgrade protoc from $OLDVERSION to $VERSION"

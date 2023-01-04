@@ -164,6 +164,77 @@ def main(sys_args: list[str]) -> None:
     write_json(args, otps)
 
 
+# workaround for PYTHON <= 3.9 use: pb.MigrationPayload | None
+def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.MigrationPayload]:
+    '''Extracts the otp migration payload from an otp url. This function is the core of the this appliation.'''
+    if not is_opt_url(otp_url, source):
+        return None
+    parsed_url = urlparse.urlparse(otp_url)
+    if verbose >= LogLevel.DEBUG: log_debug(f"parsed_url={parsed_url}")
+    try:
+        params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
+    except Exception:  # workaround for PYTHON <= 3.10
+        params = {}
+    if verbose >= LogLevel.DEBUG: log_debug(f"querystring params={params}")
+    if 'data' not in params:
+        log_error(f"could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}")
+        return None
+    data_base64 = params['data'][0]
+    if verbose >= LogLevel.DEBUG: log_debug(f"data_base64={data_base64}")
+    data_base64_fixed = data_base64.replace(' ', '+')
+    if verbose >= LogLevel.DEBUG: log_debug(f"data_base64_fixed={data_base64_fixed}")
+    data = base64.b64decode(data_base64_fixed, validate=True)
+    payload = pb.MigrationPayload()
+    try:
+        payload.ParseFromString(data)
+    except Exception as e:
+        abort(f"Cannot decode otpauth-migration migration payload.\n"
+              f"data={data_base64}", e)
+    if verbose >= LogLevel.DEBUG: log_debug(f"\n{i}. Payload Line", payload, sep='\n')
+
+    return payload
+
+
+def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count: int, infile: str, args: Args) -> int:
+    '''Converts the otp migration payload into a normal Python dictionary. This function is the core of the this appliation.'''
+    payload = get_payload_from_otp_url(otpauth_migration_url, urls_count, infile)
+
+    if not payload:
+        return 0
+
+    new_otps_count = 0
+    # pylint: disable=no-member
+    for raw_otp in payload.otp_parameters:
+        if verbose: print(f"\n{len(otps) + 1}. Secret")
+        secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
+        if verbose >= LogLevel.DEBUG: log_debug('OTP enum type:', get_enum_name_by_number(raw_otp, 'type'))
+        otp_type = get_otp_type_str_from_code(raw_otp.type)
+        otp_url = build_otp_url(secret, raw_otp)
+        otp: Otp = {
+            "name": raw_otp.name,
+            "secret": secret,
+            "issuer": raw_otp.issuer,
+            "type": otp_type,
+            "counter": raw_otp.counter if raw_otp.type == 1 else None,
+            "url": otp_url
+        }
+        if otp not in otps or not args.ignore:
+            otps.append(otp)
+            new_otps_count += 1
+            if not quiet:
+                print_otp(otp)
+            if args.printqr:
+                print_qr(args, otp_url)
+            if args.saveqr:
+                save_qr(otp, args, len(otps))
+            if not quiet:
+                print()
+        elif args.ignore and not quiet:
+            eprint(f"Ignored duplicate otp: {otp['name']}", f" / {otp['issuer']}\n" if otp['issuer'] else '\n', sep='')
+
+    return new_otps_count
+
+
 def parse_args(sys_args: list[str]) -> Args:
     global verbose, quiet, colored
     description_text = "Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps"
@@ -249,7 +320,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
                 if otp_url:
                     new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
                 if found:
-                    cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), get_color(new_otps_count, otp_url), BOX_THICKNESS)
+                    cv2_draw_box(img, [(bbox[0], bbox[1]), (bbox[2], bbox[1]), (bbox[2], bbox[3]), (bbox[0], bbox[3])], get_color(new_otps_count, otp_url))
             elif qr_mode == QRMode.ZBAR:
                 for qrcode in zbar.decode(img):
                     otp_url = qrcode.data.decode('utf-8')
@@ -414,45 +485,6 @@ def read_lines_from_text_file(filename: str) -> list[str]:
     return lines
 
 
-def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count: int, infile: str, args: Args) -> int:
-    payload = get_payload_from_otp_url(otpauth_migration_url, urls_count, infile)
-
-    if not payload:
-        return 0
-
-    new_otps_count = 0
-    # pylint: disable=no-member
-    for raw_otp in payload.otp_parameters:
-        if verbose: print(f"\n{len(otps) + 1}. Secret")
-        secret = convert_secret_from_bytes_to_base32_str(raw_otp.secret)
-        if verbose >= LogLevel.DEBUG: log_debug('OTP enum type:', get_enum_name_by_number(raw_otp, 'type'))
-        otp_type = get_otp_type_str_from_code(raw_otp.type)
-        otp_url = build_otp_url(secret, raw_otp)
-        otp: Otp = {
-            "name": raw_otp.name,
-            "secret": secret,
-            "issuer": raw_otp.issuer,
-            "type": otp_type,
-            "counter": raw_otp.counter if raw_otp.type == 1 else None,
-            "url": otp_url
-        }
-        if otp not in otps or not args.ignore:
-            otps.append(otp)
-            new_otps_count += 1
-            if not quiet:
-                print_otp(otp)
-            if args.printqr:
-                print_qr(args, otp_url)
-            if args.saveqr:
-                save_qr(otp, args, len(otps))
-            if not quiet:
-                print()
-        elif args.ignore and not quiet:
-            eprint(f"Ignored duplicate otp: {otp['name']}", f" / {otp['issuer']}\n" if otp['issuer'] else '\n', sep='')
-
-    return new_otps_count
-
-
 def convert_img_to_otp_urls(filename: str, args: Args) -> OtpUrls:
     if verbose: print(f"Reading image {filename}")
     try:
@@ -504,37 +536,6 @@ def decode_qr_img_otp_urls(img: Any, qr_mode: QRMode) -> OtpUrls:
         assert False, f"Wrong QReader mode {qr_mode.name}"
 
     return otp_urls
-
-
-# workaround for PYTHON <= 3.9 use: pb.MigrationPayload | None
-def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.MigrationPayload]:
-    '''Extracts the otp migration payload from an otp url. This function is the core of the this appliation.'''
-    if not is_opt_url(otp_url, source):
-        return None
-    parsed_url = urlparse.urlparse(otp_url)
-    if verbose >= LogLevel.DEBUG: log_debug(f"parsed_url={parsed_url}")
-    try:
-        params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
-    except Exception:  # workaround for PYTHON <= 3.10
-        params = {}
-    if verbose >= LogLevel.DEBUG: log_debug(f"querystring params={params}")
-    if 'data' not in params:
-        log_error(f"could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}")
-        return None
-    data_base64 = params['data'][0]
-    if verbose >= LogLevel.DEBUG: log_debug(f"data_base64={data_base64}")
-    data_base64_fixed = data_base64.replace(' ', '+')
-    if verbose >= LogLevel.DEBUG: log_debug(f"data_base64_fixed={data_base64_fixed}")
-    data = base64.b64decode(data_base64_fixed, validate=True)
-    payload = pb.MigrationPayload()
-    try:
-        payload.ParseFromString(data)
-    except Exception as e:
-        abort(f"Cannot decode otpauth-migration migration payload.\n"
-              f"data={data_base64}", e)
-    if verbose >= LogLevel.DEBUG: log_debug(f"\n{i}. Payload Line", payload, sep='\n')
-
-    return payload
 
 
 def is_opt_url(otp_url: str, source: str) -> bool:
