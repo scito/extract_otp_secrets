@@ -1,7 +1,7 @@
 # Extract TOTP/HOTP secrets from QR codes exported by two-factor authentication apps
 
 [![CI tests](https://github.com/scito/extract_otp_secrets/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secrets/actions/workflows/ci.yml)
-![coverage](https://img.shields.io/badge/coverage-93%25-brightgreen)
+![coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)
 [![CI docker](https://github.com/scito/extract_otp_secrets/actions/workflows/ci_docker.yml/badge.svg)](https://github.com/scito/extract_otp_secrets/actions/workflows/ci_docker.yml)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/protobuf)
 [![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/scito/extract_otp_secrets)](https://github.com/scito/extract_otp_secrets/blob/master/Pipfile.lock)
@@ -21,7 +21,47 @@ The exported QR codes from authentication apps can be read in three ways:
 
 The secret and otp values can be exported to json or csv files, as well as printed or saved to PNG images.
 
-⚡ **The project and the script were renamed from `extract_otp_secret_keys` to `extract_otp_secrets` in version 2.0.** ⚡
+⚡ **This project/script was renamed from `extract_otp_secret_keys` to `extract_otp_secrets`.** ⚡
+
+## Usage
+
+### Capture QR codes from camera (🆕 since version 2.0)
+
+1. Open "Google Authenticator" app on the mobile phone
+2. Export the QR codes from "Google Authenticator" app (see [how to export](#how-to-export-otp-secrets-from-google-authenticator-app))
+3. Point the exported QR codes to the camera of your computer
+4. Call this script without infile parameters:
+
+    python src/extract_otp_secrets.py
+
+![CV2 Capture from camera screenshot](cv2_capture_screenshot.png)
+
+Detected QR codes are surrounded with a frame. The color of the frame indicates the extracting result:
+
+* Green: The QR code is detected, decoded and the OTP secret was successfully extracted.
+* Red: The QR code is detected and decoded, but could not be successfully extracted. This is the case if a QR code not containing OTP data is captured.
+* Magenta: The QR code is detected, but could not be decoded. The QR code should be presented better to the camera or another QR reader could be used.
+
+### With builtin QR decoder from image files (🆕 since version 2.0)
+
+1. Open "Google Authenticator" app on the mobile phone
+2. Export the QR codes from "Google Authenticator" app (see [how to export](#how-to-export-otp-secrets-from-Google-Authenticator))
+4. Save the QR code as image file, e.g. example_export.png
+5. Transfer the images files to the computer where his script is installed.
+6. Call this script with the file as input:
+
+    python src/extract_otp_secrets.py example_export.png
+
+### With external QR decoder app from text files
+
+1. Open "Google Authenticator" app on the mobile phone
+2. Export the QR codes from "Google Authenticator" app (see [how to export](#how-to-export-otp-secrets-from-Google-Authenticator))
+3. Read QR codes with a third-party QR code reader (e.g. from another phone)
+4. Save the captured QR codes from the QR code reader to a text file, e.g. example_export.txt. Save each QR code on a new line. (The captured QR codes look like `otpauth-migration://offline?data=...`)
+5. Transfer the file to the computer where his script is installed.
+6. Call this script with the file as input:
+
+    python src/extract_otp_secrets.py example_export.txt
 
 ## Installation
 
@@ -67,46 +107,6 @@ The zbar DLLs are included with the Windows Python wheels. However, you might ne
 ##### OpenCV
 
 OpenCV requires [Visual C++ redistributable 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145). For more information see [opencv-python](https://pypi.org/project/opencv-python/)
-
-## Usage
-
-### Capture QR codes from camera (🆕 since version 2.0)
-
-1. Open "Google Authenticator" app on the mobile phone
-2. Export the QR codes from "Google Authenticator" app
-3. Point the QR codes to the camera of your computer
-4. Call this script without infile parameters:
-
-    python src/extract_otp_secrets.py
-
-![CV2 Capture from camera screenshot](cv2_capture_screenshot.png)
-
-Detected QR codes are surrounded with a frame. The color of the frame indicates the extracting result:
-
-* Green: The QR code is detected, decoded and the OTP secret was successfully extracted.
-* Red: The QR code is detected and decoded, but could not be successfully extracted. This is the case if a QR code not containing OTP data is captured.
-* Magenta: The QR code is detected, but could not be decoded. The QR code should be presented better to the camera or another QR reader could be used.
-
-### With builtin QR decoder from image files (🆕 since version 2.0)
-
-1. Open "Google Authenticator" app on the mobile phone
-2. Export the QR codes from "Google Authenticator" app
-4. Save the QR code as image file, e.g. example_export.png
-5. Transfer the images files to the computer where his script is installed.
-6. Call this script with the file as input:
-
-    python src/extract_otp_secrets.py example_export.png
-
-### With external QR decoder app from text files
-
-1. Open "Google Authenticator" app on the mobile phone
-2. Export the QR codes from "Google Authenticator" app
-3. Read QR codes with a QR code reader (e.g. from another phone)
-4. Save the captured QR codes in the QR code reader to a text file, e.g. example_export.txt. Save each QR code on a new line. (The captured QR codes look like `otpauth-migration://offline?data=...`)
-5. Transfer the file to the computer where his script is installed.
-6. Call this script with the file as input:
-
-    python src/extract_otp_secrets.py example_export.txt
 
 ## Program help: arguments and options
 
@@ -266,23 +266,18 @@ Import CSV with HOTP entries in KeePass as
 
 KeePass can be used as a backup for one time passwords (second factor) from the mobile phone.
 
-## Technical background
+## How to export otp secrets from Google Authenticator app
 
-The export QR code of "Google Authenticator" contains the URL `otpauth-migration://offline?data=...`.
-The data parameter is a base64 encoded proto3 message (Google Protocol Buffers).
-
-Command for regeneration of Python code from proto3 message definition file (only necessary in case of changes of the proto3 message definition or new protobuf versions):
-
-    protoc --plugin=protoc-gen-mypy=path/to/protoc-gen-mypy --python_out=src/protobuf_generated_python --mypy_out=src/protobuf_generated_python src/google_auth.proto
-
-The generated protobuf Python code was generated by protoc 21.12 (https://github.com/protocolbuffers/protobuf/releases/tag/v21.12).
-
-For Python type hint generation the [mypy-protobuf](https://github.com/nipunn1313/mypy-protobuf) package is used.
-
-## References
-
-* Proto3 documentation: https://developers.google.com/protocol-buffers/docs/pythontutorial
-* Template code: https://github.com/beemdevelopment/Aegis/pull/406
+1. Open "Google Authenticator" app
+2. Select "Transfer accounts" in the three dot menu of the app.  
+![Transfer accounts option in the Google Authenticator.](docs/Transfer-accounts-option-in-the-Google-Authenticator_300px.webp)
+3. Select "Export accounts"  
+![Export account option in the Google Authenticator.](docs/Export-account-option-in-the-Google-Authenticator_300px.webp)
+4. Pass the verification by password or fingerprint.
+5. Select your accounts
+6. Press "Next" button
+7. The exported QR code(s) ready for extraction are shown.  
+![Exported Google Authenticator QR codes](docs/Exported-QR-codes_300px.webp)
 
 ## Glossary
 
@@ -371,7 +366,6 @@ Prebuilt docker images are available for amd64 and arm64 architectures on [Docke
 Extracting from an QR image file:
 
 ```
-docker login -u USERNAME
 curl -s https://raw.githubusercontent.com/scito/extract_otp_secrets/master/example_export.png | docker run --pull always -i --rm -v "$(pwd)":/files:ro scit0/extract_otp_secrets =
 ```
 
@@ -485,7 +479,6 @@ Run tests in docker container:
 docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secrets
 ```
 
-
 #### Alpine (only text file processing)
 
 ```bash
@@ -497,6 +490,49 @@ Run tests in docker container:
 ```bash
 docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secrets_only_txt tests/extract_otp_secrets_test.py -k "not qreader" --relaxed
 ```
+
+### Full local build
+
+There is a Bash script for a full local build including linting and type checking.
+
+```bash
+./build.sh
+```
+
+The options of the build script:
+
+```
+Build extract_otp_secrets project
+
+./build.sh [options]
+
+Options:
+-i                      Interactive mode, all steps must be confirmed
+-C                      Ignore version check of protobuf/protoc
+-D                      Do not build docker
+-G                      Do not start extract_otp_secrets.py in GUI mode
+-c                      Clean everything
+-r                      Generate result files
+-h, --help              Help
+```
+
+## Technical background
+
+The export QR code of "Google Authenticator" contains the URL `otpauth-migration://offline?data=...`.
+The data parameter is a base64 encoded proto3 message (Google Protocol Buffers).
+
+Command for regeneration of Python code from proto3 message definition file (only necessary in case of changes of the proto3 message definition or new protobuf versions):
+
+    protoc --plugin=protoc-gen-mypy=path/to/protoc-gen-mypy --python_out=src/protobuf_generated_python --mypy_out=src/protobuf_generated_python src/google_auth.proto
+
+The generated protobuf Python code was generated by protoc 21.12 (https://github.com/protocolbuffers/protobuf/releases/tag/v21.12).
+
+For Python type hint generation the [mypy-protobuf](https://github.com/nipunn1313/mypy-protobuf) package is used.
+
+## References
+
+* Proto3 documentation: https://developers.google.com/protocol-buffers/docs/pythontutorial
+* Template code: https://github.com/beemdevelopment/Aegis/pull/406
 
 ## Issues
 
