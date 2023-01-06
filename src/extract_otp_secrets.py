@@ -5,7 +5,7 @@
 # Source code available on https://github.com/scito/extract_otp_secrets
 #
 # Technical background:
-# The export QR code from "Google Authenticator" contains the URL "otpauth-migration://offline?data=...".
+# The export QR code from "Google Authenticator" contains the URL "otpauth-migration://offline?data=…".
 # The data parameter is a base64 encoded proto3 message (Google Protocol Buffers).
 #
 # Command for regeneration of Python code from proto3 message definition file (only necessary in case of changes of the proto3 message definition):
