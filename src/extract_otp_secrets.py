@@ -322,7 +322,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
                 if found:
                     cv2_draw_box(img, [(bbox[0], bbox[1]), (bbox[2], bbox[1]), (bbox[2], bbox[3]), (bbox[0], bbox[3])], get_color(new_otps_count, otp_url))
             elif qr_mode == QRMode.ZBAR:
-                for qrcode in zbar.decode(img):
+                for qrcode in zbar.decode(img, symbols=[zbar.ZBarSymbol.QRCODE]):
                     otp_url = qrcode.data.decode('utf-8')
                     new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
                     cv2_draw_box(img, [qrcode.polygon], get_color(new_otps_count, otp_url))
@@ -530,7 +530,7 @@ def decode_qr_img_otp_urls(img: Any, qr_mode: QRMode) -> OtpUrls:
         otp_url, _ = cv2.wechat_qrcode.WeChatQRCode().detectAndDecode(img)
         otp_urls += list(otp_url)
     elif qr_mode == QRMode.ZBAR:
-        qrcodes = zbar.decode(img)
+        qrcodes = zbar.decode(img, symbols=[zbar.ZBarSymbol.QRCODE])
         otp_urls += [qrcode.data.decode('utf-8') for qrcode in qrcodes]
     else:
         assert False, f"Wrong QReader mode {qr_mode.name}"
