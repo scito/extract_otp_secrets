@@ -7,7 +7,7 @@ name: tests
 
 on:
   push:
-  pull_request:
+  # pull_request:
   schedule:
     # Run daily on default branch
     - cron: '37 3 * * *'
