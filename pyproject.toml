@@ -16,6 +16,8 @@ classifiers = [
     "Environment :: Win32 (MS Windows)",
     "Topic :: System :: Archiving :: Backup",
     "Topic :: Utilities",
+    "Topic :: Security",
+    "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -27,6 +29,7 @@ classifiers = [
     "Programming Language :: Python",
     "Natural Language :: English",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Typing :: Typed",
 ]
 dependencies = [
   "colorama>=0.4.6",
@@ -36,7 +39,7 @@ dependencies = [
   "protobuf",
   "pyzbar",
   "qrcode",
-  "qreader",
+  "qreader<2.0.0",
   "typing_extensions; python_version<='3.7'",
 ]
 description = "Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps such as 'Google Authenticator'"
