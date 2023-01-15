@@ -11,7 +11,7 @@ opencv-contrib-python = "*"
 pillow = "*"
 protobuf = "*"
 qrcode = "*"
-qreader = "*"
+qreader = "<2.0.0"
 
 [dev-packages]
 build = "*"
