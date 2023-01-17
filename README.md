@@ -100,6 +100,10 @@ For a detailed installation documentation of [pyzbar](https://github.com/Natural
 
     sudo dnf install libzbar0
 
+#### Linux (Arch Linux)
+
+    pacman -S zbar
+
 #### Mac OS X
 
     brew install zbar
