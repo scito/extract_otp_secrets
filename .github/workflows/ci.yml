@@ -9,6 +9,7 @@ on:
   push:
     paths-ignore:
       - 'docs/**'
+      - '**.md'
   # pull_request:
   schedule:
     # Run daily on default branch
