@@ -245,7 +245,7 @@ jobs:
         shell: bash
         run: |
               mkdir -p build/
-              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) YEARS='2020-2023' envsubst < file_version_info_template.txt > build/file_version_info.txt
+              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E "s/^([0-9]+).*/\1/") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) YEARS='2020-2023' envsubst < file_version_info_template.txt > build/file_version_info.txt
       - name: Build with pyinstaller for ${{ matrix.TARGET }}
         run: ${{ matrix.CMD_BUILD }}
       - name: Smoke tests for generated exe (general)
