@@ -3,13 +3,12 @@ Generate from file: README.md
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
+- [Download binary executable (🆕 since v2.1)](#download-binary-executable--since-v21)
 - [Usage](#usage)
   - [Capture QR codes from camera (🆕 since version 2.0)](#capture-qr-codes-from-camera--since-version-20)
   - [With builtin QR decoder from image files (🆕 since version 2.0)](#with-builtin-qr-decoder-from-image-files--since-version-20)
   - [With external QR decoder app from text files](#with-external-qr-decoder-app-from-text-files)
-- [Installation](#installation)
-  - [Download binary executable (🆕 since v2.1)](#download-binary-executable--since-v21)
-  - [Run as script (recommend for developers or advanced users)](#run-as-script-recommend-for-developers-or-advanced-users)
+- [Installation of Python script (recommend for developers or advanced users)](#installation-of-python-script-recommend-for-developers-or-advanced-users)
   - [Installation of shared system libraries](#installation-of-shared-system-libraries)
 - [Program help: arguments and options](#program-help-arguments-and-options)
 - [Examples](#examples)

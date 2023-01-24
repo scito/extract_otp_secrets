@@ -35,13 +35,12 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 
 ## Table of contents
 
+- [Download binary executable (🆕 since v2.1)](#download-binary-executable--since-v21)
 - [Usage](#usage)
   - [Capture QR codes from camera (🆕 since version 2.0)](#capture-qr-codes-from-camera--since-version-20)
   - [With builtin QR decoder from image files (🆕 since version 2.0)](#with-builtin-qr-decoder-from-image-files--since-version-20)
   - [With external QR decoder app from text files](#with-external-qr-decoder-app-from-text-files)
-- [Installation](#installation)
-  - [Download binary executable (🆕 since v2.1)](#download-binary-executable--since-v21)
-  - [Run as script (recommend for developers or advanced users)](#run-as-script-recommend-for-developers-or-advanced-users)
+- [Installation of Python script (recommend for developers or advanced users)](#installation-of-python-script-recommend-for-developers-or-advanced-users)
   - [Installation of shared system libraries](#installation-of-shared-system-libraries)
 - [Program help: arguments and options](#program-help-arguments-and-options)
 - [Examples](#examples)
@@ -86,6 +85,15 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 - [Related projects](#related-projects)
 </details>
 
+## Download binary executable (🆕 since v2.1)
+
+1. Download executable for your platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
+2. Start executable by clicking or from command line
+
+✅ Everything is just packed in one executable.  
+✅ No installation needed, neither Python nor dependencies have to be installed.  
+✅ Easy and convenient
+
 ## Usage
 
 ### Capture QR codes from camera (🆕 since version 2.0)
@@ -96,10 +104,6 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 4. Run the program without infile parameters:
 ```
 extract_otp_secrets
-```
-or
-```
-python src/extract_otp_secrets.py
 ```
 
 ![CV2 Capture from camera screenshot](docs/cv2_capture_screenshot.png)
@@ -120,7 +124,7 @@ The secrets are printed by default to the console. [Set program parameters](#pro
 4. Transfer the images files to the computer where his script is installed.
 5. Call this script with the file as input:
 ```
-python src/extract_otp_secrets.py example_export.png
+extract_otp_secrets example_export.png
 ```
 6. Remove unencrypted files with secrets from your computer and mobile.
 
@@ -133,22 +137,11 @@ python src/extract_otp_secrets.py example_export.png
 5. Transfer the file to the computer where his script is installed.
 6. Call this script with the file as input:
 ```
-python src/extract_otp_secrets.py example_export.txt
+extract_otp_secrets example_export.txt
 ```
 7. Remove unencrypted files with secrets from your computer and mobile.
 
-## Installation
-
-### Download binary executable (🆕 since v2.1)
-
-1. Download executable for your platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
-2. Start executable by clicking or from command line
-
-✅ Everything is just packed in one executable.  
-✅ No installation needed, neither Python nor dependencies have to be installed.  
-✅ Easy and convenient
-
-### Run as script (recommend for developers or advanced users)
+## Installation of Python script (recommend for developers or advanced users)
 
 ```bash
 git clone https://github.com/scito/extract_otp_secrets.git
