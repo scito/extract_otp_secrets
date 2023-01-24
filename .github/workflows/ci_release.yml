@@ -47,7 +47,7 @@ jobs:
         id: meta
         # Writing to env with >> $GITHUB_ENV is an alternative
         run: |
-          echo "date=$(TZ=Europe/Bern date +'%d.%m.%Y')" >> $GITHUB_OUTPUT
+          echo "date=$(TZ=Europe/Zurich date +'%d.%m.%Y')" >> $GITHUB_OUTPUT
           echo "version=${TAG_NAME/v/}" >> $GITHUB_OUTPUT
           echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           echo "tag_message=$(git tag -l --format='%(contents:subject)' ${{ github.ref_name }})" >> $GITHUB_OUTPUT
@@ -68,11 +68,17 @@ jobs:
             -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}","draft":true,"prerelease":false,"generate_release_notes":true}')
           echo upload_url=$(jq '.upload_url' <<< "$response") >> $GITHUB_OUTPUT
           echo $(jq -r '.upload_url' <<< "$response") > release_url.txt
+          echo $(jq -r '.id' <<< "$response") > release_id.txt
       - name: Save Release URL File for publish
         uses: actions/upload-artifact@v3
         with:
           name: release_url
           path: release_url.txt
+      - name: Save asset upload id for publish
+        uses: actions/upload-artifact@v3
+        with:
+          name: release_id
+          path: release_id.txt
 
   build-and-push-docker-image:
     name: Build Linux release in docker container
@@ -164,7 +170,6 @@ jobs:
       - name: Upload Release Asset
         id: upload-release-asset
         # TODO only for tags
-        shell: bash
         run: |
           response=$(curl \
             -X POST \
@@ -246,7 +251,7 @@ jobs:
         shell: bash
         run: |
               mkdir -p build/
-              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E "s/^([0-9]+).*/\1/") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) YEARS='2020-2023' envsubst < file_version_info_template.txt > build/file_version_info.txt
+              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n "s/^([0-9]+).*/\1/p") VERSION_BUILD=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n -e"s/^[0-9]+.+/99/p")$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) YEARS='2020-2023' envsubst < file_version_info_template.txt > build/file_version_info.txt
       - name: Build with pyinstaller for ${{ matrix.TARGET }}
         run: ${{ matrix.CMD_BUILD }}
       - name: Smoke tests for generated exe (general)
@@ -262,33 +267,22 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: release_url
+      - name: Load Release Id File from release job
+        uses: actions/download-artifact@v3
+        with:
+          name: release_id
       - name: Display structure of files
         run: ls -R
-      - name: Upload Release Asset
-        id: upload-release-asset
-        # TODO only for tags
-        if: ${{ matrix.UPLOAD }}
+      - name: Set meta data
+        id: meta
         shell: bash
         run: |
-          curl \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Content-Type: ${{ matrix.ASSET_MIME }}" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            --show-error \
-            --data-binary @dist/${{ matrix.OUT_FILE_NAME }} \
-            $(cat release_url.txt)=${{ matrix.ASSET_NAME }}
-
-        # run: |
-        #   response=$(curl \
-        #     -X POST \
-        #     -H "Accept: application/vnd.github+json" \
-        #     -H "Content-Type: ${{ matrix.ASSET_MIME }}" \
-        #     -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
-        #     -H "X-GitHub-Api-Version: 2022-11-28" \
-        #     --silent \
-        #     --show-error \
-        #     --data-binary @dist/${{ matrix.OUT_FILE_NAME }} \
-        #     $(cat release_url.txt)=${{ matrix.ASSET_NAME }})
-
+          cat release_url.txt
+          echo "release_url=$(cat release_url.txt)" >> $GITHUB_OUTPUT
+          echo "release_id=$(cat release_id.txt)" >> $GITHUB_OUTPUT
+          echo "upload_url=https://uploads.github.com/repos/scito/extract_otp_secrets/releases/$(cat release_id.txt)/assets?name=" >> $GITHUB_OUTPUT
+      - name: Upload Release Asset
+        id: upload-release-asset
+        if: ${{ matrix.UPLOAD }}
+        run: |
+          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @dist/${{ matrix.OUT_FILE_NAME }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}
