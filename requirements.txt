@@ -7,3 +7,4 @@ pyzbar
 qrcode
 qreader<2.0.0
 typing_extensions; python_version<='3.7'
+importlib_metadata; python_version<='3.7'

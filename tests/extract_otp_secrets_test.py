@@ -509,7 +509,7 @@ def test_extract_verbose(verbose_level: str, color: str, capsys: pytest.CaptureF
 
 
 def normalize_verbose_text(text: str, relaxed: bool) -> str:
-    normalized = re.sub('^.+ version: .+$', '', text, flags=re.MULTILINE | re.IGNORECASE)
+    normalized = re.sub('^.*version: .+$', '', text, flags=re.MULTILINE | re.IGNORECASE)
     if not qreader_available:
         normalized = normalized \
             .replace('QReader installed: True', 'QReader installed: False') \
@@ -544,6 +544,20 @@ def test_extract_help(capsys: pytest.CaptureFixture[str]) -> None:
 
     assert len(captured.out) > 0
     assert "-h, --help" in captured.out and "-v, --verbose" in captured.out
+    assert captured.err == ''
+    assert e.type == SystemExit
+    assert e.value.code == 0
+
+
+def test_extract_version(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as e:
+        # Act
+        extract_otp_secrets.main(['--version'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out.startswith('extract_otp_secrets ')
     assert captured.err == ''
     assert e.type == SystemExit
     assert e.value.code == 0

@@ -1,11 +1,14 @@
 build
 flake8
+gfm-toc
 mypy
 mypy-protobuf
+pyinstaller
 pylint
 pytest
 pytest-cov
 pytest-mock
 setuptools
+setuptools-git-versioning
 types-protobuf
 wheel

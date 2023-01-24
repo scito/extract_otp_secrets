@@ -2,6 +2,8 @@ QReader installed: True
 CV2 version: 4.7.0
 QR reading mode: ZBAR
 
+Version: extract_otp_secrets 2.0.2.post50+git.158245dd.dirty Linux x86_64 Python 3.11.1 (CPython/called as script)
+
 Input files: ['example_export.txt']
 [36mProcessing infile example_export.txt[39m
 Reading lines of example_export.txt
