@@ -144,8 +144,8 @@ python src/extract_otp_secrets.py example_export.txt
 1. Download executable for your platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
 2. Start executable by clicking or from command line
 
-✅ Everything is just packed in one executable.
-✅ No installation needed, neither Python nor dependencies have to be installed.
+✅ Everything is just packed in one executable.  
+✅ No installation needed, neither Python nor dependencies have to be installed.  
 ✅ Easy and convenient
 
 ### Run as script (recommend for developers or advanced users)

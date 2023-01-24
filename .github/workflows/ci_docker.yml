@@ -24,7 +24,7 @@ on:
 
 jobs:
   build-and-push-docker-debian-image:
-    name: Build Docker image and push to repositories
+    name: Build Docker Bullseye image and push to repositories
     # run only when code is compiling and tests are passing
     runs-on: ubuntu-latest
 
@@ -63,7 +63,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: "qr_reader: Build image and push to Docker Hub and GitHub Container Registry"
+      - name: "Build image and push to Docker Hub and GitHub Container Registry"
         id: docker_build_qr_reader_latest
         uses: docker/build-push-action@v3
         with:
@@ -89,7 +89,7 @@ jobs:
           echo "extract_otp_secrets: ${{ steps.docker_build_qr_reader_latest.outputs.digest }}"
 
   build-and-push-docker-alpine-image:
-    name: Build Docker image and push to repositories
+    name: Build Docker Alpine image and push to repositories
     # run only when code is compiling and tests are passing
     runs-on: ubuntu-latest
 
