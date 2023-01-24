@@ -1,4 +1,6 @@
-FROM python:3.11-slim-bullseye
+# --build-arg BASE_IMAGE=python:3.11-slim-buster
+ARG BASE_IMAGE=python:3.11-slim-bullseye
+FROM $BASE_IMAGE
 
 # https://docs.docker.com/engine/reference/builder/
 
@@ -10,7 +12,7 @@ FROM python:3.11-slim-bullseye
 
 WORKDIR /extract
 
-COPY . .
+COPY requirements*.txt src/ run_pytest.sh pytest.ini tests/ example_*.txt example_*.png example_*.csv example*.json docker/.alias ./
 
 ARG RUN_TESTS=true
 
@@ -20,13 +22,14 @@ RUN apt-get update && apt-get install -y \
         libsm6 \
         libzbar0 \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir -U -r \
-        requirements.txt \
-    && if [ "$RUN_TESTS" = "true" ]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi
+    && pip install --no-cache-dir -U -r requirements.txt \
+    && if [ "$RUN_TESTS" = "true" ]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi \
+    && echo 'test -s /extract/.alias && . /extract/.alias || true' >> ~/.bashrc
 
 WORKDIR /files
 
-ENTRYPOINT ["python", "/extract/src/extract_otp_secrets.py"]
+ENTRYPOINT ["python", "/extract/extract_otp_secrets.py"]
 
 LABEL org.opencontainers.image.source https://github.com/scito/extract_otp_secrets
 LABEL org.opencontainers.image.license GPL-3.0+
+LABEL maintainer="Scito https://scito.ch, https://github.com/scito"

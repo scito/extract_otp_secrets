@@ -1,0 +1,46 @@
+# UTF-8
+#
+# For more details about fixed file info 'ffi' see:
+# http://msdn.microsoft.com/en-us/library/ms646997.aspx
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    # The elements of each tuple represent 16-bit values from most-significant to least-significant. For example the value (2, 0, 4, 0) resolves to 0002000000040000 in hex.
+    # filevers and prodvers should be always a tuple with four items: (1, 2, 3, 4)
+    # Set not needed items to zero 0.
+    filevers=($VERSION_MAJOR, $VERSION_MINOR, $VERSION_PATCH, $VERSION_BUILD),
+    prodvers=($VERSION_MAJOR, $VERSION_MINOR, $VERSION_PATCH, $VERSION_BUILD),
+    # Contains a bitmask that specifies the valid bits 'flags'r
+    mask=0x3f,
+    # Contains a bitmask that specifies the Boolean attributes of the file.
+    flags=0x0,
+    # The operating system for which this file was designed.
+    # 0x4 - NT and there is no need to change it.
+    OS=0x4,
+    # The general type of file.
+    # 0x1 - the file is an application.
+    fileType=0x1,
+    # The function of the file.
+    # 0x0 - the function is not defined for this fileType
+    subtype=0x0,
+    # Creation date and time stamp.
+    date=(0, 0)
+    ),
+  kids=[
+    StringFileInfo(
+      [
+      StringTable(
+        # 0x0409 (U.S. English) + 04B0 (1200 = Unicode), https://learn.microsoft.com/en-us/windows/win32/menurc/stringfileinfo-block
+        '040904B0',
+        [StringStruct('CompanyName', 'scito'),
+        StringStruct('FileDescription', 'extract_otp_secrets'),
+        StringStruct('FileVersion', '$VERSION_STR'),
+        StringStruct('InternalName', 'extract_otp_secrets'),
+        StringStruct('LegalCopyright', 'Copyright © $YEARS Scito.'),
+        StringStruct('OriginalFilename', 'extract_otp_secrets.exe'),
+        StringStruct('ProductName', 'extract_otp_secrets'),
+        StringStruct('ProductVersion', '$VERSION_STR')])
+      ]),
+    # 1033 (0x0409 = U.S. English), 1200 (Unicode)
+    VarFileInfo([VarStruct('Translation', [0, 1200])])
+  ]
+)

@@ -1,16 +1,19 @@
-FROM python:3.11-alpine
+ARG BASE_IMAGE=python:3.11-alpine
+FROM $BASE_IMAGE
 
 # https://docs.docker.com/engine/reference/builder/
 
 # For debugging
 # docker run --rm -v "$(pwd)":/files:ro extract_otp_secrets_only_txt
 # docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull --build-arg RUN_TESTS=false
-# docker run --entrypoint /bin/sh -it --rm -v "$(pwd)":/files:ro extract_otp_secrets_only_txt
-# docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secrets_only_txt tests/extract_otp_secrets_test.py -k "not qreader" --relaxed -vvv -s
+# docker run --entrypoint /bin/ash -it --rm -v "$(pwd)":/files:ro extract_otp_secrets_only_txt -l
+# docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extract_otp_secrets_only_txt extract_otp_secrets_test.py -k "not qreader" --relaxed -vvv -s
+
+# https://github.com/pypa/manylinux/blob/main/docker/Dockerfile
 
 WORKDIR /extract
 
-COPY . .
+COPY requirements*.txt src/ run_pytest.sh pytest.ini tests/ example_*.txt example_*.png example_*.csv example*.json docker/.alias ./
 
 ARG RUN_TESTS=true
 
@@ -32,11 +35,13 @@ RUN apk add --no-cache \
         protobuf \
         qrcode \
     && if [[ "$(apk --print-arch)" == "aarch64" ]]; then apk del .build-deps; fi \
-    && if [[ "$RUN_TESTS" == "true" ]]; then /extract/run_pytest.sh tests/extract_otp_secrets_test.py -k "not qreader" --relaxed; else echo "Not running tests..."; fi
+    && if [[ "$RUN_TESTS" == "true" ]]; then /extract/run_pytest.sh extract_otp_secrets_test.py -k "not qreader" --relaxed; else echo "Not running tests..."; fi \
+    && echo 'test -s /extract/.alias && . /extract/.alias || true' >> ~/.profile
 
 WORKDIR /files
 
-ENTRYPOINT ["python", "/extract/src/extract_otp_secrets.py"]
+ENTRYPOINT ["python", "/extract/extract_otp_secrets.py"]
 
 LABEL org.opencontainers.image.source https://github.com/scito/extract_otp_secrets
 LABEL org.opencontainers.image.license GPL-3.0+
+LABEL maintainer="Scito https://scito.ch, https://github.com/scito"

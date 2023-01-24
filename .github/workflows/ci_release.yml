@@ -1,0 +1,281 @@
+name: release
+
+# https://data-dive.com/multi-os-deployment-in-cloud-using-pyinstaller-and-github-actions
+# https://github.com/actions/create-release (archived)
+# https://github.com/actions/upload-artifact
+# https://github.com/actions/download-artifact
+# https://github.com/actions/upload-release-asset (archived)
+# https://github.com/docker/metadata-action
+# https://github.com/marketplace/actions/generate-release-hashes
+
+# https://github.com/oleksis/pyinstaller-manylinux
+# https://github.com/pypa/manylinux
+# https://github.com/batonogov/docker-pyinstaller
+
+# https://docs.github.com/de/actions/using-workflows/workflow-syntax-for-github-actions
+# https://docs.github.com/en/actions/using-workflows
+# https://docs.github.com/en/actions/learn-github-actions/contexts
+# https://docs.github.com/en/actions/learn-github-actions/expressions
+
+# https://docs.github.com/en/rest/releases/releases
+
+# https://peps.python.org/pep-0440/
+# https://semver.org/
+
+# Build matrix:
+# - Linux x86_64 glibc 2.35: ubuntu-latest
+# - Linux x86_64 glibc 2.34: extract_otp_secrets:buster
+# - Windows x86_64: windows-latest
+# - MacOS x86_64: macos-11
+# - Linux x86_64 glibc 2.28: extract_otp_secrets:buster
+# - Linux aarch64 glibc 2.28: extract_otp_secrets:buster
+# - MacOS universal2: macos-11
+# - Windows arm64: [buildx + https://github.com/batonogov/docker-pyinstaller]
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set meta data
+        id: meta
+        # Writing to env with >> $GITHUB_ENV is an alternative
+        run: |
+          echo "date=$(TZ=Europe/Bern date +'%d.%m.%Y')" >> $GITHUB_OUTPUT
+          echo "version=${TAG_NAME/v/}" >> $GITHUB_OUTPUT
+          echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "tag_message=$(git tag -l --format='%(contents:subject)' ${{ github.ref_name }})" >> $GITHUB_OUTPUT
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+      - name: Create Release
+        id: create_release
+        run: |
+          # https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#create-a-release
+          response=$(curl \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/scito/extract_otp_secrets/releases \
+            --silent \
+            --show-error \
+            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}","draft":true,"prerelease":false,"generate_release_notes":true}')
+          echo upload_url=$(jq '.upload_url' <<< "$response") >> $GITHUB_OUTPUT
+          echo $(jq -r '.upload_url' <<< "$response") > release_url.txt
+      - name: Save Release URL File for publish
+        uses: actions/upload-artifact@v3
+        with:
+          name: release_url
+          path: release_url.txt
+
+  build-and-push-docker-image:
+    name: Build Linux release in docker container
+    # run only when code is compiling and tests are passing
+    runs-on: ubuntu-latest
+    needs: create-release
+
+    # steps to perform in job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # avoid building if there are testing errors
+      - name: Run smoke test
+        run: |
+          sudo apt-get install -y libzbar0
+          python -m pip install --upgrade pip
+          pip install -U -r requirements-dev.txt
+          pip install -U .
+          pytest
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      # setup Docker build action
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to Github Packages
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_IO_TOKEN }}
+
+      - name: "Build image from Buster and push to GitHub Container Registry"
+        id: docker_build_buster
+        uses: docker/build-push-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+          # relative path to the place where source code with Dockerfile is located
+          # TODO file:, move to docker/
+          context: .
+          file: Dockerfile
+          # builder: ${{ steps.buildx.outputs.name }}
+          build-args: |
+            BASE_IMAGE=python:3.11-slim-buster
+          # Note: tags has to be all lower-case
+          pull: true
+          tags: |
+            ghcr.io/scito/extract_otp_secrets:buster
+          push: true
+
+      # # https://stackoverflow.com/a/61155718/1663871
+      # - name: Build docker images
+      #   run: docker build -t local < .devcontainer/Dockerfile
+      # - name: Run tests
+      #   run: docker run -it -v $PWD:/srv -w/srv local make test
+
+      - name: Image digest
+        # TODO upload digests to assets
+        run: |
+          echo "extract_otp_secrets: ${{ steps.docker_build_buster.outputs.digest }}"
+
+      - name: Run Pyinstaller in container
+        run: |
+          # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files ghcr.io/scito/extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+
+      - name: Smoke tests
+        run: |
+          dist/extract_otp_secrets_linux_x86_64 -h
+          dist/extract_otp_secrets_linux_x86_64 example_export.png
+          dist/extract_otp_secrets_linux_x86_64 - < example_export.txt
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v3
+        with:
+          name: release_url
+      - name: Display structure of files
+        run: ls -R
+      - name: Upload Release Asset
+        id: upload-release-asset
+        # TODO only for tags
+        shell: bash
+        run: |
+          response=$(curl \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/x-executable" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --silent \
+            --show-error \
+            --data-binary @dist/extract_otp_secrets_linux_x86_64 \
+            $(cat release_url.txt)=extract_otp_secrets_linux_x86_64)
+
+  build:
+    name: Build packages
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#choosing-github-hosted-runners
+        include:
+          - os: ubuntu-latest
+            TARGET: linux
+            CMD_BUILD: |
+                pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile src/extract_otp_secrets.py
+            OUT_FILE_NAME: extract_otp_secrets
+            ASSET_NAME: extract_otp_secrets_linux_x86_64_ubuntu_latest
+            ASSET_MIME: application/x-executable
+            UPLOAD: false
+          - os: macos-11
+            TARGET: macos
+            # TODO add --icon
+            # TODO add --osx-bundle-identifier
+            # TODO add --codesign-identity
+            # TODO add --osx-entitlements-file
+            # TODO https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
+            # TODO --target-arch universal2
+            CMD_BUILD: |
+              pyinstaller -y --add-data $macos_python_path/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --argv-emulation src/extract_otp_secrets.py
+            OUT_FILE_NAME: extract_otp_secrets
+            ASSET_NAME: extract_otp_secrets_macos_x86_64
+            ASSET_MIME: application/x-newton-compatible-pkg
+            UPLOAD: true
+          - os: windows-latest
+            TARGET: windows
+            # TODO add --icon
+            # TODO add --manifest
+            # TODO find more elegant solution for pyzbar\libiconv.dll and pyzbar\libzbar-64.dll
+            CMD_BUILD: |
+              pyinstaller -y --add-data "$($Env:pythonLocation)\__yolo_v3_qr_detector;__yolo_v3_qr_detector" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libiconv.dll;pyzbar" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libzbar-64.dll;pyzbar" --onefile --version-file build\file_version_info.txt src\extract_otp_secrets.py
+            OUT_FILE_NAME: extract_otp_secrets.exe
+            ASSET_NAME: extract_otp_secrets_win_x86_64.exe
+            ASSET_MIME: application/vnd.microsoft.portable-executable
+            UPLOAD: true
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set macos macos_python_path
+        # TODO use variable for Python version
+        run: echo "macos_python_path=/Library/Frameworks/Python.framework/Versions/3.11" >> $GITHUB_ENV
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          check-latest: true
+      - name: Install zbar shared lib for QReader (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y libzbar0
+      - name: Install zbar shared lib for QReader (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install zbar
+      - name: Install dependencies
+        # TODO fix --use-pep517
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U -r requirements-dev.txt
+          pip install -U .
+      - name: Create Windows file_version_info.txt
+        shell: bash
+        run: |
+              mkdir -p build/
+              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) YEARS='2020-2023' envsubst < file_version_info_template.txt > build/file_version_info.txt
+      - name: Build with pyinstaller for ${{ matrix.TARGET }}
+        run: ${{ matrix.CMD_BUILD }}
+      - name: Smoke tests for generated exe (general)
+        run: |
+          dist/${{ matrix.OUT_FILE_NAME }} -h
+          dist/${{ matrix.OUT_FILE_NAME }} example_export.png
+      - name: Smoke tests for generated exe (stdin)
+        if: runner.os != 'Windows'
+        run: |
+          dist/${{ matrix.OUT_FILE_NAME }} - < example_export.txt
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v3
+        with:
+          name: release_url
+      - name: Display structure of files
+        run: ls -R
+      - name: Upload Release Asset
+        id: upload-release-asset
+        # TODO only for tags
+        if: ${{ matrix.UPLOAD }}
+        shell: bash
+        run: |
+          response=$(curl \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: ${{ matrix.ASSET_MIME }}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --silent \
+            --show-error \
+            --data-binary @dist/${{ matrix.OUT_FILE_NAME }} \
+            $(cat release_url.txt)=${{ matrix.ASSET_NAME }})
+

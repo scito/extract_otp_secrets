@@ -76,6 +76,7 @@ askContinueYn() {
 interactive=false
 ignore_version_check=true
 clean=false
+clean_flag=""
 build_docker=true
 run_gui=true
 generate_result_files=false
@@ -119,6 +120,7 @@ while test $# -gt 0; do
             ;;
         -c)
             clean=true
+            clean_flag="--clean"
             shift
             ;;
     esac
@@ -160,7 +162,7 @@ if $clean; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="rm -r dist/ build/ *.whl pytest.xml pytest-coverage.txt .coverage tests/reports || true; find . -name '*.pyc' -type f -delete; find . -name '__pycache__' -type d -exec rm -r {} \; || true; find . -name '*.egg-info' -type d -exec rm -r {} \; || true; find . -name '*_cache' -type d -exec rm -r {} \; || true; mkdir -p tests/reports;"
+    cmd="sudo rm -rf dist/ build/ dist_*/ *.whl extracted_*.csv extracted_*.json pytest.xml pytest-coverage.txt .coverage tests/reports || true; find . -name '*.pyc' -type f -delete; find . -name '__pycache__' -type d -exec rm -r {} \; || true; find . -name '*.egg-info' -type d -exec rm -r {} \; || true; find . -name '*_cache' -type d -exec rm -r {} \; || true; mkdir -p tests/reports;"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -277,6 +279,15 @@ cmd="$MYPY --strict src/*.py tests/*.py | tee $TYPE_CHECK_OUT_FILE"
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
+
+# Generate results files
+
+if $generate_result_files; then
+    cmd="for color in '' '-n'; do for level in '' '-v' '-vv' '-vvv'; do $PYTHON src/extract_otp_secrets.py example_export.txt \$color \$level > tests/data/print_verbose_output\$color\$level.txt; done; done"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+fi
+
 # pip -e install
 
 cmd="$PIP install -U -e ."
@@ -330,13 +341,26 @@ cmd="$PIP wheel ."
 if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
 eval "$cmd"
 
-# Generate results files
+# Build executable
 
-if $generate_result_files; then
-    cmd="for color in '' '-n'; do for level in '' '-v' '-vv' '-vvv'; do $PYTHON src/extract_otp_secrets.py example_export.txt $color $level > tests/data/print_verbose_output$color$level.txt; done; done"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
-fi
+cmd="LOCAL_GLIBC_VERSION=$(ldd --version | sed '1!d' | sed -E 's/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/')"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+echo "local glibc: $LOCAL_GLIBC_VERSION"
+
+cmd="pyinstaller -y --add-data $HOME/.local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile $clean_flag src/extract_otp_secrets.py"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+cmd="dist/extract_otp_secrets -h"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
+
+# Generate README.md TOC
+
+cmd="gfm-toc -s 2 -e 3 -t -o README.md > docs/README_TOC.md"
+if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+eval "$cmd"
 
 # Update Code Coverage in README.md
 
@@ -349,7 +373,7 @@ if $build_docker; then
     # Build docker
 
     # Build Dockerfile_only_txt (Alpine)
-    cmd="docker build . -t extract_otp_secrets_only_txt -f Dockerfile_only_txt --pull --build-arg RUN_TESTS=false"
+    cmd="docker build . -t extract_otp_secrets_only_txt -t extract_otp_secrets:only-txt -t extract_otp_secrets:alpine -f Dockerfile_only_txt --pull --build-arg RUN_TESTS=false"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -361,13 +385,12 @@ if $build_docker; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt tests/extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
+    cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-
-    # Build extract_otp_secrets (Debian)
-    cmd="docker build . -t extract_otp_secrets --pull --build-arg RUN_TESTS=false"
+    # Build extract_otp_secrets (Debian Bullseye)
+    cmd="docker build . -t extract_otp_secrets -t extract_otp_secrets:bullseye --pull --build-arg RUN_TESTS=false"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -387,6 +410,58 @@ if $build_docker; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
+    # Build extract_otp_secrets (Debian Buster)
+    cmd="docker build . -t extract_otp_secrets:buster --pull --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets:buster example_export.txt"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="cat example_export.txt | docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:buster - -c - > example_output.csv"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:buster = < example_export.png"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets:buster"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    # Build executable from Docker latest
+    # sed "1!d" is workaround for head -n 1 since it head procduces exit code != 0
+    BULLSEYE_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+    echo "Bullseye glibc: $BULLSEYE_GLIBC_VERSION"
+
+    cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64_bullseye --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="dist/extract_otp_secrets_linux_x86_64_bullseye -h"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    # Build executable from Docker buster
+    BUSTER_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:buster -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+    echo "Bullseye glibc: $BUSTER_GLIBC_VERSION"
+
+    cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="dist/extract_otp_secrets_linux_x86_64 -h"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    # create Windows file_version_info.txt
+    cmd="VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) YEARS='2020-2023' envsubst < file_version_info_template.txt > build/file_version_info.txt"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    # Run GUI from Docker
     if $run_gui; then
         cmd="docker run --rm -v "$(pwd)":/files:ro --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets &"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi

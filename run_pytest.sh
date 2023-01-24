@@ -1,3 +1,5 @@
 #!/bin/sh
 cd /extract
-pip install -U pytest pytest-mock && pip install --no-deps . && pytest "$@"
+mkdir -p tests
+ln -sf /extract/data tests/data
+pip install -U pytest pytest-mock && pytest "$@"
