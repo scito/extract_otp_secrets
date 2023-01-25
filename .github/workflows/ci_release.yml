@@ -136,7 +136,7 @@ jobs:
           # Note: tags has to be all lower-case
           pull: true
           tags: |
-            ghcr.io/scito/extract_otp_secrets:buster
+            scit0/extract_otp_secrets:buster
           push: true
 
       # # https://stackoverflow.com/a/61155718/1663871
@@ -153,7 +153,7 @@ jobs:
       - name: Run Pyinstaller in container
         run: |
           # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
-          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files ghcr.io/scito/extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
       - name: Smoke tests
         run: |
