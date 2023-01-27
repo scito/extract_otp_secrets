@@ -94,7 +94,10 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 :heavy_check_mark: Everything is just packed in one executable.  
 :heavy_check_mark: No installation needed, neither Python nor any dependencies have to be installed.  
 :heavy_check_mark: Easy and convenient  
-:information_source: There is a delay after starting the executable since the files have internally to be unpacked.  
+
+> :information_source: There is a delay after starting the executable since the files have internally to be unpacked.
+
+> :information_source: If you are a developer, you might prefer to run the Python script directly, see [Installation](#installation-of-python-script-recommend-for-developers-or-advanced-users)
 
 > :warning: Some antivirus tools may show a virus or trojan alert for the executable.
 > This alert is a false positive.
