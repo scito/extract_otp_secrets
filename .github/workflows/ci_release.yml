@@ -1,10 +1,8 @@
 name: release
 
 # https://data-dive.com/multi-os-deployment-in-cloud-using-pyinstaller-and-github-actions
-# https://github.com/actions/create-release (archived)
 # https://github.com/actions/upload-artifact
 # https://github.com/actions/download-artifact
-# https://github.com/actions/upload-release-asset (archived)
 # https://github.com/docker/metadata-action
 # https://github.com/marketplace/actions/generate-release-hashes
 
@@ -36,12 +34,17 @@ on:
   push:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  pull_request:
+  schedule:
+    # Run weekly on default branch
+    - cron: '47 3 * * 6'
 
 jobs:
 
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Set meta data
         id: meta
@@ -80,7 +83,7 @@ jobs:
           name: release_id
           path: release_id.txt
 
-  build-and-push-docker-image:
+  build-linux-executable-in-docker:
     name: Build Linux release in docker container
     # run only when code is compiling and tests are passing
     runs-on: ubuntu-latest
@@ -172,6 +175,7 @@ jobs:
           dist/extract_otp_secrets_linux_x86_64 --qr CV2 example_export.png
           dist/extract_otp_secrets_linux_x86_64 --qr CV2_WECHAT example_export.png
       - name: Load Release URL File from release job
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v3
         with:
           name: release_url
@@ -179,7 +183,7 @@ jobs:
         run: ls -R
       - name: Upload Release Asset
         id: upload-release-asset
-        # TODO only for tags
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           response=$(curl \
             -X POST \
@@ -192,8 +196,8 @@ jobs:
             --data-binary @dist/extract_otp_secrets_linux_x86_64 \
             $(cat release_url.txt)=extract_otp_secrets_linux_x86_64)
 
-  build:
-    name: Build packages
+  build-native-executables:
+    name: Build native packages
     needs: create-release
     runs-on: ${{ matrix.os }}
     strategy:
@@ -286,10 +290,12 @@ jobs:
         run: |
           dist/${{ matrix.OUT_FILE_NAME }} - < example_export.txt
       - name: Load Release URL File from release job
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v3
         with:
           name: release_url
       - name: Load Release Id File from release job
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v3
         with:
           name: release_id
@@ -297,14 +303,66 @@ jobs:
         run: ls -R
       - name: Set meta data
         id: meta
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         run: |
-          cat release_url.txt
-          echo "release_url=$(cat release_url.txt)" >> $GITHUB_OUTPUT
           echo "release_id=$(cat release_id.txt)" >> $GITHUB_OUTPUT
           echo "upload_url=https://uploads.github.com/repos/scito/extract_otp_secrets/releases/$(cat release_id.txt)/assets?name=" >> $GITHUB_OUTPUT
       - name: Upload Release Asset
         id: upload-release-asset
-        if: ${{ matrix.UPLOAD }}
+        if: matrix.UPLOAD && startsWith(github.ref, 'refs/tags/v')
         run: |
           curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @dist/${{ matrix.OUT_FILE_NAME }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}
+
+  upload-hashes:
+    name: Upload hashes
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - build-linux-executable-in-docker
+      - build-native-executables
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load Release Id File from release job
+        uses: actions/download-artifact@v3
+        with:
+          name: release_id
+      - name: Set meta data
+        id: meta
+        run: |
+          echo "release_id=$(cat release_id.txt)" >> $GITHUB_OUTPUT
+          echo "upload_url=https://uploads.github.com/repos/scito/extract_otp_secrets/releases/$(cat release_id.txt)/assets?name=" >> $GITHUB_OUTPUT
+      - name: Calculate and upload hashes from assets
+        run: |
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          for asset_url in $(curl \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN"\
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --silent \
+            --show-error \
+            https://api.github.com/repos/scito/extract_otp_secrets/releases/90604736/assets |
+          jq -r '.[].url'); do
+              echo "Download $asset_url"
+              name=$(curl \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "Authorization: Bearer $GITHUB_TOKEN"\
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  --output-dir assets \
+                  -L \
+                  $asset_url |
+                  jq -r '.name')
+              curl \
+                  -H "Accept: application/octet-stream" \
+                  -H "Authorization: Bearer $GITHUB_TOKEN"\
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  --create-dirs \
+                  --output-dir assets \
+                  -L \
+                  -o $name \
+                  $asset_url
+          done
+          (cd assets/ && sha256sum * > ../sha256_hashes.txt)
+          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data @sha256_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha256_hashes.txt
+
+          (cd assets/ && sha512sum * > ../sha512_hashes.txt)
+          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data @sha512_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha512_hashes.txt
