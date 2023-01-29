@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
         libglib2.0-0 \
         libsm6 \
         libzbar0 \
+        python3-tk \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir -U -r requirements.txt \
     && if [ "$RUN_TESTS" = "true" ]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi \

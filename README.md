@@ -126,6 +126,14 @@ Detected QR codes are surrounded with a frame. The color of the frame indicates 
 * Red: The QR code is detected and decoded, but could not be successfully extracted. This is the case if a QR code not containing OTP data is captured.
 * Magenta: The QR code is detected, but could not be decoded. The QR code should be presented better to the camera or another QR reader could be used.
 
+Key commands:
+
+* Space: change QR code reader
+* C: save as csv file (🆕 since v2.2)
+* J: save as json file (🆕 since v2.2)
+* K: save as KeePass csv file (🆕 since v2.2)
+* ESC, ENTER, Q: quit the program
+
 The secrets are printed by default to the console. [Set program parameters](#program-help-arguments-and-options) for other types of output, e.g. `--csv exported_secrets.csv`.
 
 ### With builtin QR decoder from image files (🆕 since version 2.0)
@@ -292,6 +300,10 @@ python extract_otp_secrets.py = < example_export.png</pre>
     * QREADER_DEEP: [QReader](https://github.com/Eric-Canas/QReader) - very slow in GUI
     * CV2: [QRCodeDetector](https://docs.opencv.org/4.x/de/dc3/classcv_1_1QRCodeDetector.html)
     * CV2_WECHAT: [WeChatQRCode](https://docs.opencv.org/4.x/dd/d63/group__wechat__qrcode.html)
+* Program usable as pure GUI application without any command line switches (🆕 since v2.2)
+    * Save otp secrets as csv file (🆕 since v2.2)
+    * Save otp secrets as json file (🆕 since v2.2)
+    * Save otp secrets as KeePass csv file(s) (🆕 since v2.2)
 * Supports [TOTP](https://www.ietf.org/rfc/rfc6238.txt) and [HOTP](https://www.ietf.org/rfc/rfc4226.txt) standards
 * Generates QR codes
 * Exports to various formats:
