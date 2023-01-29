@@ -1,4 +1,5 @@
 colorama>=0.4.6
+importlib_metadata; python_version<='3.7'
 opencv-contrib-python; sys_platform != 'darwin'
 opencv-contrib-python<=4.7.0; sys_platform == 'darwin'
 Pillow
@@ -7,4 +8,3 @@ pyzbar
 qrcode
 qreader<2.0.0
 typing_extensions; python_version<='3.7'
-importlib_metadata; python_version<='3.7'
