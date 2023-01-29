@@ -92,7 +92,14 @@ jobs:
       - name: Image digest
         # TODO upload digests to assets
         run: |
-          echo "extract_otp_secrets: ${{ steps.docker_build_qr_reader_latest.outputs.digest }}"
+          echo "extract_otp_secrets digests: ${{ steps.docker_build_qr_reader_latest.outputs.digest }}"
+          echo "${{ steps.docker_build_qr_reader_latest.outputs.digest }}" > digests.txt
+      - name: Save docker digests as artifacts
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v3
+        with:
+          name: debian_digests
+          path: digests.txt
 
   build-and-push-docker-alpine-image:
     name: Build Docker Alpine image and push to repositories
@@ -155,8 +162,15 @@ jobs:
           build-args: |
             RUN_TESTS=true
 
-
       - name: Image digest
         # TODO upload digests to assets
         run: |
-          echo "extract_otp_secrets:only-txt: ${{ steps.docker_build_only_txt.outputs.digest }}"
+          echo "extract_otp_secrets:only-txt digests: ${{ steps.docker_build_only_txt.outputs.digest }}"
+          echo "${{ steps.docker_build_qr_reader_latest.outputs.digest }}" > digests.txt
+
+      - name: Save docker digests as artifacts
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v3
+        with:
+          name: alpine_digests
+          path: digests.txt
