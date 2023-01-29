@@ -442,7 +442,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
         # ESC or Enter or q pressed
         quit = True
     elif (key == ord('c') or key == ord('C')) and is_not_headless():
-        if has_otps_or_show_warning(otps):
+        if has_no_otps_show_warning(otps):
             pass
         else:
             file_name = tkinter.filedialog.asksaveasfilename(
@@ -454,7 +454,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
             if len(file_name) > 0:
                 write_csv(file_name, otps)
     elif (key == ord('j') or key == ord('J')) and is_not_headless():
-        if has_otps_or_show_warning(otps):
+        if has_no_otps_show_warning(otps):
             pass
         else:
             file_name = tkinter.filedialog.asksaveasfilename(
@@ -466,7 +466,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
             if len(file_name) > 0:
                 write_json(file_name, otps)
     elif (key == ord('k') or key == ord('K')) and is_not_headless():
-        if has_otps_or_show_warning(otps):
+        if has_no_otps_show_warning(otps):
             pass
         else:
             file_name = tkinter.filedialog.asksaveasfilename(
@@ -784,12 +784,11 @@ def check_file_exists(filename: str) -> None:
               f"\ninput file: {filename}")
 
 
-def has_otps_or_show_warning(otps: Otps) -> bool:
+def has_no_otps_show_warning(otps: Otps) -> bool:
     if len(otps) == 0:
             tkinter.messagebox.showinfo(title="No data", message="There are no otp secrets to write")
             tk_root.update()  # dispose dialog
-
-    return len(otps) > 0
+    return len(otps) == 0
 
 
 def is_binary(line: str) -> bool:
