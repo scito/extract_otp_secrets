@@ -37,7 +37,7 @@ on:
   pull_request:
   schedule:
     # Run weekly on default branch
-    - cron: '47 3 * * 6'
+    - cron: '47 4 * * 6'
 
 jobs:
 
@@ -131,6 +131,8 @@ jobs:
 
       - name: "Build image from Buster and push to GitHub Container Registry"
         id: docker_build_buster
+        # Disable and build in ci_docker for speeding up releases
+        if: false
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64
@@ -340,7 +342,7 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             --silent \
             --show-error \
-            https://api.github.com/repos/scito/extract_otp_secrets/releases/90604736/assets |
+            https://api.github.com/repos/scito/extract_otp_secrets/releases/${{ steps.meta.outputs.release_id }}/assets |
           jq -r '.[].url'); do
               echo "Download $asset_url"
               name=$(curl \
