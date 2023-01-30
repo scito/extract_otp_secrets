@@ -44,10 +44,10 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Set meta data
         id: meta
+        if: startsWith(github.ref, 'refs/tags/v')
         # Writing to env with >> $GITHUB_ENV is an alternative
         run: |
           echo "date=$(TZ=Europe/Zurich date +'%d.%m.%Y')" >> $GITHUB_OUTPUT
@@ -58,6 +58,7 @@ jobs:
           TAG_NAME: ${{ github.ref_name }}
       - name: Create Release
         id: create_release
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           # https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#create-a-release
           response=$(curl \
@@ -73,11 +74,13 @@ jobs:
           echo $(jq -r '.upload_url' <<< "$response") > release_url.txt
           echo $(jq -r '.id' <<< "$response") > release_id.txt
       - name: Save Release URL File for publish
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v3
         with:
           name: release_url
           path: release_url.txt
       - name: Save asset upload id for publish
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v3
         with:
           name: release_id
