@@ -87,10 +87,17 @@ jobs:
           path: release_id.txt
 
   build-linux-executable-in-docker:
-    name: Build Linux release in docker container
+    name: Build ${{ matrix.PLATFORM }} release in docker container
     # run only when code is compiling and tests are passing
     runs-on: ubuntu-latest
     needs: create-release
+    strategy:
+      matrix:
+        include:
+          - PLATFORM: linux/amd64
+            EXE: extract_otp_secrets_linux_x86_64
+          - PLATFORM: linux/arm64
+            EXE: extract_otp_secrets_linux_arm64
 
     # steps to perform in job
     steps:
@@ -132,53 +139,35 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: "Build image from Buster and push to GitHub Container Registry"
-        id: docker_build_buster
-        # Disable and build in ci_docker for speeding up releases
-        if: false
-        uses: docker/build-push-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
-          # relative path to the place where source code with Dockerfile is located
-          # TODO file:, move to docker/
-          context: .
-          file: Dockerfile
-          # builder: ${{ steps.buildx.outputs.name }}
-          build-args: |
-            BASE_IMAGE=python:3.11-slim-buster
-          # Note: tags has to be all lower-case
-          pull: true
-          tags: |
-            scit0/extract_otp_secrets:buster
-          push: true
-
-      # # https://stackoverflow.com/a/61155718/1663871
-      # - name: Build docker images
-      #   run: docker build -t local < .devcontainer/Dockerfile
-      # - name: Run tests
-      #   run: docker run -it -v $PWD:/srv -w/srv local make test
-
       - name: Image digest
         # TODO upload digests to assets
         run: |
           echo "extract_otp_secrets: ${{ steps.docker_build_buster.outputs.digest }}"
 
-      - name: Run Pyinstaller in container
+        # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
+        # https://github.com/multiarch/qemu-user-static
+        # https://hub.docker.com/r/multiarch/qemu-user-static/
+      - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
-          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --pull always
+          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
-      - name: Smoke tests
+      - name: Smoke tests ${{ matrix.PLATFORM }}
+        if: matrix.PLATFORM == 'linux/amd64'
         run: |
-          dist/extract_otp_secrets_linux_x86_64 -V
-          dist/extract_otp_secrets_linux_x86_64 -h
-          dist/extract_otp_secrets_linux_x86_64 example_export.png
-          dist/extract_otp_secrets_linux_x86_64 - < example_export.txt
-          dist/extract_otp_secrets_linux_x86_64 --qr ZBAR example_export.png
-          dist/extract_otp_secrets_linux_x86_64 --qr QREADER example_export.png
-          dist/extract_otp_secrets_linux_x86_64 --qr QREADER_DEEP example_export.png
-          dist/extract_otp_secrets_linux_x86_64 --qr CV2 example_export.png
-          dist/extract_otp_secrets_linux_x86_64 --qr CV2_WECHAT example_export.png
+          dist/${{ matrix.EXE }} -V
+          dist/${{ matrix.EXE }} -h
+          dist/${{ matrix.EXE }} example_export.png
+          dist/${{ matrix.EXE }} - < example_export.txt
+          dist/${{ matrix.EXE }} --qr ZBAR example_export.png
+          dist/${{ matrix.EXE }} --qr QREADER example_export.png
+          dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png
+          dist/${{ matrix.EXE }} --qr CV2 example_export.png
+          dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png
+      - name: Smoke tests ${{ matrix.PLATFORM }}
+        if: matrix.PLATFORM == 'linux/arm64'
+        run: |
+          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
       - name: Load Release URL File from release job
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v3
@@ -198,8 +187,8 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             --silent \
             --show-error \
-            --data-binary @dist/extract_otp_secrets_linux_x86_64 \
-            $(cat release_url.txt)=extract_otp_secrets_linux_x86_64)
+            --data-binary @dist/${{ matrix.EXE }} \
+            $(cat release_url.txt)=${{ matrix.EXE }})
 
   build-native-executables:
     name: Build native packages

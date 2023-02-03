@@ -325,8 +325,9 @@ python extract_otp_secrets.py = < example_export.png</pre>
 * Prints colored output (🆕 since v2.0)
 * Startable as executable (script, Python, and all dependencies packed in one executable) (🆕 since v2.1)
     * extract_otp_secrets_linux_x86_64 (requires glibc >= 2.28)
+    * extract_otp_secrets_linux_arm64 (requires glibc >= 2.28)
     * extract_otp_secrets_win_x86_64.exe
-    * extract_otp_secrets_macos_x86_64 (untested)
+    * extract_otp_secrets_macos_x86_64 (macOS >= 11) (untested)
 * Prebuilt Docker images provided for amd64 and arm64 (🆕 since v2.0)
 * Many ways to run the script:
     * Native Python
