@@ -786,8 +786,8 @@ def check_file_exists(filename: str) -> None:
 
 def has_no_otps_show_warning(otps: Otps) -> bool:
     if len(otps) == 0:
-            tkinter.messagebox.showinfo(title="No data", message="There are no otp secrets to write")
-            tk_root.update()  # dispose dialog
+        tkinter.messagebox.showinfo(title="No data", message="There are no otp secrets to write")
+        tk_root.update()  # dispose dialog
     return len(otps) == 0
 
 
@@ -815,7 +815,7 @@ def do_debug_checks() -> bool:
 
 def is_not_headless() -> bool:
     if headless:
-        log_warn(f"Cannot open dialog in headless mode")
+        log_warn("Cannot open dialog in headless mode")
     return not headless
 
 

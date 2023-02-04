@@ -80,6 +80,7 @@ clean_flag=""
 build_docker=true
 run_gui=true
 generate_result_files=false
+PYTHONHASHSEED=31
 
 while test $# -gt 0; do
     case $1 in
@@ -436,7 +437,7 @@ if $build_docker; then
     BULLSEYE_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
     echo "Bullseye glibc: $BULLSEYE_GLIBC_VERSION"
 
-    cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64_bullseye --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+    cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64_bullseye --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -448,7 +449,7 @@ if $build_docker; then
     BUSTER_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:buster -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
     echo "Bullseye glibc: $BUSTER_GLIBC_VERSION"
 
-    cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+    cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -458,6 +459,24 @@ if $build_docker; then
 
     # create Windows file_version_info.txt
     cmd="VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) YEARS='2020-2023' envsubst < file_version_info_template.txt > build/file_version_info.txt"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    # build linux/arm64
+    # Build extract_otp_secrets (Debian Buster)
+    cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:buster --pull --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="docker run --platform linux/arm64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="PLATFORM='linux/arm64' && EXE='dist/extract_otp_secrets_linux_arm64' && docker run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 

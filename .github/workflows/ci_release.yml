@@ -56,6 +56,7 @@ jobs:
           echo "tag_message=$(git tag -l --format='%(contents:subject)' ${{ github.ref_name }})" >> $GITHUB_OUTPUT
         env:
           TAG_NAME: ${{ github.ref_name }}
+          PYTHONHASHSEED: 31
       - name: Create Release
         id: create_release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -149,8 +150,8 @@ jobs:
         # https://hub.docker.com/r/multiarch/qemu-user-static/
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --pull always
-          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
       - name: Smoke tests ${{ matrix.PLATFORM }}
         if: matrix.PLATFORM == 'linux/amd64'
@@ -268,6 +269,9 @@ jobs:
               mkdir -p build/
               VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n "s/^([0-9]+).*/\1/p") VERSION_BUILD=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n -e"s/^[0-9]+.+/99/p")$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) YEARS='2020-2023' envsubst < file_version_info_template.txt > build/file_version_info.txt
       - name: Build with pyinstaller for ${{ matrix.TARGET }}
+        env:
+          # Reproducible build: https://pyinstaller.org/en/stable/advanced-topics.html#creating-a-reproducible-build
+          PYTHONHASHSEED: 31
         run: ${{ matrix.CMD_BUILD }}
       - name: Smoke tests for generated exe (general)
         run: |
