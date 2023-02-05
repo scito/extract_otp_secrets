@@ -65,6 +65,7 @@ else:
 
 
 debug_mode = '-d' in sys.argv[1:] or '--debug' in sys.argv[1:]
+quiet = '-q' in sys.argv[1:] or '--quiet' in sys.argv[1:]
 headless: bool = False
 
 
@@ -82,13 +83,17 @@ try:
     try:
         import pyzbar.pyzbar as zbar  # type: ignore
         from qreader import QReader  # type: ignore
-    except ImportError as e:
-        print(f"""
-ERROR: Cannot import QReader module. This problem is probably due to the missing zbar shared library.
+        zbar_available = True
+    except Exception as e:
+        if not quiet:
+            print(f"""
+WARN: Cannot import pyzbar or qreader module. This problem is probably due to the missing zbar shared library.
 On Linux and macOS libzbar0 must be installed.
 See in README.md for the installation of the libzbar0.
 Exception: {e}\n""", file=sys.stderr)
-        raise e
+        zbar_available = False
+        if debug_mode:
+            raise e
 
     # Types
     # workaround for PYTHON <= 3.9: Final[tuple[int]]
@@ -121,9 +126,9 @@ Exception: {e}\n""", file=sys.stderr)
 
     TextPosition = Enum('TextPosition', ['LEFT', 'RIGHT'])
 
-    qreader_available = True
+    cv2_available = True
 except ImportError as e:
-    qreader_available = False
+    cv2_available = False
     if debug_mode:
         raise e
 
@@ -145,10 +150,10 @@ LogLevel = IntEnum('LogLevel', ['QUIET', 'NORMAL', 'VERBOSE', 'MORE_VERBOSE', 'D
 
 # Constants
 CAMERA: Final[str] = 'camera'
+CV2_QRMODES: List[str] = [QRMode.CV2.name, QRMode.CV2_WECHAT.name]
 
 # Global variable declaration
 verbose: IntEnum = LogLevel.NORMAL
-quiet: bool = False
 colored: bool = True
 executable: bool = False
 __version__: str
@@ -174,7 +179,7 @@ def main(sys_args: list[str]) -> None:
     # https://pyinstaller.org/en/stable/runtime-information.html#run-time-information
     executable = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
 
-    if qreader_available and not headless:
+    if cv2_available and not headless:
         try:
             tk_root = tkinter.Tk()
             tk_root.withdraw()
@@ -275,7 +280,7 @@ def parse_args(sys_args: list[str]) -> Args:
     name = os.path.basename(sys.argv[0])
     cmd = f"python {name}" if name.endswith('.py') else f"{name}"
     description_text = "Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps"
-    if qreader_available:
+    if cv2_available:
         description_text += "\nIf no infiles are provided, a GUI window starts and QR codes are captured from the camera."
     example_text = f"""examples:
 {cmd}
@@ -288,15 +293,18 @@ def parse_args(sys_args: list[str]) -> Args:
                                          description=description_text,
                                          epilog=example_text)
     arg_parser.add_argument('infile', help="""a) file or - for stdin with 'otpauth-migration://...' URLs separated by newlines, lines starting with # are ignored;
-b) image file containing a QR code or = for stdin for an image containing a QR code""", nargs='*' if qreader_available else '+')
+b) image file containing a QR code or = for stdin for an image containing a QR code""", nargs='*' if cv2_available else '+')
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
     arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
-    if qreader_available:
+    if cv2_available:
         arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, type=int, metavar=('NUMBER'))
-        arg_parser.add_argument('--qr', '-Q', help=f'QR reader (default: {QRMode.ZBAR.name})', type=str, choices=[mode.name for mode in QRMode], default=QRMode.ZBAR.name)
+        if not zbar_available:
+            arg_parser.add_argument('--qr', '-Q', help=f'QR reader (default: {QRMode.CV2.name})', type=str, choices=[QRMode.CV2.name, QRMode.CV2_WECHAT.name], default=QRMode.CV2.name)
+        else:
+            arg_parser.add_argument('--qr', '-Q', help=f'QR reader (default: {QRMode.ZBAR.name})', type=str, choices=[mode.name for mode in QRMode], default=QRMode.ZBAR.name)
     arg_parser.add_argument('-i', '--ignore', help='ignore duplicate otps', action='store_true')
     arg_parser.add_argument('--no-color', '-n', help='do not use ANSI colors in console output', action='store_true')
     arg_parser.add_argument('--version', '-V', help='print version and quit', action=PrintVersionAction)
@@ -314,8 +322,8 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
         verbose = LogLevel.DEBUG
         log_debug('Debug mode start')
     quiet = True if args.quiet else False
-    if verbose: print(f"QReader installed: {qreader_available}")
-    if qreader_available:
+    if verbose: print(f"QReader installed: {cv2_available}")
+    if cv2_available:
         if verbose >= LogLevel.VERBOSE: print(f"CV2 version: {cv2.__version__}")
         if verbose: print(f"QR reading mode: {args.qr}\n")
 
@@ -339,7 +347,8 @@ def extract_otps_from_camera(args: Args) -> Otps:
     cam = cv2.VideoCapture(args.camera)
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_AUTOSIZE)
 
-    qreader = QReader()
+    if zbar_available:
+        qreader = QReader()
     cv2_qr = cv2.QRCodeDetector()
     cv2_qr_wechat = cv2.wechat_qrcode.WeChatQRCode()
     while True:
@@ -478,7 +487,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
             if len(file_name) > 0:
                 write_keepass_csv(file_name, otps)
     elif key == 32:
-        qr_mode = next_qr_mode(qr_mode)
+        qr_mode = next_valid_qr_mode(qr_mode, zbar_available)
         if verbose >= LogLevel.MORE_VERBOSE: print(f"QR reading mode: {qr_mode}")
     if cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
         # Window close clicked
@@ -526,7 +535,7 @@ def get_otp_urls_from_file(filename: str, args: Args) -> OtpUrls:
             return lines
 
     # could not process text file, try reading as image
-    if filename != '-' and qreader_available:
+    if filename != '-' and cv2_available:
         return convert_img_to_otp_urls(filename, args)
 
     return []
@@ -799,6 +808,14 @@ def is_binary(line: str) -> bool:
         return True
 
 
+def next_valid_qr_mode(qr_mode: QRMode, with_zbar: bool = True) -> QRMode:
+    ok = False
+    while not ok:
+        qr_mode = next_qr_mode(qr_mode)
+        ok = True if with_zbar else qr_mode.name in CV2_QRMODES
+    return qr_mode
+
+
 def next_qr_mode(qr_mode: QRMode) -> QRMode:
     return QRMode((qr_mode.value + 1) % len(QRMode))
 
@@ -809,6 +826,10 @@ def do_debug_checks() -> bool:
     import cv2  # noqa: F401 # This is only a debug import
     log_debug('Try: import numpy as np')
     import numpy as np  # noqa: F401 # This is only a debug import
+    log_debug('Try: import pyzbar.pyzbar as zbar')
+    import pyzbar.pyzbar as zbar  # noqa: F401 # This is only a debug import
+    log_debug('Try: from qreader import QReader')
+    from qreader import QReader  # noqa: F401 # This is only a debug import
     print(color('\nDebug checks passed', colorama.Fore.GREEN))
     return True
 

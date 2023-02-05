@@ -45,11 +45,11 @@ except ImportError:
     # ignore
     pass
 
-qreader_available: bool = extract_otp_secrets.qreader_available
+cv2_available: bool = extract_otp_secrets.cv2_available
 
 
 # Quickfix comment
-# @pytest.mark.skipif(sys.platform.startswith("win") or not qreader_available or sys.implementation.name == 'pypy' or sys.version_info >= (3, 10), reason="Quickfix")
+# @pytest.mark.skipif(sys.platform.startswith("win") or not cv2 or sys.implementation.name == 'pypy' or sys.version_info >= (3, 10), reason="Quickfix")
 
 
 def test_extract_stdout(capsys: pytest.CaptureFixture[str]) -> None:
@@ -122,7 +122,7 @@ def test_extract_stdin_only_comments(capsys: pytest.CaptureFixture[str], monkeyp
 
 
 def test_extract_empty_file_no_qreader(capsys: pytest.CaptureFixture[str]) -> None:
-    if qreader_available:
+    if cv2_available:
         # Act
         with pytest.raises(SystemExit) as e:
             extract_otp_secrets.main(['-n', 'tests/data/empty_file.txt'])
@@ -510,7 +510,7 @@ def test_extract_verbose(verbose_level: str, color: str, capsys: pytest.CaptureF
 
 def normalize_verbose_text(text: str, relaxed: bool) -> str:
     normalized = re.sub('^.*version: .+$', '', text, flags=re.MULTILINE | re.IGNORECASE)
-    if not qreader_available:
+    if not cv2_available:
         normalized = normalized \
             .replace('QReader installed: True', 'QReader installed: False') \
             .replace('\nQR reading mode: ZBAR\n\n', '')
@@ -564,7 +564,7 @@ def test_extract_version(capsys: pytest.CaptureFixture[str]) -> None:
 
 
 def test_extract_no_arguments(capsys: pytest.CaptureFixture[str], mocker: MockerFixture) -> None:
-    if qreader_available:
+    if cv2_available:
         # Arrange
         otps = read_json('example_output.json')
         mocker.patch('extract_otp_secrets.extract_otps_from_camera', return_value=otps)
@@ -648,7 +648,7 @@ class MockCam:
     ('CV2_WECHAT', 'tests/data/lena_std.tif', None),
 ])
 def test_extract_otps_from_camera(qr_reader: Optional[str], file: str, success: bool, capsys: pytest.CaptureFixture[str], mocker: MockerFixture) -> None:
-    if qreader_available:
+    if cv2_available:
         # Arrange
         mockCam = MockCam([file])
         mocker.patch('cv2.VideoCapture', return_value=mockCam)
@@ -733,7 +733,7 @@ def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
     ('-n', None, False, False),
 ])
 def test_quiet(parameter: str, parameter_value: Optional[str], stdout_expected: bool, stderr_expected: bool, capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
-    if parameter in ['-Q', '-C'] and not qreader_available:
+    if parameter in ['-Q', '-C'] and not cv2_available:
         return
 
     # Arrange
@@ -1074,6 +1074,12 @@ url: This is just a text file masquerading as an image file.
 
     assert captured.err == expected_stderr
     assert captured.out == ''
+
+
+def test_next_valid_qr_mode() -> None:
+    assert extract_otp_secrets.next_valid_qr_mode(extract_otp_secrets.QRMode.CV2, True) == extract_otp_secrets.QRMode.CV2_WECHAT
+    assert extract_otp_secrets.next_valid_qr_mode(extract_otp_secrets.QRMode.CV2_WECHAT, True) == extract_otp_secrets.QRMode.ZBAR
+    assert extract_otp_secrets.next_valid_qr_mode(extract_otp_secrets.QRMode.CV2_WECHAT, False) == extract_otp_secrets.QRMode.CV2
 
 
 EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT = '''Name:    pi@raspberrypi
