@@ -44,14 +44,20 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    outputs:
+      date: ${{ steps.meta.outputs.date }}
+      version: ${{ steps.meta.outputs.version }}
+      inline_version: ${{ steps.meta.outputs.inline_version }}
+      tag_name: ${{ steps.meta.outputs.tag_name }}
+      tag_message: ${{ steps.meta.outputs.tag_message }}
     steps:
       - name: Set meta data
         id: meta
-        if: startsWith(github.ref, 'refs/tags/v')
         # Writing to env with >> $GITHUB_ENV is an alternative
         run: |
           echo "date=$(TZ=Europe/Zurich date +'%d.%m.%Y')" >> $GITHUB_OUTPUT
           echo "version=${TAG_NAME/v/}" >> $GITHUB_OUTPUT
+          echo "inline_version=${TAG_NAME/v/_}" >> $GITHUB_OUTPUT
           echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           echo "tag_message=$(git tag -l --format='%(contents:subject)' ${{ github.ref_name }})" >> $GITHUB_OUTPUT
         env:
@@ -97,8 +103,10 @@ jobs:
         include:
           - PLATFORM: linux/amd64
             EXE: extract_otp_secrets_linux_x86_64
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64
           - PLATFORM: linux/arm64
             EXE: extract_otp_secrets_linux_arm64
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_arm64
 
     # steps to perform in job
     steps:
@@ -189,7 +197,7 @@ jobs:
             --silent \
             --show-error \
             --data-binary @dist/${{ matrix.EXE }} \
-            $(cat release_url.txt)=${{ matrix.EXE }})
+            $(cat release_url.txt)=${{ matrix.ASSET_NAME }})
 
   build-native-executables:
     name: Build native packages
@@ -208,7 +216,7 @@ jobs:
             CMD_BUILD: |
               pyinstaller -y --add-data "$($Env:pythonLocation)\__yolo_v3_qr_detector;__yolo_v3_qr_detector" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libiconv.dll;pyzbar" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libzbar-64.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\msvcr120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\msvcp120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\vcamp120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\vcomp120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\vccorlib120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120u.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120chs.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120cht.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120deu.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120enu.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120esn.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120fra.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120ita.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120jpn.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120kor.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120rus.dll;pyzbar" --onefile --version-file build\file_version_info.txt src\extract_otp_secrets.py
             OUT_FILE_NAME: extract_otp_secrets.exe
-            ASSET_NAME: extract_otp_secrets_win_x86_64.exe
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_win_x86_64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
             UPLOAD: true
           - os: macos-11
@@ -222,7 +230,7 @@ jobs:
             CMD_BUILD: |
               pyinstaller -y --add-data $macos_python_path/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --argv-emulation src/extract_otp_secrets.py
             OUT_FILE_NAME: extract_otp_secrets
-            ASSET_NAME: extract_otp_secrets_macos_x86_64
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64
             ASSET_MIME: application/x-newton-compatible-pkg
             UPLOAD: true
           - os: ubuntu-latest
@@ -230,7 +238,7 @@ jobs:
             CMD_BUILD: |
                 pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile src/extract_otp_secrets.py
             OUT_FILE_NAME: extract_otp_secrets
-            ASSET_NAME: extract_otp_secrets_linux_x86_64_ubuntu_latest
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64_ubuntu_latest
             ASSET_MIME: application/x-executable
             UPLOAD: false
     steps:
