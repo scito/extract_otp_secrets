@@ -76,7 +76,7 @@ jobs:
             https://api.github.com/repos/scito/extract_otp_secrets/releases \
             --silent \
             --show-error \
-            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}","draft":true,"prerelease":false,"generate_release_notes":true}')
+            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}\n\nJust download the executable and execute it.\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.28) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.28) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | MacOS x86_64/amd64 (Big Sur) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | N/A |\n ","draft":true,"prerelease":false,"generate_release_notes":true}')
           echo upload_url=$(jq '.upload_url' <<< "$response") >> $GITHUB_OUTPUT
           echo $(jq -r '.upload_url' <<< "$response") > release_url.txt
           echo $(jq -r '.id' <<< "$response") > release_id.txt
