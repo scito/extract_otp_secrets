@@ -137,12 +137,14 @@ jobs:
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
+        if: github.secret_source == 'Actions'
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to Github Packages
         uses: docker/login-action@v2
+        if: github.secret_source == 'Actions'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
