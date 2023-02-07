@@ -51,6 +51,8 @@ jobs:
       tag_name: ${{ steps.meta.outputs.tag_name }}
       tag_message: ${{ steps.meta.outputs.tag_message }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Set meta data
         id: meta
         # Writing to env with >> $GITHUB_ENV is an alternative
@@ -66,8 +68,13 @@ jobs:
       - name: Create Release
         id: create_release
         if: startsWith(github.ref, 'refs/tags/v')
+        # https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#create-a-release
         run: |
-          # https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#create-a-release
+          echo "date: ${{ steps.meta.outputs.date }}"
+          echo "version: ${{ steps.meta.outputs.version }}"
+          echo "inline_version: ${{ steps.meta.outputs.inline_version }}"
+          echo "tag_name: ${{ steps.meta.outputs.tag_name }}"
+          echo "tag_message: ${{ steps.meta.outputs.tag_message }}"
           response=$(curl \
             -X POST \
             -H "Accept: application/vnd.github+json" \
@@ -76,7 +83,7 @@ jobs:
             https://api.github.com/repos/scito/extract_otp_secrets/releases \
             --silent \
             --show-error \
-            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}\n\nJust download the executable and execute it.\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.28) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.28) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | MacOS x86_64/amd64 (barely tested due to no access to Apple environment; libzbar must be installed separately, see README.md) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | N/A |\n ","draft":true,"prerelease":false,"generate_release_notes":true}')
+            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}\n\nDownload the executable for your platform and execute it.\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.28) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.28) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | MacOS x86_64/amd64 (barely tested due to lack of Apple environment; maybe execute permission must be set manually to the executable; optional libzbar must be installed separately, see README.md) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | N/A |\n ","draft":true,"prerelease":false,"generate_release_notes":true}')
           echo upload_url=$(jq '.upload_url' <<< "$response") >> $GITHUB_OUTPUT
           echo $(jq -r '.upload_url' <<< "$response") > release_url.txt
           echo $(jq -r '.id' <<< "$response") > release_id.txt
