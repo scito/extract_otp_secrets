@@ -45,7 +45,7 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
   - [Installation of optional shared system libraries (recommended)](#installation-of-optional-shared-system-libraries-recommended)
 - [Program help: arguments and options](#program-help-arguments-and-options)
 - [Examples](#examples)
-  - [Printing otp secrets form text file](#printing-otp-secrets-form-text-file)
+  - [Printing otp secrets from text file](#printing-otp-secrets-form-text-file)
   - [Printing otp secrets from image file](#printing-otp-secrets-from-image-file)
   - [Writing otp secrets to csv file](#writing-otp-secrets-to-csv-file)
   - [Writing otp secrets to json file](#writing-otp-secrets-to-json-file)
