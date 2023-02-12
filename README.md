@@ -114,7 +114,7 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 
 :x: Unfortunately, I cannot provide a signed and notarized installable application for macOS as .dmg or .pkg. Apple is not Open Source friendly and requires a yearly Developer ID subscription. I am not willing to pay [USD 99 per year](https://developer.apple.com/support/compare-memberships/) to Apple for this little open source tool.
 
-However, the bare executable can be executed from the command line.
+However, the bare executable can be executed from the command line:
 
 1. Download executable for macOS platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
 2. Open Terminal application
