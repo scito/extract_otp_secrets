@@ -43,7 +43,7 @@ import re
 import sys
 import urllib.parse as urlparse
 from enum import Enum, IntEnum
-from typing import Any, List, Optional, Sequence, TextIO, Tuple, Union
+from typing import Any, List, Optional, Sequence, TextIO, Tuple, Union, TYPE_CHECKING
 
 import colorama
 from pkg_resources import DistributionNotFound, get_distribution
@@ -200,6 +200,7 @@ def main(sys_args: list[str]) -> None:
     write_csv(args.csv, otps)
     write_keepass_csv(args.keepass, otps)
     write_json(args.json, otps)
+    write_txt(args.txt, otps, True)
 
 
 # workaround for PYTHON <= 3.9 use: pb.MigrationPayload | None
@@ -262,9 +263,9 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count:
             if not quiet:
                 print_otp(otp)
             if args.printqr:
-                print_qr(args, otp_url)
+                print_qr(otp_url)
             if args.saveqr:
-                save_qr(otp, args, len(otps))
+                save_qr_image(otp, args.saveqr, len(otps))
             if not quiet:
                 print()
         elif args.ignore and not quiet:
@@ -297,8 +298,9 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
     arg_parser.add_argument('--csv', '-c', help='export csv file or - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--keepass', '-k', help='export totp/hotp csv file(s) for KeePass, - for stdout', metavar=('FILE'))
     arg_parser.add_argument('--json', '-j', help='export json file or - for stdout', metavar=('FILE'))
-    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal (requires qrcode module)', action='store_true')
-    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to the given folder (requires qrcode module)', metavar=('DIR'))
+    arg_parser.add_argument('--txt', '-t', help='export txt file or - for stdout', metavar=('FILE'))
+    arg_parser.add_argument('--printqr', '-p', help='print QR code(s) as text to the terminal', action='store_true')
+    arg_parser.add_argument('--saveqr', '-s', help='save QR code(s) as images to directory', metavar=('DIR'))
     if cv2_available:
         arg_parser.add_argument('--camera', '-C', help='camera number of system (default camera: 0)', default=0, type=int, metavar=('NUMBER'))
         if not zbar_available:
@@ -314,7 +316,7 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
     output_group.add_argument('-q', '--quiet', help='no stdout output, except output set by -', action='store_true')
     args = arg_parser.parse_args(sys_args)
     colored = not args.no_color
-    if args.csv == '-' or args.json == '-' or args.keepass == '-':
+    if args.csv == '-' or args.json == '-' or args.keepass == '-' or args.txt == '-':
         args.quiet = args.q = True
 
     verbose = args.verbose if args.verbose else LogLevel.NORMAL
@@ -391,7 +393,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
 
         cv2_print_text(img, f"Mode: {qr_mode.name} (Hit SPACE to change)", 0, TextPosition.LEFT, FONT_COLOR, 20)
         cv2_print_text(img, "Press ESC to quit", 1, TextPosition.LEFT, FONT_COLOR, 17)
-        cv2_print_text(img, "Press C/J/K to save as csv/json/keepass file", 2, TextPosition.LEFT, FONT_COLOR, None)
+        cv2_print_text(img, "Press C/J/K/T to save as csv/json/keepass/txt file", 2, TextPosition.LEFT, FONT_COLOR, None)
 
         cv2_print_text(img, f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured", 0, TextPosition.RIGHT, FONT_COLOR)
         cv2_print_text(img, f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted", 1, TextPosition.RIGHT, FONT_COLOR)
@@ -486,6 +488,18 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
             tk_root.update()
             if len(file_name) > 0:
                 write_keepass_csv(file_name, otps)
+    elif (key == ord('t') or key == ord('T')) and is_not_headless():
+        if has_no_otps_show_warning(otps):
+            pass
+        else:
+            file_name = tkinter.filedialog.asksaveasfilename(
+                title="Save extracted otp secrets as text",
+                defaultextension='.txt',
+                filetypes=[('Text', '*.txt'), ('All', '*.*')]
+            )
+            tk_root.update()
+            if len(file_name) > 0:
+                write_txt(file_name, otps, True)
     elif key == 32:
         qr_mode = next_valid_qr_mode(qr_mode, zbar_available)
         if verbose >= LogLevel.MORE_VERBOSE: print(f"QR reading mode: {qr_mode}")
@@ -655,28 +669,27 @@ def build_otp_url(secret: str, raw_otp: pb.MigrationPayload.OtpParameters) -> st
     return otp_url
 
 
-def print_otp(otp: Otp) -> None:
-    print(f"Name:    {otp['name']}")
-    print(f"Secret:  {otp['secret']}")
-    if otp['issuer']: print(f"Issuer:  {otp['issuer']}")
-    print(f"Type:    {otp['type']}")
+def print_otp(otp: Otp, out: Optional[TextIO] = None) -> None:
+    print(f"Name:    {otp['name']}", file=out)
+    print(f"Secret:  {otp['secret']}", file=out)
+    if otp['issuer']: print(f"Issuer:  {otp['issuer']}", file=out)
+    print(f"Type:    {otp['type']}", file=out)
     if otp['type'] == 'hotp':
-        print(f"Counter: {otp['counter']}")
+        print(f"Counter: {otp['counter']}", file=out)
     if verbose:
-        print(otp['url'])
+        print(otp['url'], file=out)
 
 
-def save_qr(otp: Otp, args: Args, j: int) -> str:
-    dir = args.saveqr
+def save_qr_image(otp: Otp, dir: str, j: int) -> str:
     if not (os.path.exists(dir)): os.makedirs(dir, exist_ok=True)
     pattern = re.compile(r'[\W_]+')
     file_otp_name = pattern.sub('', otp['name'])
     file_otp_issuer = pattern.sub('', otp['issuer'])
-    save_qr_file(args, otp['url'], f"{dir}/{j}-{file_otp_name}{'-' + file_otp_issuer if file_otp_issuer else ''}.png")
+    save_qr_image_file(otp['url'], f"{dir}/{j}-{file_otp_name}{'-' + file_otp_issuer if file_otp_issuer else ''}.png")
     return file_otp_name
 
 
-def save_qr_file(args: Args, otp_url: OtpUrl, name: str) -> None:
+def save_qr_image_file(otp_url: OtpUrl, name: str) -> None:
     qr = QRCode()
     qr.add_data(otp_url)
     img = qr.make_image(fill_color='black', back_color='white')
@@ -684,10 +697,20 @@ def save_qr_file(args: Args, otp_url: OtpUrl, name: str) -> None:
     img.save(name)
 
 
-def print_qr(args: Args, otp_url: str) -> None:
+def print_qr(otp_url: str, out: Optional[TextIO] = None) -> None:
     qr = QRCode()
     qr.add_data(otp_url)
-    qr.print_ascii()
+    qr.print_ascii(out)
+
+
+def write_txt(file: str, otps: Otps, write_qr: bool = False) -> None:
+    if file and len(file) > 0 and len(otps) > 0:
+        with open_file_or_stdout(file) as outfile:
+            for otp in otps:
+                print_otp(otp, outfile)
+                if write_qr:
+                    print_qr(otp['url'], outfile)
+                print(file=outfile)
 
 
 def write_csv(file: str, otps: Otps) -> None:

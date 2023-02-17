@@ -29,3 +29,4 @@ extract_otp_secrets_linux_arm64.spec
 extract_otp_secrets_linux_x86_64_bullseye.spec
 extract_otp_secrets_linux_x86_64.spec
 extract_otp_secrets.spec
+test.txt
