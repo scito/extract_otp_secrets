@@ -376,6 +376,48 @@ def test_extract_json_stdout_only_comments(capsys: pytest.CaptureFixture[str]) -
     assert captured.err == ''
 
 
+def test_extract_txt(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
+    # Arrange
+    output_file = str(tmp_path / 'test_example_output.txt')
+
+    # Act
+    extract_otp_secrets.main(['-q', '-t', output_file, 'example_export.txt'])
+
+    # Assert
+    expected_txt = read_file_to_str('tests/data/printqr_output.txt')
+    actual_txt = read_file_to_str(output_file)
+
+    assert actual_txt == expected_txt
+
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == ''
+
+
+def test_extract_txt_stdout(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-t', '-', 'example_export.txt'])
+
+    # Assert
+    expected_txt = read_file_to_str('tests/data/printqr_output.txt')
+    captured = capsys.readouterr()
+
+    assert captured.out == expected_txt
+    assert captured.err == ''
+
+
+def test_extract_txt_stdout_only_comments(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-t', '-', 'tests/data/only_comments.txt'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == ''
+
+
 def test_extract_not_encoded_plus(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     extract_otp_secrets.main(['tests/data/test_plus_problem_export.txt'])
@@ -724,8 +766,10 @@ def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
     ('-k', 'outfile', False, False),
     ('-k', '-', True, False),
     ('-j', 'outfile', False, False),
-    ('-s', 'outfile', False, False),
     ('-j', '-', True, False),
+    ('-t', 'outfile', False, False),
+    ('-t', '-', True, False),
+    ('-s', 'outfile', False, False),
     ('-i', None, False, False),
     ('-p', None, True, False),
     ('-Q', 'CV2', False, False),
