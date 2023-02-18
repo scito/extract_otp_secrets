@@ -4,7 +4,7 @@ Generate from file: README.md
 
 - [Table of contents](#table-of-contents)
 - [Download and run binary executable (🆕 since v2.1)](#download-and-run-binary-executable--since-v21)
-  - [MacOS application](#macos-application)
+  - [MacOS](#macos)
 - [Usage](#usage)
   - [Capture QR codes from camera (🆕 since version 2.0)](#capture-qr-codes-from-camera--since-version-20)
   - [With builtin QR decoder from image files (🆕 since version 2.0)](#with-builtin-qr-decoder-from-image-files--since-version-20)
