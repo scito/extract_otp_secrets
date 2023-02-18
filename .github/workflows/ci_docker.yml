@@ -79,7 +79,7 @@ jobs:
           # relative path to the place where source code with Dockerfile is located
           # TODO file:, move to docker/
           context: .
-          file: Dockerfile
+          file: docker/Dockerfile
           # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
           pull: true
@@ -152,7 +152,7 @@ jobs:
           # relative path to the place where source code with Dockerfile is located
           platforms: linux/amd64,linux/arm64
           context: .
-          file: Dockerfile_only_txt
+          file: docker/Dockerfile_only_txt
           # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
           pull: true
@@ -235,7 +235,7 @@ jobs:
           # relative path to the place where source code with Dockerfile is located
           # TODO file:, move to docker/
           context: .
-          file: Dockerfile
+          file: docker/Dockerfile
           # builder: ${{ steps.buildx.outputs.name }}
           build-args: |
             BASE_IMAGE=python:3.11-slim-buster

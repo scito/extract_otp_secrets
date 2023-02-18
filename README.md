@@ -37,7 +37,7 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 ## Table of contents
 
 - [Download and run binary executable (🆕 since v2.1)](#download-and-run-binary-executable--since-v21)
-  - [MacOS application](#macos-application)
+  - [MacOS](#macos)
 - [Usage](#usage)
   - [Capture QR codes from camera (🆕 since version 2.0)](#capture-qr-codes-from-camera--since-version-20)
   - [With builtin QR decoder from image files (🆕 since version 2.0)](#with-builtin-qr-decoder-from-image-files--since-version-20)
@@ -108,7 +108,7 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 
 :information_source: The executables are not signed. Thus, the operating system may show a warning about download from unknown source.
 
-### MacOS application
+### MacOS
 
 > Beginning in macOS 10.15, all software built after June 1, 2019, and distributed with Developer ID must be notarized. However, you aren’t required to notarize software that you distribute through the Mac App Store because the App Store submission process already includes equivalent security checks. <small>[developer.apple.com](https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution)</small>
 
@@ -121,6 +121,15 @@ However, the bare executable can be executed from the command line:
 3. Change to Downloads: `cd $HOME/Downloads`
 4. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_OS_vX.X.X`
 5. Start executable from command line: `./extract_otp_secrets_OS_vX.X.X`
+
+#### Apple Silicon (ARM)
+
+Currently, there is no build for M1 and M2 Apple Silicon processors due to lack of hardware. However, the binary executable should be runnable by Rosetta2 emulation.
+
+```
+arch -x86_64 extract_otp_secrets_OS_vX.X.X
+```
+:warning: This command is untested due to lack of hardware.
 
 ## Usage
 
@@ -345,8 +354,8 @@ python extract_otp_secrets.py = < example_export.png</pre>
     * extract_otp_secrets_linux_arm64 (requires glibc >= 2.28)
     * extract_otp_secrets_win_x86_64.exe
     * extract_otp_secrets_macos_x86_64 (optional [libzbar](#installation-of-optional-shared-system-libraries-recommended) needs to be installed manually if needed)
-        * extract_otp_secrets_macos_x86_64.dmg N/A, see [why](#macos-application)
-        * extract_otp_secrets_macos_x86_64.pkg N/A, see [why](#macos-application)
+        * extract_otp_secrets_macos_x86_64.dmg N/A, see [why](#macos)
+        * extract_otp_secrets_macos_x86_64.pkg N/A, see [why](#macos)
 * Prebuilt Docker images provided for amd64 and arm64 (🆕 since v2.0)
 * Many ways to run the script:
     * Native Python
@@ -622,7 +631,7 @@ pip install -U -r requirements.txt
 Build and run the app within the container:
 
 ```bash
-docker build . -t extract_otp_secrets --pull --build-arg RUN_TESTS=false
+docker build . -t extract_otp_secrets --pull -f docker/Dockerfile --build-arg RUN_TESTS=false
 ```
 
 Run tests in docker container:
@@ -634,7 +643,7 @@ docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extrac
 #### Alpine (only text file processing)
 
 ```bash
-docker build . -t extract_otp_secrets:only_txt --pull -f Dockerfile_only_txt --build-arg RUN_TESTS=false
+docker build . -t extract_otp_secrets:only_txt --pull -f docker/Dockerfile_only_txt --build-arg RUN_TESTS=false
 ```
 
 Run tests in docker container:

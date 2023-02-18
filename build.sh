@@ -374,7 +374,7 @@ if $build_docker; then
     # Build docker
 
     # Build Dockerfile_only_txt (Alpine)
-    cmd="docker build . -t extract_otp_secrets_only_txt -t extract_otp_secrets:only-txt -t extract_otp_secrets:alpine -f Dockerfile_only_txt --pull --build-arg RUN_TESTS=false"
+    cmd="docker build . -t extract_otp_secrets_only_txt -t extract_otp_secrets:only-txt -t extract_otp_secrets:alpine -f docker/Dockerfile_only_txt --pull --build-arg RUN_TESTS=false"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -391,7 +391,7 @@ if $build_docker; then
     eval "$cmd"
 
     # Build extract_otp_secrets (Debian Bullseye)
-    cmd="docker build . -t extract_otp_secrets -t extract_otp_secrets:bullseye --pull --build-arg RUN_TESTS=false"
+    cmd="docker build . -t extract_otp_secrets -t extract_otp_secrets:bullseye --pull -f docker/Dockerfile --build-arg RUN_TESTS=false"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -412,7 +412,7 @@ if $build_docker; then
     eval "$cmd"
 
     # Build extract_otp_secrets (Debian Buster)
-    cmd="docker build . -t extract_otp_secrets:buster --pull --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
+    cmd="docker build . -t extract_otp_secrets:buster --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -469,7 +469,7 @@ if $build_docker; then
 
     # build linux/arm64
     # Build extract_otp_secrets (Debian Buster)
-    cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:buster --pull --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
+    cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:buster --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
