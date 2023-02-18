@@ -16,7 +16,7 @@ COPY requirements*.txt src/ run_pytest.sh pytest.ini tests/ example_*.txt exampl
 
 ARG RUN_TESTS=true
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
         libgl1 \
         libglib2.0-0 \
         libsm6 \
