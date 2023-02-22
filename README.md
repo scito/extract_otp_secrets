@@ -215,7 +215,7 @@ For a detailed installation documentation of [pyzbar](https://github.com/Natural
 
 #### Linux (Fedora)
 
-    sudo dnf install libzbar0
+    sudo dnf install zbar
 
 #### Linux (Arch Linux)
 
