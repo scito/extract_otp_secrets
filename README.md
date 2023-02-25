@@ -90,8 +90,8 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 ## Download and run binary executable (🆕 since v2.1)
 
 1. Download executable for your platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
-2. Linux and macOS: Set executable bit for the downloaded file, e.g in terminal with `chmod +x extract_otp_secrets_OS_vX.X.X`
-3. Start executable by clicking or from command line (macOS: startable only from command line, see [below](#macOS-application))
+2. Linux and macOS: Set executable bit for the downloaded file, e.g in terminal with `chmod +x extract_otp_secrets_X.Y.Z_OS_ARCH`
+3. Start executable by clicking or from command line (macOS: startable only from command line, see [below](#macos))
 
 :heavy_check_mark: Everything is just packed in one executable.  
 :heavy_check_mark: No installation needed, neither Python nor any dependencies have to be installed.  
@@ -119,15 +119,15 @@ However, the bare executable can be executed from the command line:
 1. Download executable for macOS platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
 2. Open Terminal application
 3. Change to Downloads: `cd $HOME/Downloads`
-4. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_OS_vX.X.X`
-5. Start executable from command line: `./extract_otp_secrets_OS_vX.X.X`
+4. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_X.Y.Z_macos_x86_64`
+5. Start executable from command line: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
 
 #### Apple Silicon (ARM)
 
 Currently, there is no build for M1 and M2 Apple Silicon processors due to lack of hardware. However, the binary executable should be runnable by Rosetta2 emulation.
 
 ```
-arch -x86_64 extract_otp_secrets_OS_vX.X.X
+arch -x86_64 extract_otp_secrets_X.Y.Z_macos_x86_64
 ```
 :warning: This command is untested due to lack of hardware.
 
@@ -688,11 +688,13 @@ Build extract_otp_secrets project
 Options:
 -i                      Interactive mode, all steps must be confirmed
 -C                      Ignore version check of protobuf/protoc
+-E                      Do not build exe
 -D                      Do not build docker
+-V                      Do not run pipenv
 -G                      Do not start extract_otp_secrets.py in GUI mode
 -c                      Clean everything
 -r                      Generate result files
--h, --help              Help
+-h, --help              Show help and quit
 ```
 
 ## Technical background

@@ -78,6 +78,8 @@ ignore_version_check=true
 clean=false
 clean_flag=""
 build_docker=true
+build_exe=true
+run_pipenv=true
 run_gui=true
 generate_result_files=false
 PYTHONHASHSEED=31
@@ -92,11 +94,13 @@ while test $# -gt 0; do
             echo "Options:"
             echo "-i                      Interactive mode, all steps must be confirmed"
             echo "-C                      Ignore version check of protobuf/protoc"
+            echo "-E                      Do not build exe"
             echo "-D                      Do not build docker"
+            echo "-V                      Do not run pipenv"
             echo "-G                      Do not start extract_otp_secrets.py in GUI mode"
             echo "-c                      Clean everything"
             echo "-r                      Generate result files"
-            echo "-h, --help              Help"
+            echo "-h, --help              Show help and quit"
             quit
             ;;
         -a)
@@ -107,8 +111,16 @@ while test $# -gt 0; do
             ignore_version_check=false
             shift
             ;;
+        -E)
+            build_exe=false
+            shift
+            ;;
         -D)
             build_docker=false
+            shift
+            ;;
+        -V)
+            run_pipenv=false
             shift
             ;;
         -G)
@@ -320,21 +332,23 @@ eval "$cmd"
 
 # Pipenv
 
-cmd="$PIP install -U pipenv"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+if $run_pipenv; then
+    cmd="$PIP install -U pipenv"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-$PIPENV --version
+    $PIPENV --version
 
-cmd="$PIPENV update && $PIPENV --rm && $PIPENV install"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="$PIPENV update && $PIPENV --rm && $PIPENV install"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-$PIPENV run python --version
+    $PIPENV run python --version
 
-cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+fi
 
 # Build wheel
 
@@ -344,18 +358,20 @@ eval "$cmd"
 
 # Build executable
 
-cmd="LOCAL_GLIBC_VERSION=$(ldd --version | sed '1!d' | sed -E 's/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/')"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
-echo "local glibc: $LOCAL_GLIBC_VERSION"
+if $build_exe; then
+    cmd="LOCAL_GLIBC_VERSION=$(ldd --version | sed '1!d' | sed -E 's/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/')"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+    echo "local glibc: $LOCAL_GLIBC_VERSION"
 
-cmd="pyinstaller -y --specpath installer --add-data $HOME/.local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile $clean_flag src/extract_otp_secrets.py"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="pyinstaller -y --specpath installer --add-data $HOME/.local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile $clean_flag src/extract_otp_secrets.py"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
 
-cmd="dist/extract_otp_secrets -h"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="dist/extract_otp_secrets -h"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+fi
 
 # Generate README.md TOC
 
@@ -437,53 +453,55 @@ if $build_docker; then
     BULLSEYE_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
     echo "Bullseye glibc: $BULLSEYE_GLIBC_VERSION"
 
-    cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --specpath installer --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64_bullseye --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+    if $build_exe; then
+        cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --specpath installer --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64_bullseye --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    cmd="dist/extract_otp_secrets_linux_x86_64_bullseye -h"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        cmd="dist/extract_otp_secrets_linux_x86_64_bullseye -h"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    # Build executable from Docker buster
-    BUSTER_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:buster -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
-    echo "Bullseye glibc: $BUSTER_GLIBC_VERSION"
+        # Build executable from Docker buster
+        BUSTER_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:buster -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+        echo "Bullseye glibc: $BUSTER_GLIBC_VERSION"
 
-    cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --specpath installer --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        cmd="docker run --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --specpath installer --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    cmd="dist/extract_otp_secrets_linux_x86_64 -h"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        cmd="dist/extract_otp_secrets_linux_x86_64 -h"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    # create Windows win_file_version_info.txt
-    cmd="VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2023' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        # create Windows win_file_version_info.txt
+        cmd="VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2023' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    # create macOS extract_otp_secrets_macos.spec from extract_otp_secrets_macos_template.spec
-    cmd="VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2023' envsubst < installer/extract_otp_secrets_macos_template.spec > build/extract_otp_secrets_macos.spec"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        # create macOS extract_otp_secrets_macos.spec from extract_otp_secrets_macos_template.spec
+        cmd="VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2023' envsubst < installer/extract_otp_secrets_macos_template.spec > build/extract_otp_secrets_macos.spec"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    # build linux/arm64
-    # Build extract_otp_secrets (Debian Buster)
-    cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:buster --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        # build linux/arm64
+        # Build extract_otp_secrets (Debian Buster)
+        cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:buster --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    cmd="docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        cmd="docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    cmd="docker run --platform linux/arm64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller --specpath installer -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        cmd="docker run --platform linux/arm64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller --specpath installer -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
 
-    cmd="PLATFORM='linux/arm64' && EXE='dist/extract_otp_secrets_linux_arm64' && docker run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
+        cmd="PLATFORM='linux/arm64' && EXE='dist/extract_otp_secrets_linux_arm64' && docker run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+    fi
 
     # Run GUI from Docker
     if $run_gui; then
