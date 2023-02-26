@@ -117,19 +117,16 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 However, the bare executable can be executed from the command line:
 
 1. Download executable for macOS platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
-2. Open Terminal application
-3. Change to Downloads: `cd $HOME/Downloads`
+2. Open `Terminal` application
+3. Change to Downloads folder in Terminal: `cd $HOME/Downloads`
 4. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_X.Y.Z_macos_x86_64`
 5. Start executable from command line: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
 
-#### Apple Silicon (ARM)
+:information_source: Replace `X.Y.Z` in above commands with the version number of your downloaded file, e.g. `extract_otp_secrets_2.4.0_macos_x86_64`
 
-Currently, there is no build for M1 and M2 Apple Silicon processors due to lack of hardware. However, the binary executable should be runnable by Rosetta2 emulation.
+:information_source: If Rosetta2 emulation is installed, these steps work also for M1 and M2 Apple Silicon processors and the program can be executed directly.
 
-```
-arch -x86_64 extract_otp_secrets_X.Y.Z_macos_x86_64
-```
-:warning: This command is untested due to lack of hardware.
+> :warning: It seems the GUI mode is not working in Terminal on macOS. In tests no [GUI window](#usage) was opened. (Remarks and hints about macOS are welcome since I do not know macOS.)
 
 ## Usage
 
