@@ -87,9 +87,8 @@ try:
     except Exception as e:
         if not quiet:
             print(f"""
-WARN: Cannot import pyzbar or qreader module. This problem is probably due to the missing zbar shared library.
-On Linux and macOS libzbar0 must be installed.
-See in README.md for the installation of the libzbar0.
+WARN: Cannot import pyzbar module. This problem is probably due to the missing zbar shared library. (The zbar library is optional.)
+See in README.md for the installation of the zbar shared library.
 Exception: {e}\n""", file=sys.stderr)
         zbar_available = False
         if debug_mode:

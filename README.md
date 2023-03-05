@@ -747,7 +747,7 @@ FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependenc
 ## Related projects
 
 * [ZBar](https://github.com/mchehab/zbar) is an open source software suite for reading bar codes from various sources, including webcams.
-* [Aegis Authenticator](https://github.com/beemdevelopment/Aegis) is a free, secure and open source 2FA app for Android.
+* [Aegis Authenticator](https://github.com/beemdevelopment/Aegis) is a free, secure and open source 2FA app for Android. This app can scan Google export QR codes and export the secrets, e.g. as JSON. However, a second device is required.
 * [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar) is a good QR code reader Python module
 * [OpenCV](https://docs.opencv.org/4.x/) (CV2) Open Source Computer Vision library with [opencv-python](https://github.com/opencv/opencv-python)
 * [Python QReader](https://github.com/Eric-Canas/QReader) Python QR code readers
