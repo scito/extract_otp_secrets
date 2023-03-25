@@ -30,3 +30,7 @@ extract_otp_secrets_linux_x86_64_bullseye.spec
 extract_otp_secrets_linux_x86_64.spec
 extract_otp_secrets.spec
 test.txt
+extract_otp_secrets.build/
+extract_otp_secrets.dist/
+extract_otp_secrets.onefile-build/
+extract_otp_secrets.bin

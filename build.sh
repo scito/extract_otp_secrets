@@ -339,7 +339,7 @@ if $run_pipenv; then
 
     $PIPENV --version
 
-    cmd="$PIPENV update && $PIPENV --rm && $PIPENV install"
+    cmd="$PIPENV --rm && $PIPENV update && $PIPENV install"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -526,5 +526,7 @@ eval "$cmd"
 
 line=$(printf '#%.0s' $(eval echo {1..$(( ($COLUMNS - 10) / 2))}))
 echo -e "\n${greenBold}$line SUCCESS $line${reset}"
+
+git status
 
 quit
