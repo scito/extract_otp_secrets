@@ -3,6 +3,7 @@ flake8
 gfm-toc
 mypy
 mypy-protobuf
+nuitka
 pyinstaller
 pylint
 pytest

@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzbar0 \
         python3-tk \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir -U -r requirements.txt \
+    && pip install --no-cache-dir -U pip -r requirements.txt \
     && if [ "$RUN_TESTS" = "true" ]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi \
     && echo 'test -s /extract/.alias && . /extract/.alias || true' >> ~/.bashrc
 

@@ -30,6 +30,7 @@ RUN apk add --no-cache \
         zlib-dev \
     ; fi \
     && pip install --no-cache-dir -U \
+        pip \
         colorama \
         Pillow \
         protobuf \

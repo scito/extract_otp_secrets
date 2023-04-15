@@ -1,8 +1,11 @@
 [build-system]
 requires = [
-  "setuptools>=64.0.0", "wheel>=0.37.0", "pip",
+  "pip",
+  "nuitka",
   # https://setuptools-git-versioning.readthedocs.io/en/latest/differences.html
+  "setuptools>=64.0.0",
   "setuptools-git-versioning",
+  "wheel>=0.37.0",
 ]
 build-backend = "setuptools.build_meta"
 
