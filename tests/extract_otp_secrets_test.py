@@ -39,7 +39,7 @@ from utils import (count_files_in_dir, file_exits, read_binary_file_as_stream,
 import extract_otp_secrets
 
 try:
-    import cv2  # type: ignore
+    import cv2
     from extract_otp_secrets import SUCCESS_COLOR, FAILURE_COLOR, FONT, FONT_SCALE, FONT_COLOR, FONT_THICKNESS, FONT_LINE_STYLE
 except ImportError:
     # ignore

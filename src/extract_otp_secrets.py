@@ -70,7 +70,7 @@ headless: bool = False
 
 
 try:
-    import cv2  # type: ignore # TODO use cv2 types if available
+    import cv2
     import numpy as np  # TODO use numpy types if available
 
     try:
@@ -325,7 +325,7 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
     quiet = True if args.quiet else False
     if verbose: print(f"QReader installed: {cv2_available}")
     if cv2_available:
-        if verbose >= LogLevel.VERBOSE: print(f"CV2 version: {cv2.__version__}")
+        if verbose >= LogLevel.VERBOSE: print(f"CV2 version: -")  # TODO {cv2.__version__}
         if verbose: print(f"QR reading mode: {args.qr}\n")
 
     return args
