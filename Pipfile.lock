@@ -428,10 +428,10 @@
         },
         "nuitka": {
             "hashes": [
-                "sha256:cab5c9d277c8979005e538998310d30e7e73db8e73020099410072dddb6a6cb5"
+                "sha256:72cbed45bc0be8cb39d0d7ee3c54565dd95dd5edb75220bd24d60c299a0490e2"
             ],
             "index": "pypi",
-            "version": "==1.7.3"
+            "version": "==1.7.5"
         },
         "ordered-set": {
             "hashes": [
@@ -451,11 +451,11 @@
         },
         "platformdirs": {
             "hashes": [
-                "sha256:cec7b889196b9144d088e4c57d9ceef7374f6c39694ad1577a0aab50d27ea28c",
-                "sha256:f87ca4fcff7d2b0f81c6a748a77973d7af0f4d526f98f308477c3c436c74d528"
+                "sha256:1b42b450ad933e981d56e59f1b97495428c9bd60698baab9f3eb3d00d5822421",
+                "sha256:ad8291ae0ae5072f66c16945166cb11c63394c7a3ad1b1bc9828ca3162da8c2f"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==3.8.1"
+            "version": "==3.9.1"
         },
         "pluggy": {
             "hashes": [
