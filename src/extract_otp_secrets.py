@@ -735,8 +735,8 @@ def write_keepass_csv(file: str, otps: Otps) -> None:
         if has_hotp:
             count_hotp_entries = write_keepass_htop_csv(otp_filename_hotp, otps)
         if not quiet:
-            if count_totp_entries: print(f"Exported {count_totp_entries} totp entrie{'s'[:count_totp_entries != 1]} to keepass csv file {otp_filename_totp}")
-            if count_hotp_entries: print(f"Exported {count_hotp_entries} hotp entrie{'s'[:count_hotp_entries != 1]} to keepass csv file {otp_filename_hotp}")
+            if has_totp and count_totp_entries: print(f"Exported {count_totp_entries} totp entrie{'s'[:count_totp_entries != 1]} to keepass csv file {otp_filename_totp}")
+            if has_hotp and count_hotp_entries: print(f"Exported {count_hotp_entries} hotp entrie{'s'[:count_hotp_entries != 1]} to keepass csv file {otp_filename_hotp}")
 
 
 def write_keepass_totp_csv(file: str, otps: Otps) -> int:
