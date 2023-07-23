@@ -290,11 +290,11 @@
         },
         "dill": {
             "hashes": [
-                "sha256:a07ffd2351b8c678dfc4a856a3005f8067aea51d6ba6c700796a4d9e280f39f0",
-                "sha256:e5db55f3687856d8fbdab002ed78544e1c4559a130302693d839dfe8f93f2373"
+                "sha256:76b122c08ef4ce2eedcd4d1abd8e641114bfc6c2867f49f3c41facf65bf19f5e",
+                "sha256:cc1c8b182eb3013e24bd475ff2e9295af86c1a38eb1aff128dac8962a9ce3c03"
             ],
             "markers": "python_version >= '3.11'",
-            "version": "==0.3.6"
+            "version": "==0.3.7"
         },
         "flake8": {
             "hashes": [
@@ -566,11 +566,11 @@
         },
         "types-protobuf": {
             "hashes": [
-                "sha256:7bd5ea122a057b11a82b785d9de464932a1e9175fe977a4128adef11d7f35547",
-                "sha256:c926104f69ea62103846681b35b690d8d100ecf86c6cdda16c850a1313a272e4"
+                "sha256:1066b069d4f0e09bdebb64ca4f35cc6b8accf52f808368046ccec96744af0375",
+                "sha256:ee1a1ac8c099870075ef4457c01f3d56e189d8af1c13c3aa9f8dc207ca35337c"
             ],
             "index": "pypi",
-            "version": "==4.23.0.1"
+            "version": "==4.23.0.2"
         },
         "typing-extensions": {
             "hashes": [
