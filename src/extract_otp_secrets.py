@@ -43,25 +43,14 @@ import re
 import sys
 import urllib.parse as urlparse
 from enum import Enum, IntEnum
-from typing import Any, List, Optional, Sequence, TextIO, Tuple, Union, TYPE_CHECKING
+from importlib.metadata import PackageNotFoundError, version
+from typing import (Any, Final, List, Optional, Sequence, TextIO, Tuple,
+                    TypedDict, Union)
 
 import colorama
 from qrcode import QRCode  # type: ignore
 
 import protobuf_generated_python.google_auth_pb2 as pb
-
-# workaround for PYTHON <= 3.7: compatibility
-if sys.version_info >= (3, 8):
-    from typing import Final, TypedDict
-else:
-    from typing_extensions import Final, TypedDict
-
-# workaround for PYTHON <= 3.7: compatibility
-if sys.version_info >= (3, 8):
-    from importlib.metadata import PackageNotFoundError, version
-else:
-    from importlib_metadata import PackageNotFoundError, version
-
 
 debug_mode = '-d' in sys.argv[1:] or '--debug' in sys.argv[1:]
 quiet = '-q' in sys.argv[1:] or '--quiet' in sys.argv[1:]
@@ -103,9 +92,8 @@ Exception: {e}\n""", file=sys.stderr)
     FONT_SCALE: Final[float] = 1.3
     FONT_THICKNESS: Final[int] = 1
     FONT_LINE_STYLE: Final[int] = cv2.LINE_AA
-    FONT_COLOR: Final[ColorBGR] = (255, 0, 0)
+    FONT_COLOR: Final[ColorBGR] = 255, 0, 0
     BOX_THICKNESS: Final[int] = 5
-    # workaround for PYTHON <= 3.7: must use () for assignments
     WINDOW_X: Final[int] = 0
     WINDOW_Y: Final[int] = 1
     WINDOW_WIDTH: Final[int] = 2
@@ -114,10 +102,10 @@ Exception: {e}\n""", file=sys.stderr)
     TEXT_HEIGHT: Final[int] = 1
     BORDER: Final[int] = 5
     START_Y: Final[int] = 20
-    START_POS_TEXT: Final[Point] = (BORDER, START_Y)
-    NORMAL_COLOR: Final[ColorBGR] = (255, 0, 255)
-    SUCCESS_COLOR: Final[ColorBGR] = (0, 255, 0)
-    FAILURE_COLOR: Final[ColorBGR] = (0, 0, 255)
+    START_POS_TEXT: Final[Point] = BORDER, START_Y
+    NORMAL_COLOR: Final[ColorBGR] = 255, 0, 255
+    SUCCESS_COLOR: Final[ColorBGR] = 0, 255, 0
+    FAILURE_COLOR: Final[ColorBGR] = 0, 0, 255
     CHAR_DX: Final[int] = (lambda text: cv2.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS)[0][TEXT_WIDTH] // len(text))("28 QR codes capturedMMM")
     FONT_DY: Final[int] = cv2.getTextSize("M", FONT, FONT_SCALE, FONT_THICKNESS)[0][TEXT_HEIGHT] + 5
     WINDOW_NAME: Final[str] = "Extract OTP Secrets: Capture QR Codes from Camera"
@@ -130,12 +118,12 @@ except ImportError as e:
     if debug_mode:
         raise e
 
-# Workaround for PYTHON <= 3.9: Union[int, None] used instead of int | None
+# Workaround for PYTHON <= 3.9: Generally Union[int, None] used instead of int | None
 
 # Types
 Args = argparse.Namespace
 OtpUrl = str
-# workaround for PYTHON <= 3.7: Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': int | None, 'url': OtpUrl})
+# Workaround for PYTHON <= 3.9: Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': int | None, 'url': OtpUrl})
 Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': Union[int, None], 'url': OtpUrl})
 # workaround for PYTHON <= 3.9: Otps = list[Otp]
 Otps = List[Otp]
@@ -275,9 +263,7 @@ def extract_otp_from_otp_url(otpauth_migration_url: str, otps: Otps, urls_count:
 def parse_args(sys_args: list[str]) -> Args:
     global verbose, quiet, colored
 
-    # For PYTHON <= 3.7: Use :=
-    name = os.path.basename(sys.argv[0])
-    cmd = f"python {name}" if name.endswith('.py') else f"{name}"
+    cmd = f"python {name}" if (name := os.path.basename(sys.argv[0])).endswith('.py') else f"{name}"
     description_text = "Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps"
     if cv2_available:
         description_text += "\nIf no infiles are provided, a GUI window starts and QR codes are captured from the camera."
@@ -324,7 +310,7 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
     quiet = True if args.quiet else False
     if verbose: print(f"QReader installed: {cv2_available}")
     if cv2_available:
-        if verbose >= LogLevel.VERBOSE: print(f"CV2 version: -")  # TODO {cv2.__version__}
+        if verbose >= LogLevel.VERBOSE: print(f"CV2 version: {cv2.__version__}")  # type: ignore # cv2.__version__ is not available
         if verbose: print(f"QR reading mode: {args.qr}\n")
 
     return args
