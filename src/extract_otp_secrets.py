@@ -46,7 +46,6 @@ from enum import Enum, IntEnum
 from typing import Any, List, Optional, Sequence, TextIO, Tuple, Union, TYPE_CHECKING
 
 import colorama
-from pkg_resources import DistributionNotFound, get_distribution
 from qrcode import QRCode  # type: ignore
 
 import protobuf_generated_python.google_auth_pb2 as pb
@@ -898,19 +897,7 @@ def get_raw_version() -> str:
         return __version__
     except PackageNotFoundError:
         # package is not installed
-        pass
-
-    # In some cases importlib cannot properly detect package version, for example it was compiled into executable file, so it uses some custom import mechanism.
-    # Instead, use pkg_resources which is included in setuptools (but has a significant runtime cost)
-
-    try:
-        __version__ = get_distribution("package-name").version
-        return __version__
-    except DistributionNotFound:
-        # package is not installed
-        pass
-
-    return ''
+        return ''
 
 
 # workaround for PYTHON <= 3.9 use: BaseException | None
