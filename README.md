@@ -5,7 +5,7 @@
 ![coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)
 [![License](https://img.shields.io/github/license/scito/extract_otp_secrets)](https://github.com/scito/extract_otp_secrets/blob/master/LICENSE)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/scito/extract_otp_secrets?sort=semver)](https://github.com/scito/extract_otp_secrets/releases/latest)  
-![python versions](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
+![python versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 [![Docker image](https://img.shields.io/badge/docker-image-blue)](https://hub.docker.com/repository/docker/scit0/extract_otp_secrets/general)
 [![Linux](https://img.shields.io/badge/os-linux-yellow)](https://github.com/scito/extract_otp_secrets/releases/latest)
 [![Windows](https://img.shields.io/badge/os-windows-yellow)](https://github.com/scito/extract_otp_secrets/releases/latest)
@@ -367,7 +367,7 @@ python extract_otp_secrets.py = < example_export.png</pre>
     * macOS
     * Windows
 * Uses UTF-8 on all platforms
-* Supports Python >= 3.7
+* Supports Python >= 3.8
 * Installation of shared system libraries is optional (🆕 since v2.3)
 * Provides a debug mode (-d) for analyzing import problems
 * Written in modern Python using type hints and following best practices
