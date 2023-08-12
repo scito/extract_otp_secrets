@@ -33,7 +33,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           check-latest: false
-          allow-prereleases: true
       - name: Install zbar shared lib for QReader (Linux)
         if: runner.os == 'Linux'
         run: |

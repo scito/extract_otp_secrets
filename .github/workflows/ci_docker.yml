@@ -25,7 +25,7 @@ on:
 
 jobs:
   build-and-push-docker-debian-image:
-    name: Build Docker Bullseye image and push to repositories
+    name: Build Docker Bookworm image and push to repositories
     # run only when code is compiling and tests are passing
     runs-on: ubuntu-latest
 
@@ -82,12 +82,14 @@ jobs:
           file: docker/Dockerfile
           # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
+          build-args: |
+            BASE_IMAGE=python:3.12-slim-bookworm
           pull: true
           tags: |
             scit0/extract_otp_secrets:latest
-            scit0/extract_otp_secrets:bullseye
+            scit0/extract_otp_secrets:bookworm
             ghcr.io/scito/extract_otp_secrets:latest
-            ghcr.io/scito/extract_otp_secrets:bullseye
+            ghcr.io/scito/extract_otp_secrets:bookworm
           # build on feature branches, push only on master branch
           push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
 
@@ -179,8 +181,8 @@ jobs:
           name: alpine_digests
           path: digests.txt
 
-  build-and-push-docker-buster-image:
-    name: Build Docker Buster image (for PyInstsaller) and push to repositories
+  build-and-push-docker-bullseye-image:
+    name: Build Docker Bullseye image (for PyInstsaller) and push to repositories
     # run only when code is compiling and tests are passing
     runs-on: ubuntu-latest
 
@@ -226,23 +228,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: "Build image from Buster and push to GitHub Container Registry"
-        id: docker_build_buster
+      - name: "Build image from Bullseye and push to GitHub Container Registry"
+        id: docker_build_bullseye
         if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64
           # relative path to the place where source code with Dockerfile is located
-          # TODO file:, move to docker/
           context: .
           file: docker/Dockerfile
           # builder: ${{ steps.buildx.outputs.name }}
           build-args: |
-            BASE_IMAGE=python:3.11-slim-buster
+            BASE_IMAGE=python:3.12-slim-bullseye
           # Note: tags has to be all lower-case
           pull: true
           tags: |
-            scit0/extract_otp_secrets:buster
+            scit0/extract_otp_secrets:bullseye
           push: ${{ github.secret_source == 'Actions' }}
 
       - name: Image digest
@@ -254,5 +255,5 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v3
         with:
-          name: buster_digests
+          name: bullseye_digests
           path: digests.txt
