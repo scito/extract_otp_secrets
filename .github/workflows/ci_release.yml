@@ -26,7 +26,7 @@ name: release
 
 # Build matrix:
 # - Linux x86_64 glibc 2.35: ubuntu-latest
-# - Linux x86_64 glibc 2.34: extract_otp_secrets:buster
+# - Linux x86_64 glibc 2.31: extract_otp_secrets:bullseye
 # - Windows x86_64: windows-latest
 # - MacOS x86_64: macos-11
 # - Linux x86_64 glibc 2.28: extract_otp_secrets:buster
@@ -164,7 +164,7 @@ jobs:
       - name: Image digest
         # TODO upload digests to assets
         run: |
-          echo "extract_otp_secrets: ${{ steps.docker_build_buster.outputs.digest }}"
+          echo "extract_otp_secrets: ${{ steps.docker_build_bullseye.outputs.digest }}"
 
         # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
         # https://github.com/multiarch/qemu-user-static
@@ -172,7 +172,7 @@ jobs:
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
           docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
       - name: Smoke tests ${{ matrix.PLATFORM }}
         if: matrix.PLATFORM == 'linux/amd64'
@@ -236,7 +236,7 @@ jobs:
             ASSET_MIME: application/vnd.microsoft.portable-executable
             UPLOAD: true
             CMD_BUILD: |
-              pyinstaller -y --add-data "$($Env:pythonLocation)\__yolo_v3_qr_detector;__yolo_v3_qr_detector" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libiconv.dll;pyzbar" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libzbar-64.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\msvcr120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\msvcp120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\vcamp120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\vcomp120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\vccorlib120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120u.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120chs.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120cht.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120deu.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120enu.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120esn.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120fra.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120ita.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120jpn.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120kor.dll;pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120rus.dll;pyzbar" --onefile --version-file build\win_file_version_info.txt --name extract_otp_secrets.exe src\extract_otp_secrets.py
+              pyinstaller -y --add-data "$($Env:pythonLocation)\__yolo_v3_qr_detector:__yolo_v3_qr_detector" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libiconv.dll:pyzbar" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libzbar-64.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcr120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcamp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcomp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vccorlib120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120u.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120chs.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120cht.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120deu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120enu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120esn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120fra.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120ita.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120jpn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120kor.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120rus.dll:pyzbar" --onefile --version-file build\win_file_version_info.txt --name extract_otp_secrets.exe src\extract_otp_secrets.py
           - os: macos-11
             TARGET: macos
             # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle

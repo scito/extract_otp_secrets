@@ -347,8 +347,8 @@ python extract_otp_secrets.py = < example_export.png</pre>
 * Prints errors and warnings to stderr (🆕 since v2.0)
 * Prints colored output (🆕 since v2.0)
 * Startable as executable (script, Python, and all dependencies packed in one executable) (🆕 since v2.1)
-    * extract_otp_secrets_linux_x86_64 (requires glibc >= 2.28)
-    * extract_otp_secrets_linux_arm64 (requires glibc >= 2.28)
+    * extract_otp_secrets_linux_x86_64 (requires glibc >= 2.31)
+    * extract_otp_secrets_linux_arm64 (requires glibc >= 2.31)
     * extract_otp_secrets_win_x86_64.exe
     * extract_otp_secrets_macos_x86_64 (optional [libzbar](#installation-of-optional-shared-system-libraries-recommended) needs to be installed manually if needed)
         * extract_otp_secrets_macos_x86_64.dmg N/A, see [why](#macos)
