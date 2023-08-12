@@ -406,6 +406,10 @@ if $build_local; then
         cmd="dist/extract_otp_secrets -h"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
+
+        cmd="dist/extract_otp_secrets --qr ZBAR example_export.png"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
     fi
 
     # Build compiled executable
@@ -429,6 +433,10 @@ if $build_local; then
         eval "$cmd"
 
         cmd="dist/extract_otp_secrets_compiled -h"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="dist/extract_otp_secrets_compiled --qr ZBAR example_export.png"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi
@@ -548,6 +556,10 @@ if $build_docker; then
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
+            cmd="dist/extract_otp_secrets_linux_x86_64_bookworm --qr ZBAR example_export.png || echo 'Could not run exe; see error message above'"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
             # Build executable from Docker bullseye
             BULLSEYE_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
             echo "Bullseye glibc: $BULLSEYE_GLIBC_VERSION"
@@ -557,6 +569,10 @@ if $build_docker; then
             eval "$cmd"
 
             cmd="dist/extract_otp_secrets_linux_x86_64 -h"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="dist/extract_otp_secrets_linux_x86_64 --qr ZBAR example_export.png"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
         fi
@@ -583,6 +599,10 @@ if $build_docker; then
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
+            cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_bookworm_compiled --qr ZBAR example_export.png"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
             cmd="cp build/docker/nuitka/extract_otp_secrets_linux_x86_64_bookworm_compiled dist/"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
@@ -596,6 +616,10 @@ if $build_docker; then
             eval "$cmd"
 
             cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_bullseye_compiled -h"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_bullseye_compiled --qr ZBAR example_export.png"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 

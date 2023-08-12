@@ -27,6 +27,7 @@ name: release
 # Build matrix:
 # - Linux x86_64 glibc 2.35: ubuntu-latest
 # - Linux x86_64 glibc 2.31: extract_otp_secrets:bullseye
+# - Linux x86_64 glibc 2.36: extract_otp_secrets:bookworm
 # - Windows x86_64: windows-latest
 # - MacOS x86_64: macos-11
 # - Linux x86_64 glibc 2.28: extract_otp_secrets:buster
@@ -87,7 +88,7 @@ jobs:
             https://api.github.com/repos/scito/extract_otp_secrets/releases \
             --silent \
             --show-error \
-            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}\n\n## Executables\n\nDownload the executable for your platform and execute it, see [README.md](https://github.com/scito/extract_otp_secrets#readme)\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.28) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.28) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64.dmg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64.pkg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | MacOS x86_64/amd64 (bare executable, see [README.md](https://github.com/scito/extract_otp_secrets#readme); optional libzbar must be installed manually, see [README.md](https://github.com/scito/extract_otp_secrets#readme)) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | N/A |\n","draft":true,"prerelease":false,"generate_release_notes":true}')
+            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}\n\n## Executables\n\nDownload the executable for your platform and execute it, see [README.md](https://github.com/scito/extract_otp_secrets#readme)\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.31) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.31) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64.dmg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64.pkg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | MacOS x86_64/amd64 (bare executable, see [README.md](https://github.com/scito/extract_otp_secrets#readme); optional libzbar must be installed manually, see [README.md](https://github.com/scito/extract_otp_secrets#readme)) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | N/A |\n","draft":true,"prerelease":false,"generate_release_notes":true}')
           echo upload_url=$(jq '.upload_url' <<< "$response") >> $GITHUB_OUTPUT
           echo $(jq -r '.upload_url' <<< "$response") > release_url.txt
           echo $(jq -r '.id' <<< "$response") > release_id.txt
@@ -174,11 +175,12 @@ jobs:
           docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes
           docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
-      - name: Smoke tests ${{ matrix.PLATFORM }}
+      - name: Smoke tests linux/amd64
         if: matrix.PLATFORM == 'linux/amd64'
         run: |
           dist/${{ matrix.EXE }} -V
           dist/${{ matrix.EXE }} -h
+          dist/${{ matrix.EXE }} --debug
           dist/${{ matrix.EXE }} example_export.png
           dist/${{ matrix.EXE }} - < example_export.txt
           dist/${{ matrix.EXE }} --qr ZBAR example_export.png
@@ -186,7 +188,7 @@ jobs:
           dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png
           dist/${{ matrix.EXE }} --qr CV2 example_export.png
           dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png
-      - name: Smoke tests ${{ matrix.PLATFORM }}
+      - name: Smoke tests linux/arm64
         if: matrix.PLATFORM == 'linux/arm64'
         run: |
           docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
@@ -268,11 +270,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: Set macos macos_python_path
         # TODO use variable for Python version
-        run: echo "macos_python_path=/Library/Frameworks/Python.framework/Versions/3.11" >> $GITHUB_ENV
-      - name: Set up Python 3.11
+        run: echo "macos_python_path=/Library/Frameworks/Python.framework/Versions/3.12" >> $GITHUB_ENV
+      - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
           check-latest: true
       - name: Install zbar shared lib for QReader (Linux)
         if: runner.os == 'Linux'
@@ -302,6 +304,7 @@ jobs:
         run: |
           dist/${{ matrix.EXE }} -V
           dist/${{ matrix.EXE }} -h
+          dist/${{ matrix.EXE }} --debug
           dist/${{ matrix.EXE }} example_export.png
           dist/${{ matrix.EXE }} --qr ZBAR example_export.png
           dist/${{ matrix.EXE }} --qr QREADER example_export.png
