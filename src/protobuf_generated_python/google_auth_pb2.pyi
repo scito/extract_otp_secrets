@@ -28,7 +28,7 @@ class MigrationPayload(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _AlgorithmEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[MigrationPayload._Algorithm.ValueType], builtins.type):  # noqa: F821
+    class _AlgorithmEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[MigrationPayload._Algorithm.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         ALGO_INVALID: MigrationPayload._Algorithm.ValueType  # 0
         ALGO_SHA1: MigrationPayload._Algorithm.ValueType  # 1
@@ -41,7 +41,7 @@ class MigrationPayload(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _OtpTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[MigrationPayload._OtpType.ValueType], builtins.type):  # noqa: F821
+    class _OtpTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[MigrationPayload._OtpType.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         OTP_INVALID: MigrationPayload._OtpType.ValueType  # 0
         OTP_HOTP: MigrationPayload._OtpType.ValueType  # 1
