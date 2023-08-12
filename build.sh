@@ -127,6 +127,7 @@ while test $# -gt 0; do
             ;;
         -L)
             build_local=false
+            build_base=false
             shift
             ;;
         -a)
@@ -498,24 +499,24 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        # Build extract_otp_secrets (Debian Buster)
-        cmd="docker build . -t extract_otp_secrets:buster -t extract_otp_secrets:buster-x86_64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
+        # Build extract_otp_secrets (Debian Bullseye)
+        cmd="docker build . -t extract_otp_secrets:bullseye -t extract_otp_secrets:bullseye-x86_64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.12-slim-bullseye"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets:buster example_export.txt"
+        cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="cat example_export.txt | docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:buster - -c - > example_output.csv"
+        cmd="cat example_export.txt | docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye - -c - > example_output.csv"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:buster = < example_export.png"
+        cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye = < example_export.png"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets:buster"
+        cmd="docker run --entrypoint /extract/run_pytest.sh --rm -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -531,8 +532,8 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        # Build extract_otp_secrets (Debian Buster)
-        cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:buster-arm64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.11-slim-buster"
+        # Build extract_otp_secrets (Debian Bullseye)
+        cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:bullseye-arm64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.12-slim-bullseye"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi
@@ -547,11 +548,11 @@ if $build_docker; then
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            # Build executable from Docker buster
-            BUSTER_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:buster -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
-            echo "Bookworm glibc: $BUSTER_GLIBC_VERSION"
+            # Build executable from Docker bullseye
+            BULLSEYE_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+            echo "Bullseye glibc: $BULLSEYE_GLIBC_VERSION"
 
-            cmd="docker run --platform linux/amd64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --specpath installer --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="docker run --platform linux/amd64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --specpath installer --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -562,11 +563,11 @@ if $build_docker; then
 
         if $build_arm; then
             # build linux/arm64
-            cmd="docker run --platform linux/arm64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster-arm64 -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller --specpath installer -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="docker run --platform linux/arm64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:bullseye-arm64 -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller --specpath installer -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="PLATFORM='linux/arm64' && EXE='dist/extract_otp_secrets_linux_arm64' && docker run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster-arm64 -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
+            cmd="PLATFORM='linux/arm64' && EXE='dist/extract_otp_secrets_linux_arm64' && docker run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:bullseye-arm64 -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
         fi
@@ -586,30 +587,30 @@ if $build_docker; then
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            # Build executable from Docker buster
-            BUSTER_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:buster -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
-            echo "Bookworm glibc: $BUSTER_GLIBC_VERSION"
+            # Build executable from Docker bullseye
+            BULLSEYE_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+            echo "Bookworm glibc: $BULLSEYE_GLIBC_VERSION"
 
-            cmd="docker run --platform linux/amd64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=/usr/local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_buster_compiled /files/src/extract_otp_secrets.py'"
+            cmd="docker run --platform linux/amd64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=/usr/local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_bullseye_compiled /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_buster_compiled -h"
+            cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_bullseye_compiled -h"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="cp build/docker/nuitka/extract_otp_secrets_linux_x86_64_buster_compiled dist/"
+            cmd="cp build/docker/nuitka/extract_otp_secrets_linux_x86_64_bullseye_compiled dist/"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
         fi
 
         if $build_arm; then
             # build linux/arm64
-            cmd="docker run --platform linux/arm64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster-arm64 -c 'apt-get update && apt-get -y install binutils build-essential patchelf qt5-default && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=/usr/local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_arm64_compiled /files/src/extract_otp_secrets.py'"
+            cmd="docker run --platform linux/arm64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:bullseye-arm64 -c 'apt-get update && apt-get -y install binutils build-essential patchelf qt5-default && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=/usr/local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_arm64_compiled /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="PLATFORM='linux/arm64' && EXE='build/docker/nuitka/extract_otp_secrets_linux_arm64_compiled' && docker run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:buster-arm64 -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
+            cmd="PLATFORM='linux/arm64' && EXE='build/docker/nuitka/extract_otp_secrets_linux_arm64_compiled' && docker run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:bullseye-arm64 -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -633,12 +634,14 @@ if $run_gui; then
     eval "$cmd"
 fi
 
-line=$(printf '#%.0s' $(eval echo {1..$(( ($COLUMNS - 10) / 2))}))
-echo -e "\n${blueBold}$line RESULTS $line${reset}"
+if $build_base; then
+    line=$(printf '#%.0s' $(eval echo {1..$(( ($COLUMNS - 10) / 2))}))
+    echo -e "\n${blueBold}$line RESULTS $line${reset}"
 
-cmd="cat $TYPE_CHECK_OUT_FILE $LINT_OUT_FILE $COVERAGE_OUT_FILE"
-if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-eval "$cmd"
+    cmd="cat $TYPE_CHECK_OUT_FILE $LINT_OUT_FILE $COVERAGE_OUT_FILE"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+fi
 
 line=$(printf '#%.0s' $(eval echo {1..$(( ($COLUMNS - 10) / 2))}))
 echo -e "\n${greenBold}$line SUCCESS $line${reset}"

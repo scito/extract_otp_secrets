@@ -1,5 +1,5 @@
 # --build-arg BASE_IMAGE=python:3.11-slim-buster
-ARG BASE_IMAGE=python:3.11-slim-bookworm
+ARG BASE_IMAGE=python:3.12-slim-bookworm
 FROM $BASE_IMAGE
 
 # https://docs.docker.com/engine/reference/builder/
