@@ -60,7 +60,7 @@
                 "sha256:f8db2f125746e44dce707dd44d4f4efeea8d7e2b43aace3f8d1f235cfa2733dd",
                 "sha256:f93fc78fe8bf15afe2b8d6b6499f1c73953169fad1e9a8dd086cdff3190e7fdf"
             ],
-            "markers": "python_version >= '3.10'",
+            "markers": "python_version < '3.13' and python_version >= '3.9'",
             "version": "==1.26.0"
         },
         "opencv-contrib-python": {
@@ -393,10 +393,10 @@
         },
         "nuitka": {
             "hashes": [
-                "sha256:496d95f5a3d2298e79720ab7f8e0b33bd18e726dd39b33341e69758dc51f9881"
+                "sha256:a0a3896a5260226918081f017c2c71da34d9959cd2c9a2631f3c54e821adb99b"
             ],
             "index": "pypi",
-            "version": "==1.8.3"
+            "version": "==1.8.4"
         },
         "ordered-set": {
             "hashes": [
