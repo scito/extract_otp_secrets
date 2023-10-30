@@ -60,7 +60,7 @@
                 "sha256:e44ccb93f30c75dfc0c3aa3ce38f33486a75ec9abadabd4e59f114994a9c4617",
                 "sha256:e509cbc488c735b43b5ffea175235cec24bbc57b227ef1acc691725beb230d1c"
             ],
-            "markers": "python_version < '3.13' and python_version >= '3.9'",
+            "markers": "python_version >= '3.10'",
             "version": "==1.26.1"
         },
         "opencv-contrib-python": {
@@ -537,12 +537,12 @@
         },
         "types-protobuf": {
             "hashes": [
-                "sha256:048ca006a08ac0563ff04a86ddcdda6f8877b024f5ff89ed6180510b017c3a91",
-                "sha256:6652be32c647a855cd9c01e6c556ecdc94988188c4de89942ad13e906537aaee"
+                "sha256:131ab7d0cbc9e444bc89c994141327dcce7bcaeded72b1acb72a94827eb9c7af",
+                "sha256:57ab42cb171dfdba2c74bb5b50c250478538cc3c5ed95b8b368929ad0c9f90a5"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.7'",
-            "version": "==4.24.0.3"
+            "version": "==4.24.0.4"
         },
         "typing-extensions": {
             "hashes": [
