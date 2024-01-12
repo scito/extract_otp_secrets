@@ -60,6 +60,7 @@ headless: bool = False
 try:
     import cv2
     import numpy as np
+    import cv2.typing
 
     try:
         import tkinter
@@ -310,7 +311,7 @@ b) image file containing a QR code or = for stdin for an image containing a QR c
     quiet = True if args.quiet else False
     if verbose: print(f"QReader installed: {cv2_available}")
     if cv2_available:
-        if verbose >= LogLevel.VERBOSE: print(f"CV2 version: {cv2.__version__}")  # type: ignore # cv2.__version__ is not available
+        if verbose >= LogLevel.VERBOSE: print(f"CV2 version: {cv2.__version__}")
         if verbose: print(f"QR reading mode: {args.qr}\n")
 
     return args
@@ -363,7 +364,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
                 if QRMode.CV2:
                     otp_url, raw_pts, _ = cv2_qr.detectAndDecode(img)
                 else:
-                    otp_url, raw_pts = cv2_qr_wechat.detectAndDecode(img)
+                    otp_url, raw_pts = cv2_qr_wechat.detectAndDecode(img)  # type: ignore  # use proper cv2 types
                 if raw_pts is not None:
                     if otp_url:
                         new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
@@ -404,16 +405,15 @@ def get_color(new_otps_count: int, otp_url: str) -> ColorBGR:
             return NORMAL_COLOR
 
 
-# TODO use cv2 types if available
-def cv2_draw_box(img: list[tuple[Any, Any]], raw_pts: list[tuple[Any, Any]], color: ColorBGR) -> np.ndarray[Any, np.dtype[np.int32]]:
+# TODO use proper cv2 types if available
+def cv2_draw_box(img: cv2.typing.MatLike, raw_pts: cv2.typing.MatLike | list[tuple[Any, Any]], color: ColorBGR) -> np.ndarray[Any, np.dtype[np.int32]]:
     pts = np.array([raw_pts], np.int32)
     pts = pts.reshape((-1, 1, 2))
     cv2.polylines(img, [pts], True, color, BOX_THICKNESS)
     return pts
 
 
-# TODO use cv2 types if available
-def cv2_print_text(img: cv2.UMat, text: str, line_number: int, position: TextPosition, color: ColorBGR, opposite_len: Optional[int] = None) -> None:
+def cv2_print_text(img: cv2.typing.MatLike, text: str, line_number: int, position: TextPosition, color: ColorBGR, opposite_len: Optional[int] = None) -> None:
     window_dim = cv2.getWindowImageRect(WINDOW_NAME)
     out_text = text
     if opposite_len:
