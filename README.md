@@ -119,8 +119,9 @@ However, the bare executable can be executed from the command line:
 1. Download executable for macOS platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
 2. Open `Terminal` application
 3. Change to Downloads folder in Terminal: `cd $HOME/Downloads`
-4. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_X.Y.Z_macos_x86_64`
-5. Start executable from command line: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
+4. Remove quarantine bit for the downloaded file: `xattr -r -d com.apple.quarantine extract_otp_secrets_X.Y.Z_macos_x86_64`
+5. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_X.Y.Z_macos_x86_64`
+6. Start executable from command line: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
 
 :information_source: Replace `X.Y.Z` in above commands with the version number of your downloaded file, e.g. `extract_otp_secrets_2.4.0_macos_x86_64`
 
