@@ -354,6 +354,9 @@ python extract_otp_secrets.py = < example_export.png</pre>
     * extract_otp_secrets_macos_x86_64 (optional [libzbar](#installation-of-optional-shared-system-libraries-recommended) needs to be installed manually if needed)
         * extract_otp_secrets_macos_x86_64.dmg N/A, see [why](#macos)
         * extract_otp_secrets_macos_x86_64.pkg N/A, see [why](#macos)
+    * extract_otp_secrets_macos_arm64 (optional [libzbar](#installation-of-optional-shared-system-libraries-recommended) needs to be installed manually if needed) (🆕 since v2.7)
+        * extract_otp_secrets_macos_arm64.dmg N/A, see [why](#macos)
+        * extract_otp_secrets_macos_arm64.pkg N/A, see [why](#macos)
 * Prebuilt Docker images provided for amd64 and arm64 (🆕 since v2.0)
 * Many ways to run the script:
     * Native Python
