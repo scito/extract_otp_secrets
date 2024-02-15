@@ -239,7 +239,7 @@ jobs:
             UPLOAD: true
             CMD_BUILD: |
               pyinstaller -y --add-data "$($Env:pythonLocation)\__yolo_v3_qr_detector:__yolo_v3_qr_detector" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libiconv.dll:pyzbar" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libzbar-64.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcr120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcamp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcomp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vccorlib120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120u.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120chs.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120cht.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120deu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120enu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120esn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120fra.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120ita.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120jpn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120kor.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120rus.dll:pyzbar" --onefile --version-file build\win_file_version_info.txt --name extract_otp_secrets.exe src\extract_otp_secrets.py
-          - os: macos-11
+          - os: macos-12
             TARGET: macos
             # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
             EXE: extract_otp_secrets
