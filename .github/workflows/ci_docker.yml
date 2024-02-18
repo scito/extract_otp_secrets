@@ -100,7 +100,7 @@ jobs:
           echo "${{ steps.docker_build_qr_reader_latest.outputs.digest }}" > digests.txt
       - name: Save docker digests as artifacts
         if: github.ref == 'refs/heads/master'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: debian_digests
           path: digests.txt
@@ -176,7 +176,7 @@ jobs:
 
       - name: Save docker digests as artifacts
         if: github.ref == 'refs/heads/master'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: alpine_digests
           path: digests.txt
@@ -253,7 +253,7 @@ jobs:
           echo "${{ steps.docker_build_qr_reader_latest.outputs.digest }}" > digests.txt
       - name: Save docker digests as artifacts
         if: github.ref == 'refs/heads/master'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bullseye_digests
           path: digests.txt
