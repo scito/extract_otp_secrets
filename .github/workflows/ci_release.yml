@@ -94,13 +94,13 @@ jobs:
           echo $(jq -r '.id' <<< "$response") > release_id.txt
       - name: Save Release URL File for publish
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release_url
           path: release_url.txt
       - name: Save asset upload id for publish
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release_id
           path: release_id.txt
@@ -194,13 +194,13 @@ jobs:
           docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
       - name: Load Release URL File from release job
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release_url
       - name: Display structure of files
         run: ls -R
       - name: Upload EXE to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.EXE }}
           path: dist/${{ matrix.EXE }}
@@ -317,12 +317,12 @@ jobs:
           dist/${{ matrix.EXE }} - < example_export.txt
       - name: Load Release URL File from release job
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release_url
       - name: Load Release Id File from release job
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release_id
       - name: Display structure of files
@@ -335,12 +335,12 @@ jobs:
           echo "release_id=$(cat release_id.txt)" >> $GITHUB_OUTPUT
           echo "upload_url=https://uploads.github.com/repos/scito/extract_otp_secrets/releases/$(cat release_id.txt)/assets?name=" >> $GITHUB_OUTPUT
       - name: Upload EXE to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.EXE }}
           path: dist/${{ matrix.EXE }}
       - name: Upload DMG to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: runner.os == 'macOS'
         with:
           name: ${{ matrix.DMG }}
@@ -365,7 +365,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Load Release Id File from release job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release_id
       - name: Set meta data
