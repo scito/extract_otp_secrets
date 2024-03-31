@@ -1,0 +1,6 @@
+otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY
+otpauth://totp/pi%40raspberrypi?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&issuer=raspberrypi
+otpauth://hotp/hotp%20demo?secret=7KSQL2JTUDIS5EF65KLMRQIIGY&counter=4
+otpauth://totp/encoding%3A%20%C2%BF%C3%A4%C3%84%C3%A9%C3%89%3F%20%28demo%29?secret=7KSQL2JTUDIS5EF65KLMRQIIGY

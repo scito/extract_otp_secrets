@@ -418,6 +418,37 @@ def test_extract_txt_stdout_only_comments(capsys: pytest.CaptureFixture[str]) ->
     assert captured.err == ''
 
 
+def test_extract_urls(capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
+    # Arrange
+    output_file = str(tmp_path / 'test_example_url_list.txt')
+
+    # Act
+    extract_otp_secrets.main(['-q', '-u', output_file, 'example_export.txt'])
+
+    # Assert
+    expected_txt = read_file_to_str('tests/data/url_list_output.txt')
+    actual_txt = read_file_to_str(output_file)
+
+    assert actual_txt == expected_txt
+
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == ''
+
+
+def test_extract_urls_stdout(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-u', '-', 'example_export.txt'])
+
+    # Assert
+    expected_txt = read_file_to_str('tests/data/url_list_output.txt')
+    captured = capsys.readouterr()
+
+    assert captured.out == expected_txt
+    assert captured.err == ''
+
+
 def test_extract_not_encoded_plus(capsys: pytest.CaptureFixture[str]) -> None:
     # Act
     extract_otp_secrets.main(['tests/data/test_plus_problem_export.txt'])
