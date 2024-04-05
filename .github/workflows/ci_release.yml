@@ -281,10 +281,6 @@ jobs:
         if: runner.os == 'Windows'
         run: ls "$($Env:WinDir)\system32"
       - uses: actions/checkout@v3
-      - name: Set macos macos_python_path
-        if: runner.os == 'macOS'
-        # TODO use variable for Python version
-        run: echo "macos_python_path=/Library/Frameworks/Python.framework/Versions/3.12" >> $GITHUB_ENV
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
@@ -303,6 +299,11 @@ jobs:
         run: |
           # https://earthly.dev/blog/homebrew-on-m1/
           eval "$(/opt/homebrew/bin/brew shellenv)"
+          echo PATH 1
+          echo $PATH
+          export PATH="$PATH:/opt/homebrew/bin:/opt/homebrew/sbin:/opt/homebrew/lib"
+          echo PATH 2
+          echo $PATH
       - name: List MacOS dirs
         if: matrix.os == 'macos-14'
         run: |
@@ -316,8 +317,6 @@ jobs:
           echo $PATH
           echo HOMEBREW_CELLAR
           echo $HOMEBREW_CELLAR
-          echo brew deps --tree --installed
-          brew deps --tree --installed
       - name: List env
         if: runner.os == 'macOS'
         run: |
