@@ -297,11 +297,14 @@ jobs:
       - name: Install zbar shared lib for QReader (macOS)
         if: runner.os == 'macOS'
         run: |
+          brew install zbar create-dmg
+      - name: Setup homebrew env for macOS arm64
+        if: matrix.os == 'macos-14'
+        run: |
           # https://earthly.dev/blog/homebrew-on-m1/
           eval "$(/opt/homebrew/bin/brew shellenv)"
-          brew install zbar create-dmg
       - name: List MacOS dirs
-        if: runner.os == 'macOS'
+        if: matrix.os == 'macos-14'
         run: |
           echo "ls /opt/homebrew/Cellar/zbar"
           ls -al "/opt/homebrew/Cellar/zbar"
