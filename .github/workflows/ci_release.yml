@@ -105,119 +105,119 @@ jobs:
           name: release_id
           path: release_id.txt
 
-  build-linux-executable-in-docker:
-    name: Build ${{ matrix.PLATFORM }} release in docker container
-    # run only when code is compiling and tests are passing
-    runs-on: ubuntu-latest
-    needs: create-release
-    strategy:
-      matrix:
-        include:
-          - PLATFORM: linux/amd64
-            EXE: extract_otp_secrets_linux_x86_64
-            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64
-          - PLATFORM: linux/arm64
-            EXE: extract_otp_secrets_linux_arm64
-            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_arm64
+  # build-linux-executable-in-docker:
+  #   name: Build ${{ matrix.PLATFORM }} release in docker container
+  #   # run only when code is compiling and tests are passing
+  #   runs-on: ubuntu-latest
+  #   needs: create-release
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - PLATFORM: linux/amd64
+  #           EXE: extract_otp_secrets_linux_x86_64
+  #           ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64
+  #         - PLATFORM: linux/arm64
+  #           EXE: extract_otp_secrets_linux_arm64
+  #           ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_arm64
 
-    # steps to perform in job
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  #   # steps to perform in job
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      # avoid building if there are testing errors
-      - name: Run smoke test
-        run: |
-          sudo apt-get install -y libzbar0
-          python -m pip install --upgrade pip
-          pip install -U -r requirements-dev.txt
-          pip install -U .
-          pytest
+  #     # avoid building if there are testing errors
+  #     - name: Run smoke test
+  #       run: |
+  #         sudo apt-get install -y libzbar0
+  #         python -m pip install --upgrade pip
+  #         pip install -U -r requirements-dev.txt
+  #         pip install -U .
+  #         pytest
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v2
 
-      # setup Docker build action
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-        # Workaround for failing builds: https://github.com/docker/build-push-action/issues/761#issuecomment-1383822381
-        # TODO remove workaround when fixed
-        with:
-          driver-opts: |
-            image=moby/buildkit:v0.10.6
+  #     # setup Docker build action
+  #     - name: Set up Docker Buildx
+  #       id: buildx
+  #       uses: docker/setup-buildx-action@v2
+  #       # Workaround for failing builds: https://github.com/docker/build-push-action/issues/761#issuecomment-1383822381
+  #       # TODO remove workaround when fixed
+  #       with:
+  #         driver-opts: |
+  #           image=moby/buildkit:v0.10.6
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: github.secret_source == 'Actions'
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Login to DockerHub
+  #       uses: docker/login-action@v2
+  #       if: github.secret_source == 'Actions'
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Login to Github Packages
-        uses: docker/login-action@v2
-        if: github.secret_source == 'Actions'
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_IO_TOKEN }}
+  #     - name: Login to Github Packages
+  #       uses: docker/login-action@v2
+  #       if: github.secret_source == 'Actions'
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: Image digest
-        # TODO upload digests to assets
-        run: |
-          echo "extract_otp_secrets: ${{ steps.docker_build_bullseye.outputs.digest }}"
+  #     - name: Image digest
+  #       # TODO upload digests to assets
+  #       run: |
+  #         echo "extract_otp_secrets: ${{ steps.docker_build_bullseye.outputs.digest }}"
 
-        # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
-        # https://github.com/multiarch/qemu-user-static
-        # https://hub.docker.com/r/multiarch/qemu-user-static/
-      - name: Run Pyinstaller in container for ${{ matrix.EXE }}
-        run: |
-          docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+  #       # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
+  #       # https://github.com/multiarch/qemu-user-static
+  #       # https://hub.docker.com/r/multiarch/qemu-user-static/
+  #     - name: Run Pyinstaller in container for ${{ matrix.EXE }}
+  #       run: |
+  #         docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes
+  #         docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
-      - name: Smoke tests linux/amd64
-        if: matrix.PLATFORM == 'linux/amd64'
-        run: |
-          dist/${{ matrix.EXE }} -V
-          dist/${{ matrix.EXE }} -h
-          dist/${{ matrix.EXE }} --debug
-          dist/${{ matrix.EXE }} example_export.png
-          dist/${{ matrix.EXE }} - < example_export.txt
-          dist/${{ matrix.EXE }} --qr ZBAR example_export.png
-          dist/${{ matrix.EXE }} --qr QREADER example_export.png
-          dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png
-          dist/${{ matrix.EXE }} --qr CV2 example_export.png
-          dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png
-      - name: Smoke tests linux/arm64
-        if: matrix.PLATFORM == 'linux/arm64'
-        run: |
-          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
-      - name: Load Release URL File from release job
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/download-artifact@v4
-        with:
-          name: release_url
-      - name: Display structure of files
-        run: ls -R
-      - name: Upload EXE to artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.EXE }}
-          path: dist/${{ matrix.EXE }}
-      - name: Upload Release Asset
-        id: upload-release-asset
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          response=$(curl \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Content-Type: application/x-executable" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            --silent \
-            --show-error \
-            --data-binary @dist/${{ matrix.EXE }} \
-            $(cat release_url.txt)=${{ matrix.ASSET_NAME }})
+  #     - name: Smoke tests linux/amd64
+  #       if: matrix.PLATFORM == 'linux/amd64'
+  #       run: |
+  #         dist/${{ matrix.EXE }} -V
+  #         dist/${{ matrix.EXE }} -h
+  #         dist/${{ matrix.EXE }} --debug
+  #         dist/${{ matrix.EXE }} example_export.png
+  #         dist/${{ matrix.EXE }} - < example_export.txt
+  #         dist/${{ matrix.EXE }} --qr ZBAR example_export.png
+  #         dist/${{ matrix.EXE }} --qr QREADER example_export.png
+  #         dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png
+  #         dist/${{ matrix.EXE }} --qr CV2 example_export.png
+  #         dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png
+  #     - name: Smoke tests linux/arm64
+  #       if: matrix.PLATFORM == 'linux/arm64'
+  #       run: |
+  #         docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
+  #     - name: Load Release URL File from release job
+  #       if: startsWith(github.ref, 'refs/tags/v')
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: release_url
+  #     - name: Display structure of files
+  #       run: ls -R
+  #     - name: Upload EXE to artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: ${{ matrix.EXE }}
+  #         path: dist/${{ matrix.EXE }}
+  #     - name: Upload Release Asset
+  #       id: upload-release-asset
+  #       if: startsWith(github.ref, 'refs/tags/v')
+  #       run: |
+  #         response=$(curl \
+  #           -X POST \
+  #           -H "Accept: application/vnd.github+json" \
+  #           -H "Content-Type: application/x-executable" \
+  #           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
+  #           -H "X-GitHub-Api-Version: 2022-11-28" \
+  #           --silent \
+  #           --show-error \
+  #           --data-binary @dist/${{ matrix.EXE }} \
+  #           $(cat release_url.txt)=${{ matrix.ASSET_NAME }})
 
   build-native-executables:
     name: Build native packages
@@ -227,18 +227,18 @@ jobs:
       matrix:
         # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#choosing-github-hosted-runners
         include:
-          - os: windows-latest
-            TARGET: windows
-            # TODO add --icon
-            # TODO add --manifest
-            # TODO find more elegant solution for pyzbar\libiconv.dll and pyzbar\libzbar-64.dll
-            # Files of Visual C++ 2013 Redistributable Package: https://support.microsoft.com/en-us/topic/update-for-visual-c-2013-redistributable-package-d8ccd6a5-4e26-c290-517b-8da6cfdf4f10
-            EXE: extract_otp_secrets.exe
-            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_win_x86_64.exe
-            ASSET_MIME: application/vnd.microsoft.portable-executable
-            UPLOAD: true
-            CMD_BUILD: |
-              pyinstaller -y --add-data "$($Env:pythonLocation)\__yolo_v3_qr_detector:__yolo_v3_qr_detector" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libiconv.dll:pyzbar" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libzbar-64.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcr120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcamp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcomp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vccorlib120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120u.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120chs.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120cht.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120deu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120enu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120esn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120fra.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120ita.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120jpn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120kor.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120rus.dll:pyzbar" --onefile --version-file build\win_file_version_info.txt --name extract_otp_secrets.exe src\extract_otp_secrets.py
+          # - os: windows-latest
+          #   TARGET: windows
+          #   # TODO add --icon
+          #   # TODO add --manifest
+          #   # TODO find more elegant solution for pyzbar\libiconv.dll and pyzbar\libzbar-64.dll
+          #   # Files of Visual C++ 2013 Redistributable Package: https://support.microsoft.com/en-us/topic/update-for-visual-c-2013-redistributable-package-d8ccd6a5-4e26-c290-517b-8da6cfdf4f10
+          #   EXE: extract_otp_secrets.exe
+          #   ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_win_x86_64.exe
+          #   ASSET_MIME: application/vnd.microsoft.portable-executable
+          #   UPLOAD: true
+          #   CMD_BUILD: |
+          #     pyinstaller -y --add-data "$($Env:pythonLocation)\__yolo_v3_qr_detector:__yolo_v3_qr_detector" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libiconv.dll:pyzbar" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libzbar-64.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcr120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcamp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcomp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vccorlib120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120u.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120chs.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120cht.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120deu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120enu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120esn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120fra.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120ita.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120jpn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120kor.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120rus.dll:pyzbar" --onefile --version-file build\win_file_version_info.txt --name extract_otp_secrets.exe src\extract_otp_secrets.py
           - os: macos-12
             TARGET: macos
             # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
@@ -265,14 +265,14 @@ jobs:
               VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2024' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
               pyinstaller -y extract_otp_secrets_macos.spec
               installer/build_dmg.sh
-          - os: ubuntu-latest
-            TARGET: linux
-            EXE: extract_otp_secrets_ubuntu
-            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64_ubuntu_latest
-            ASSET_MIME: application/x-executable
-            UPLOAD: false
-            CMD_BUILD: |
-                pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_ubuntu src/extract_otp_secrets.py
+          # - os: ubuntu-latest
+          #   TARGET: linux
+          #   EXE: extract_otp_secrets_ubuntu
+          #   ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64_ubuntu_latest
+          #   ASSET_MIME: application/x-executable
+          #   UPLOAD: false
+          #   CMD_BUILD: |
+          #       pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_ubuntu src/extract_otp_secrets.py
     steps:
       - name: Output path
         if: runner.os == 'Windows'
@@ -294,11 +294,31 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get install -y libzbar0
-      - name: Install zbar shared lib for QReader (macOS)
+          - name: Install zbar shared lib for QReader (macOS)
+          if: runner.os == 'macOS'
+          run: |
+            # https://earthly.dev/blog/homebrew-on-m1/
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+            brew install zbar create-dmg
+      - name: List MacOS dirs
         if: runner.os == 'macOS'
         run: |
-          export DYLD_LIBRARY_PATH="$(brew --prefix)/lib:$DYLD_LIBRARY_PATH"
-          brew install zbar create-dmg
+          echo "ls /opt/homebrew/Cellar/zbar"
+          ls -al "/opt/homebrew/Cellar/zbar"
+          echo "ls /opt/homebrew/Cellar/zbar/0.23.93"
+          ls -al "/opt/homebrew/Cellar/zbar/0.23.93"
+          echo /opt/homebrew/lib
+          ls -al /opt/homebrew/lib
+          echo PATH
+          echo $PATH
+          echo HOMEBREW_CELLAR
+          echo $HOMEBREW_CELLAR
+          echo brew deps --tree --installed
+          brew deps --tree --installed
+      - name: List env
+        if: runner.os == 'macOS'
+        run: |
+          set
       - name: Install dependencies
         # TODO fix --use-pep517
         run: |
@@ -371,55 +391,55 @@ jobs:
         run: |
           curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @dist/${{ matrix.DMG }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME_DMG }}
 
-  upload-hashes:
-    name: Upload hashes
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs:
-      - build-linux-executable-in-docker
-      - build-native-executables
-    runs-on: ubuntu-latest
-    steps:
-      - name: Load Release Id File from release job
-        uses: actions/download-artifact@v4
-        with:
-          name: release_id
-      - name: Set meta data
-        id: meta
-        run: |
-          echo "release_id=$(cat release_id.txt)" >> $GITHUB_OUTPUT
-          echo "upload_url=https://uploads.github.com/repos/scito/extract_otp_secrets/releases/$(cat release_id.txt)/assets?name=" >> $GITHUB_OUTPUT
-      - name: Calculate and upload hashes from assets
-        run: |
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          for asset_url in $(curl \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN"\
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            --silent \
-            --show-error \
-            https://api.github.com/repos/scito/extract_otp_secrets/releases/${{ steps.meta.outputs.release_id }}/assets |
-          jq -r '.[].url'); do
-              echo "Download $asset_url"
-              name=$(curl \
-                  -H "Accept: application/vnd.github+json" \
-                  -H "Authorization: Bearer $GITHUB_TOKEN"\
-                  -H "X-GitHub-Api-Version: 2022-11-28" \
-                  --output-dir assets \
-                  -L \
-                  $asset_url |
-                  jq -r '.name')
-              curl \
-                  -H "Accept: application/octet-stream" \
-                  -H "Authorization: Bearer $GITHUB_TOKEN"\
-                  -H "X-GitHub-Api-Version: 2022-11-28" \
-                  --create-dirs \
-                  --output-dir assets \
-                  -L \
-                  -o $name \
-                  $asset_url
-          done
-          (cd assets/ && sha256sum * > ../sha256_hashes.txt)
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @sha256_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha256_hashes.txt
+  # upload-hashes:
+  #   name: Upload hashes
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   needs:
+  #     - build-linux-executable-in-docker
+  #     - build-native-executables
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Load Release Id File from release job
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: release_id
+  #     - name: Set meta data
+  #       id: meta
+  #       run: |
+  #         echo "release_id=$(cat release_id.txt)" >> $GITHUB_OUTPUT
+  #         echo "upload_url=https://uploads.github.com/repos/scito/extract_otp_secrets/releases/$(cat release_id.txt)/assets?name=" >> $GITHUB_OUTPUT
+  #     - name: Calculate and upload hashes from assets
+  #       run: |
+  #         GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+  #         for asset_url in $(curl \
+  #           -H "Accept: application/vnd.github+json" \
+  #           -H "Authorization: Bearer $GITHUB_TOKEN"\
+  #           -H "X-GitHub-Api-Version: 2022-11-28" \
+  #           --silent \
+  #           --show-error \
+  #           https://api.github.com/repos/scito/extract_otp_secrets/releases/${{ steps.meta.outputs.release_id }}/assets |
+  #         jq -r '.[].url'); do
+  #             echo "Download $asset_url"
+  #             name=$(curl \
+  #                 -H "Accept: application/vnd.github+json" \
+  #                 -H "Authorization: Bearer $GITHUB_TOKEN"\
+  #                 -H "X-GitHub-Api-Version: 2022-11-28" \
+  #                 --output-dir assets \
+  #                 -L \
+  #                 $asset_url |
+  #                 jq -r '.name')
+  #             curl \
+  #                 -H "Accept: application/octet-stream" \
+  #                 -H "Authorization: Bearer $GITHUB_TOKEN"\
+  #                 -H "X-GitHub-Api-Version: 2022-11-28" \
+  #                 --create-dirs \
+  #                 --output-dir assets \
+  #                 -L \
+  #                 -o $name \
+  #                 $asset_url
+  #         done
+  #         (cd assets/ && sha256sum * > ../sha256_hashes.txt)
+  #         curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @sha256_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha256_hashes.txt
 
-          (cd assets/ && sha512sum * > ../sha512_hashes.txt)
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @sha512_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha512_hashes.txt
+  #         (cd assets/ && sha512sum * > ../sha512_hashes.txt)
+  #         curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @sha512_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha512_hashes.txt
