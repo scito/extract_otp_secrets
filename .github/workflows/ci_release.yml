@@ -325,10 +325,6 @@ jobs:
           ls -al /opt/homebrew/lib
           echo HOMEBREW_CELLAR
           echo $HOMEBREW_CELLAR
-      - name: List MacOS Recursive
-        if: runner.os == 'macOS'
-        run: |
-          ls -alRL $Python_ROOT_DIR
       - name: List env
         if: runner.os == 'macOS'
         run: |
@@ -339,6 +335,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -U -r requirements-dev.txt
           pip install -U .
+      - name: List MacOS Recursive
+        if: runner.os == 'macOS'
+        run: |
+          ls -alRL $Python_ROOT_DIR
       - name: Create Windows win_file_version_info.txt
         shell: bash
         run: |
