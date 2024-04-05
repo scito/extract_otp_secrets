@@ -299,6 +299,9 @@ jobs:
         run: |
           # https://earthly.dev/blog/homebrew-on-m1/
           eval "$(/opt/homebrew/bin/brew shellenv)"
+      - name: Path for macOS arm64
+        if: matrix.os == 'macos-14'
+        run: |
           echo PATH 1
           echo $PATH
           export PATH="$PATH:/opt/homebrew/bin:/opt/homebrew/sbin:/opt/homebrew/lib"
@@ -307,14 +310,14 @@ jobs:
       - name: List MacOS dirs
         if: matrix.os == 'macos-14'
         run: |
+          echo PATH
+          echo $PATH
           echo "ls /opt/homebrew/Cellar/zbar"
           ls -al "/opt/homebrew/Cellar/zbar"
           echo "ls /opt/homebrew/Cellar/zbar/0.23.93"
           ls -al "/opt/homebrew/Cellar/zbar/0.23.93"
           echo /opt/homebrew/lib
           ls -al /opt/homebrew/lib
-          echo PATH
-          echo $PATH
           echo HOMEBREW_CELLAR
           echo $HOMEBREW_CELLAR
       - name: List env
