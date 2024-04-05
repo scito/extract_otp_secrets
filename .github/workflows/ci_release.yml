@@ -307,6 +307,11 @@ jobs:
           export PATH="$PATH:/opt/homebrew/bin:/opt/homebrew/sbin:/opt/homebrew/lib"
           echo PATH 2
           echo $PATH
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/sbin" >> $GITHUB_PATH
+          echo "/opt/homebrew/lib" >> $GITHUB_PATH
+          echo GITHUB_PATH
+          echo $GITHUB_PATH
       - name: List MacOS dirs
         if: matrix.os == 'macos-14'
         run: |
