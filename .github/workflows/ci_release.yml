@@ -328,7 +328,7 @@ jobs:
       - name: List MacOS Recursive
         if: runner.os == 'macOS'
         run: |
-          ls -alR $Python_ROOT_DIR
+          ls -alR --dereference-command-line-symlink-to-dir $Python_ROOT_DIR
       - name: List env
         if: runner.os == 'macOS'
         run: |
