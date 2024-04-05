@@ -9,7 +9,7 @@ a = Analysis(
     ['src/extract_otp_secrets.py'],
     pathex=[],
     binaries=[],
-    datas=[('$macos_python_path/__yolo_v3_qr_detector/', '__yolo_v3_qr_detector/')],
+    datas=[('__yolo_v3_qr_detector/', '__yolo_v3_qr_detector/')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
