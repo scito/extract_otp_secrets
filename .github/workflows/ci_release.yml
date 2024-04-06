@@ -294,8 +294,13 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install zbar create-dmg
+      - name: Setup homebrew env for macOS x86
+        if: matrix.os == 'macos-12'
+        run: |
+          # https://earthly.dev/blog/homebrew-on-m1/
+          eval "$(/usr/local/bin/brew shellenv)"
       - name: Setup homebrew env for macOS arm64
-        if: runner.os == 'macOS'
+        if: matrix.os == 'macos-14'
         run: |
           # https://earthly.dev/blog/homebrew-on-m1/
           eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -322,6 +327,21 @@ jobs:
           echo $GITHUB_PATH
           echo PYTHON_SITE_PACKAGES_PATH
           echo $PYTHON_SITE_PACKAGES_PATH
+      - name: List MacOS dirs
+        if: runner.os == 'macOS'
+        run: |
+          echo PATH
+          echo $PATH
+          echo HOMEBREW_PREFIX
+          echo $HOMEBREW_PREFIX
+          echo HOMEBREW_CELLAR
+          echo $HOMEBREW_CELLAR
+          echo "ls $HOMEBREW_PREFIX/Cellar/zbar"
+          ls -al "$HOMEBREW_PREFIX/Cellar/zbar"
+          echo "ls $HOMEBREW_PREFIX/Cellar/zbar/0.23.93"
+          ls -al "$HOMEBREW_PREFIX/Cellar/zbar/0.23.93"
+          echo $HOMEBREW_PREFIX/lib
+          ls -al $HOMEBREW_PREFIX/lib
       - name: List MacOS dirs
         if: matrix.os == 'macos-14'
         run: |
