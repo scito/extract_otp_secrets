@@ -9,9 +9,9 @@ a = Analysis(
     ['src/extract_otp_secrets.py'],
     pathex=[],
     binaries=[
-        (os.environ['HOMEBREW_PREFIX'] + '/lib/libzbar.0.dylib', 'zbar'),
-        (os.environ['HOMEBREW_PREFIX'] + '/lib/libzbar.a', 'zbar'),
-        (os.environ['HOMEBREW_PREFIX'] + '/lib/libzbar.dylib', 'zbar')
+        (os.environ['HOMEBREW_PREFIX'] + '/lib/libzbar.0.dylib', 'lib'),
+        (os.environ['HOMEBREW_PREFIX'] + '/lib/libzbar.a', 'lib'),
+        (os.environ['HOMEBREW_PREFIX'] + '/lib/libzbar.dylib', 'lib')
     ],
     datas=[(os.environ['PYTHON_SITE_PACKAGES_PATH'] + '/__yolo_v3_qr_detector/', '__yolo_v3_qr_detector/')],
     hiddenimports=[],
