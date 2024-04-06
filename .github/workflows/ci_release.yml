@@ -306,8 +306,7 @@ jobs:
       - name: Set env PYTHON_SITE_PACKAGES_PATH
         if: runner.os == 'macOS'
         run: |
-          python -c 'import site; print(site.getsitepackages())'
-          echo "PYTHON_SITE_PACKAGES_PATH=$(echo \"$Python_ROOT_DIR/lib/python3.12/site-packages\")" >> $GITHUB_ENV
+          echo "PYTHON_SITE_PACKAGES_PATH=$(echo $Python_ROOT_DIR/lib/python3.12/site-packages)" >> $GITHUB_ENV
       - name: Path for macOS arm64
         if: matrix.os == 'macos-14'
         run: |
