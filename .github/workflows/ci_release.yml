@@ -302,7 +302,7 @@ jobs:
       - name: Set env
         if: runner.os == 'macOS'
         run: |
-          python -m site --user-site
+          python -m site
           echo "PYTHON_SITE_PACKAGES_PATH=$(python -m site --user-site)" >> $GITHUB_ENV
       - name: Path for macOS arm64
         if: matrix.os == 'macos-14'
