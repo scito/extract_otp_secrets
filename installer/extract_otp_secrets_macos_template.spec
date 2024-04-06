@@ -8,7 +8,11 @@ block_cipher = None
 a = Analysis(
     ['src/extract_otp_secrets.py'],
     pathex=[],
-    binaries=[],
+    binaries=[
+        (os.environ['HOMEBREW_CELLAR'] + '/libzbar.0.dylib', 'zbar'),
+        (os.environ['HOMEBREW_CELLAR'] + '/libzbar.a', 'zbar'),
+        (os.environ['HOMEBREW_CELLAR'] + '/libzbar.dylib', 'zbar')
+    ],
     datas=[(os.environ['PYTHON_SITE_PACKAGES_PATH'] + '/__yolo_v3_qr_detector/', '__yolo_v3_qr_detector/')],
     hiddenimports=[],
     hookspath=[],
