@@ -299,6 +299,11 @@ jobs:
         run: |
           # https://earthly.dev/blog/homebrew-on-m1/
           eval "$(/opt/homebrew/bin/brew shellenv)"
+      - name: Set env
+        if: runner.os == 'macOS'
+        run: |
+          python -m site --user-site
+          echo "PYTHON_SITE_PACKAGES_PATH=$(python -m site --user-site)" >> $GITHUB_ENV
       - name: Path for macOS arm64
         if: matrix.os == 'macos-14'
         run: |
@@ -312,6 +317,8 @@ jobs:
           echo "/opt/homebrew/lib" >> $GITHUB_PATH
           echo GITHUB_PATH
           echo $GITHUB_PATH
+          echo PYTHON_SITE_PACKAGES_PATH
+          echo $PYTHON_SITE_PACKAGES_PATH
       - name: List MacOS dirs
         if: matrix.os == 'macos-14'
         run: |
