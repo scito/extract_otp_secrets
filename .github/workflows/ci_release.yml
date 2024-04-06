@@ -298,7 +298,8 @@ jobs:
         if: matrix.os == 'macos-12'
         run: |
           # https://earthly.dev/blog/homebrew-on-m1/
-          eval "$(/usr/local/bin/brew shellenv)"
+          # eval "$(/usr/local/bin/brew shellenv)"
+          echo "HOMEBREW_PREFIX=/usr/local" >> $GITHUB_ENV
       - name: Setup homebrew env for macOS arm64
         if: matrix.os == 'macos-14'
         run: |
