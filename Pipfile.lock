@@ -401,12 +401,12 @@
         },
         "mypy-protobuf": {
             "hashes": [
-                "sha256:0d0548c6b9a6faf14ce1a9ce2831c403a5c1f2a9363e85b1e2c51d5d57aa8393",
-                "sha256:21f270da0a9792a9dac76b0df463c027e561664ab6973c59be4e4d064dfe67dc"
+                "sha256:02f242eb3409f66889f2b1a3aa58356ec4d909cdd0f93115622e9e70366eca3c",
+                "sha256:56176e4d569070e7350ea620262478b49b7efceba4103d468448f1d21492fd6c"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==3.5.0"
+            "version": "==3.6.0"
         },
         "nuitka": {
             "hashes": [
@@ -461,7 +461,6 @@
                 "sha256:f7417703f841167e5a27d48be13389d52ad705ec09eade63dfc3180a959215d7",
                 "sha256:fbfe61e7ee8c1860855696e3ac6cfd1b01af5498facc6834fcc345c9684fb2ca"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==5.26.1"
         },
@@ -552,12 +551,12 @@
         },
         "types-protobuf": {
             "hashes": [
-                "sha256:8e039486df058141cb221ab99f88c5878c08cca4376db1d84f63279860aa09cd",
-                "sha256:c80426f9fb9b21aee514691e96ab32a5cd694a82e2ac07964b352c3e7e0182bc"
+                "sha256:9b87cd279378693071247227f52e89738af7c8d6f06dbdd749b0cf473c4916ce",
+                "sha256:c03a44357b03c233c8c5864ce3e07dd9c766a00497d271496923f7ae3cb9e1de"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==4.24.0.20240311"
+            "version": "==4.24.0.20240408"
         },
         "typing-extensions": {
             "hashes": [
