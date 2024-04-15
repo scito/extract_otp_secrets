@@ -526,20 +526,20 @@
         },
         "setuptools": {
             "hashes": [
-                "sha256:0ff4183f8f42cd8fa3acea16c45205521a4ef28f73c6391d8a25e92893134f2e",
-                "sha256:c21c49fb1042386df081cb5d86759792ab89efca84cf114889191cd09aacc80c"
+                "sha256:6c1fccdac05a97e598fb0ae3bbed5904ccb317337a51139dcd51453611bbb987",
+                "sha256:c636ac361bc47580504644275c9ad802c50415c7522212252c033bd15f301f32"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==69.2.0"
+            "version": "==69.5.1"
         },
         "setuptools-git-versioning": {
             "hashes": [
-                "sha256:75e3e8c4528fa21ca2417a1f222fdaaa4d2ca7d8536c44affad827c6ec9ba0d4",
-                "sha256:a57873f91687bf5fe97d28f65fa8c2d03bfe633cf7373c365bb83a87975a0de6"
+                "sha256:72d6e473fc4e86f8563ce411e6c9057766c99aa40b84c862276b48f387eb8e93",
+                "sha256:85b5fbe7bda8e9c24bbd9e587a9d4b91129417f4dd3e11e3c0d5f3f835fc4d4d"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.7'",
-            "version": "==1.13.6"
+            "version": "==2.0.0"
         },
         "tomlkit": {
             "hashes": [
