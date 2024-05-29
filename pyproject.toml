@@ -21,11 +21,11 @@ classifiers = [
     "Topic :: Utilities",
     "Topic :: Security",
     "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Intended Audience :: End Users/Desktop",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
@@ -55,7 +55,7 @@ license = {text = "GNU General Public License v3 (GPLv3)"}
 readme = "README.md"
 authors = [{name = "scito", email = "info@scito.ch"}]
 maintainers = [{name = "scito", email = "info@scito.ch"}]
-requires-python = ">=3.7, <4"
+requires-python = ">=3.8, <4"
 scripts = {extract_otp_secrets = "extract_otp_secrets:sys_main"}
 urls = {Project-URL = "https://github.com/scito/extract_otp_secrets", Bug-Reports = "https://github.com/scito/extract_otp_secrets/issues", Source = "https://github.com/scito/extract_otp_secrets"}
 
