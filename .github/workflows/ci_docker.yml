@@ -32,7 +32,7 @@ jobs:
     # steps to perform in job
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # avoid building if there are testing errors
       - name: Run smoke test
@@ -44,12 +44,12 @@ jobs:
           pytest
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       # setup Docker build action
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         # Workaround for failing builds: https://github.com/docker/build-push-action/issues/761#issuecomment-1383822381
         # TODO remove workaround when fixed
         with:
@@ -57,14 +57,14 @@ jobs:
             image=moby/buildkit:v0.10.6
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: github.secret_source == 'Actions'
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to Github Packages
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: github.secret_source == 'Actions'
         with:
           registry: ghcr.io
@@ -73,7 +73,7 @@ jobs:
 
       - name: "Build image and push to Docker Hub and GitHub Container Registry"
         id: docker_build_qr_reader_latest
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
           # relative path to the place where source code with Dockerfile is located
@@ -113,7 +113,7 @@ jobs:
     # steps to perform in job
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # avoid building if there are testing errors
       - name: Run smoke test
@@ -125,22 +125,22 @@ jobs:
           pytest
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       # setup Docker build action
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: github.secret_source == 'Actions'
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to Github Packages
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: github.secret_source == 'Actions'
         with:
           registry: ghcr.io
@@ -149,7 +149,7 @@ jobs:
 
       - name: "only_txt: Build image and push to Docker Hub and GitHub Container Registry"
         id: docker_build_only_txt
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           # relative path to the place where source code with Dockerfile is located
           platforms: linux/amd64,linux/arm64
@@ -189,7 +189,7 @@ jobs:
     # steps to perform in job
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # avoid building if there are testing errors
       - name: Run smoke test
@@ -201,12 +201,12 @@ jobs:
           pytest
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       # setup Docker build action
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         # Workaround for failing builds: https://github.com/docker/build-push-action/issues/761#issuecomment-1383822381
         # TODO remove workaround when fixed
         with:
@@ -214,14 +214,14 @@ jobs:
             image=moby/buildkit:v0.10.6
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: github.secret_source == 'Actions'
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to Github Packages
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: github.secret_source == 'Actions'
         with:
           registry: ghcr.io
@@ -231,7 +231,7 @@ jobs:
       - name: "Build image from Bullseye and push to GitHub Container Registry"
         id: docker_build_bullseye
         if: github.ref == 'refs/heads/master'
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
           # relative path to the place where source code with Dockerfile is located
