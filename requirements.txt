@@ -1,6 +1,5 @@
 colorama>=0.4.6
-opencv-contrib-python; sys_platform != 'darwin'
-opencv-contrib-python<=4.7.0; sys_platform == 'darwin'
+opencv-contrib-python
 Pillow
 protobuf
 pyzbar
