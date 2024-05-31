@@ -721,7 +721,7 @@ For Python type hint generation the [mypy-protobuf](https://github.com/nipunn131
 
 ## Issues
 
-* Segmentation fault on macOS with CV2 4.7.0: https://github.com/opencv/opencv/issues/23072
+* Segmentation fault on macOS with CV2 4.7.0: https://github.com/opencv/opencv/issues/23072 (fixed)
 * CV2 window does not show icons: https://github.com/opencv/opencv-python/issues/585
 
 ## Problems and Troubleshooting
