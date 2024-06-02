@@ -101,7 +101,7 @@ while test $# -gt 0; do
             echo "-C                      Ignore version check of protobuf/protoc"
             echo "-e                      Build exe"
             echo "-n                      Build nuitka exe"
-            echo "-L                      Do not build local (exe)"
+            echo "-L                      Do not run protoc and base build locally incl. exes"
             echo "-d                      Build docker"
             echo "-a                      Build arm"
             echo "-X                      Do not build x86_64"
@@ -365,6 +365,13 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
+        # Update Code Coverage in README.md
+
+        # https://github.com/marketplace/actions/pytest-coverage-comment
+        # Coverage-95%25-yellowgreen
+        echo -e "Update code coverage in README.md"
+        TOTAL_COVERAGE=$(cat $COVERAGE_OUT_FILE | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
+
         # Pipenv
 
         if $run_pipenv; then
@@ -399,7 +406,7 @@ if $build_local; then
         eval "$cmd"
         echo "local glibc: $LOCAL_GLIBC_VERSION"
 
-        cmd="pyinstaller -y --specpath installer --add-data $HOME/.local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile $clean_flag src/extract_otp_secrets.py"
+        cmd="time pyinstaller -y --specpath installer --add-data $HOME/.local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile $clean_flag src/extract_otp_secrets.py"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -424,7 +431,7 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$PYTHON -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=$HOME/.local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=build/nuitka --output-filename=extract_otp_secrets_compiled src/extract_otp_secrets.py"
+        cmd="time $PYTHON -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --noinclude-default-mode=nofollow --include-data-dir=$HOME/.local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=build/nuitka --output-filename=extract_otp_secrets_compiled src/extract_otp_secrets.py"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -446,13 +453,6 @@ if $build_local; then
     cmd="gfm-toc -s 2 -e 3 -t -o README.md > docs/README_TOC.md"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
-
-    # Update Code Coverage in README.md
-
-    # https://github.com/marketplace/actions/pytest-coverage-comment
-    # Coverage-95%25-yellowgreen
-    echo -e "Update code coverage in README.md"
-    TOTAL_COVERAGE=$(cat $COVERAGE_OUT_FILE | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
 
     # create Windows win_file_version_info.txt
     cmd="VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") VERSION_BUILD=$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2023' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt"
