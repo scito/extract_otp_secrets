@@ -431,7 +431,7 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="time $PYTHON -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --noinclude-default-mode=nofollow --include-data-dir=$HOME/.local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=build/nuitka --output-filename=extract_otp_secrets_compiled src/extract_otp_secrets.py"
+        cmd="time $PYTHON -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --noinclude-default-mode=nofollow --clang --include-data-dir=$HOME/.local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=build/nuitka --output-filename=extract_otp_secrets_compiled src/extract_otp_secrets.py"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
