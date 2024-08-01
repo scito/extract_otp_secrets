@@ -430,10 +430,10 @@
         },
         "nuitka": {
             "hashes": [
-                "sha256:cf57c72417e6ce1959c34a404f055cbe3714306f01455917426604b4cfec7980"
+                "sha256:26743df70d08278c67cdd1dac581bc3bd5ad49b60f1101aef4e99911a323ecc4"
             ],
             "index": "pypi",
-            "version": "==2.4.2"
+            "version": "==2.4.5"
         },
         "ordered-set": {
             "hashes": [
