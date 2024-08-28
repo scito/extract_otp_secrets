@@ -192,21 +192,21 @@
         },
         "protobuf": {
             "hashes": [
-                "sha256:0e341109c609749d501986b835f667c6e1e24531096cff9d34ae411595e26505",
-                "sha256:176c12b1f1c880bf7a76d9f7c75822b6a2bc3db2d28baa4d300e8ce4cde7409b",
-                "sha256:354d84fac2b0d76062e9b3221f4abbbacdfd2a4d8af36bab0474f3a0bb30ab38",
-                "sha256:4fadd8d83e1992eed0248bc50a4a6361dc31bcccc84388c54c86e530b7f58863",
-                "sha256:54330f07e4949d09614707c48b06d1a22f8ffb5763c159efd5c0928326a91470",
-                "sha256:610e700f02469c4a997e58e328cac6f305f649826853813177e6290416e846c6",
-                "sha256:7fc3add9e6003e026da5fc9e59b131b8f22b428b991ccd53e2af8071687b4fce",
-                "sha256:9e8f199bf7f97bd7ecebffcae45ebf9527603549b2b562df0fbc6d4d688f14ca",
-                "sha256:a109916aaac42bff84702fb5187f3edadbc7c97fc2c99c5ff81dd15dcce0d1e5",
-                "sha256:b848dbe1d57ed7c191dfc4ea64b8b004a3f9ece4bf4d0d80a367b76df20bf36e",
-                "sha256:f3ecdef226b9af856075f28227ff2c90ce3a594d092c39bee5513573f25e2714"
+                "sha256:10319748764b917a9a7cddef1582a0a9cd0f8f6d04e545c6236f7ccaf9b624d9",
+                "sha256:1fe7735902e84ce35c4152cf07981c176713935a8efad78cea547aae5f4f75cb",
+                "sha256:25169c7624d5a9e669fa6faff5a6e818f854346d51ee347b2284676beb9e85dd",
+                "sha256:25ba1f0633f73c3939f3b84e1636f3eb3bab7196952ebb83906d56945edd6aa8",
+                "sha256:565b051249a2f8270af04206dd4f3b73a02343e7d9e072aed57441b369b3467d",
+                "sha256:b97259641e8d38738eef34a173e51d2d53a453baab01a32477a64752d9ce59a3",
+                "sha256:d5a0e229061600842e57af4ff6a8522ede5280bcfa4fe7f3a1c20589377859a6",
+                "sha256:e673f173cbac4e59c7817ed358e471e4c77aa9166986edf3e731156379a556c7",
+                "sha256:e85fed07013e5a0121efbaf1b14355fdc66f6e545f12fc5985b2882370410006",
+                "sha256:eaa1016e353d8fc5bf08c8087e96eed15f5297aa52bb7ee1f533278bb3f3aad7",
+                "sha256:f0c24374aaaf103f33662e4de7666a4a4280abebdb8a9f3f0f9b1d71b61174ec"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==5.27.2"
+            "version": "==5.27.4"
         },
         "pypng": {
             "hashes": [
