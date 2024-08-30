@@ -592,7 +592,7 @@ def convert_img_to_otp_urls(filename: str, args: Args) -> OtpUrls:
                 stdin = sys.stdin.buffer.read()
             except AttributeError:
                 # Workaround for pytest, since pytest cannot monkeypatch sys.stdin.buffer
-                stdin = sys.stdin.read()  # type: ignore # Workaround for pytest fixtures
+                stdin = sys.stdin.read()
             if not stdin:
                 log_warn("stdin is empty")
             try:

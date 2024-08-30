@@ -849,7 +849,14 @@ data=XXXX
 Exception: unpack requires a buffer of 4 bytes
 '''
 
-    assert captured.err == first_expected_stderr or captured.err == second_expected_stderr
+    #
+    third_expected_stderr = '''
+ERROR: Cannot decode otpauth-migration migration payload.
+data=XXXX
+Exception: Error parsing message with type 'MigrationPayload'
+'''
+
+    assert captured.err == first_expected_stderr or captured.err == second_expected_stderr or captured.err == third_expected_stderr
     assert captured.out == ''
     assert e.value.code == 1
     assert e.type == SystemExit
