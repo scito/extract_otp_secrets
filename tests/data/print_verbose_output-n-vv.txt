@@ -1,5 +1,5 @@
 QReader installed: True
-CV2 version: 4.7.0
+CV2 version: 4.10.0
 QR reading mode: ZBAR
 
 Input files: ['example_export.txt']

@@ -559,7 +559,7 @@ def test_normalize_bytes() -> None:
 # Generate verbose output:
 # for color in '' '-n'; do for level in '' '-v' '-vv' '-vvv'; do python3.11 src/extract_otp_secrets.py example_export.txt $color $level > tests/data/print_verbose_output$color$level.txt; done; done
 # workaround for PYTHON <= 3.10
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="fileinput.input encoding exists since PYTHON 3.10")
+@pytest.mark.skipif(sys.version_info < (3, 10) or sys.platform.startswith("win"), reason="fileinput.input encoding exists since PYTHON 3.10 OR Windows fatal exception: access violation")
 @pytest.mark.parametrize("verbose_level", ['', '-v', '-vv', '-vvv'])
 @pytest.mark.parametrize("color", ['', '-n'])
 def test_extract_verbose(verbose_level: str, color: str, capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
