@@ -915,10 +915,15 @@ def get_raw_version() -> str:
 
 # workaround for PYTHON <= 3.9 use: BaseException | None
 def log_debug(*values: object, sep: Optional[str] = ' ') -> None:
+    if os.name == 'nt':
+        # Workaround "Windows fatal exception: access violation"
+        print(f"\nDEBUG: {str(values[0])}")
+        return
+
     if colored:
-        print(f"{colorama.Fore.CYAN}\nDEBUG: {str(values[0])}", *values[1:], colorama.Fore.RESET, sep)
+        print(f"{colorama.Fore.CYAN}\nDEBUG: {str(values[0])}", *values[1:], colorama.Fore.RESET, sep=sep)
     else:
-        print(f"\nDEBUG: {str(values[0])}", *values[1:], sep)
+        print(f"\nDEBUG: {str(values[0])}", *values[1:], sep=sep)
 
 
 # workaround for PYTHON <= 3.9 use: BaseException | None
