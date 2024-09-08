@@ -474,11 +474,11 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt example_export.txt"
+        cmd="docker run --network none --rm -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt - < example_export.txt"
+        cmd="docker run --network none --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets_only_txt - < example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -491,15 +491,15 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets example_export.txt"
+        cmd="docker run --network none --rm -v \"$(pwd)\":/files:ro extract_otp_secrets example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="cat example_export.txt | docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - -c - > example_output.csv"
+        cmd="cat example_export.txt | docker run --network none --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets - -c - > example_output.csv"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets = < example_export.png"
+        cmd="docker run --network none --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets = < example_export.png"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -512,15 +512,15 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --rm -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye example_export.txt"
+        cmd="docker run --network none --rm -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="cat example_export.txt | docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye - -c - > example_output.csv"
+        cmd="cat example_export.txt | docker run --network none --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye - -c - > example_output.csv"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="docker run --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye = < example_export.png"
+        cmd="docker run --network none --rm -i -v \"$(pwd)\":/files:ro extract_otp_secrets:bullseye = < example_export.png"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -530,13 +530,13 @@ if $build_docker; then
 
         # Build executable from Docker latest
         # sed "1!d" is workaround for head -n 1 since it head procduces exit code != 0
-        BOOKWORM_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+        BOOKWORM_GLIBC_VERSION=$(docker run --network none --entrypoint /bin/bash --rm extract_otp_secrets -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
         echo "Bookworm glibc: $BOOKWORM_GLIBC_VERSION"
     fi
 
     if $build_arm; then
         # build linux/arm64
-        cmd="docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes"
+        cmd="docker run --network none --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -561,7 +561,7 @@ if $build_docker; then
             eval "$cmd"
 
             # Build executable from Docker bullseye
-            BULLSEYE_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+            BULLSEYE_GLIBC_VERSION=$(docker run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
             echo "Bullseye glibc: $BULLSEYE_GLIBC_VERSION"
 
             cmd="docker run --platform linux/amd64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --specpath installer --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
@@ -608,7 +608,7 @@ if $build_docker; then
             eval "$cmd"
 
             # Build executable from Docker bullseye
-            BULLSEYE_GLIBC_VERSION=$(docker run --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+            BULLSEYE_GLIBC_VERSION=$(docker run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
             echo "Bookworm glibc: $BULLSEYE_GLIBC_VERSION"
 
             cmd="docker run --platform linux/amd64 --entrypoint /bin/bash --rm -v \"$(pwd)\":/files -w /files extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=/usr/local/__yolo_v3_qr_detector/=__yolo_v3_qr_detector/ --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_bullseye_compiled /files/src/extract_otp_secrets.py'"
@@ -646,7 +646,7 @@ if $build_docker; then
 
     # Run GUI from Docker
     if $build_x86_64 && $run_gui; then
-        cmd="docker run --rm -v "$(pwd)":/files:ro --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets &"
+        cmd="docker run --network none --rm -v "$(pwd)":/files:ro --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets &"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi
