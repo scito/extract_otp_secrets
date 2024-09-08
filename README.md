@@ -121,13 +121,21 @@ However, the bare executable can be executed from the command line:
 3. Change to Downloads folder in Terminal: `cd $HOME/Downloads`
 4. Remove quarantine bit for the downloaded file: `xattr -r -d com.apple.quarantine extract_otp_secrets_X.Y.Z_macos_x86_64`
 5. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_X.Y.Z_macos_x86_64`
-6. Start executable from command line: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
+6. Start executable from command line for the first time: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
+7. Wait approximately 30 seconds to 1 minute on the first run. Terminal will display the following error:
+    ```
+    OpenCV: not authorized to capture video (status 0), requesting...
+    OpenCV: camera failed to properly initialize!
+    ```
+8. macOS will then prompt to request camera access.
+9. After allowing camera access, rerun the program.
+10. On the second run, the GUI prompt shows correctly and is fully operable: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
 
 :information_source: Replace `X.Y.Z` in above commands with the version number of your downloaded file, e.g. `extract_otp_secrets_2.4.0_macos_x86_64`
 
 :information_source: If Rosetta2 emulation is installed, these steps work also for M1 and M2 Apple Silicon processors and the program can be executed directly.
 
-> :warning: It seems the GUI mode is not working in Terminal on macOS. In tests no [GUI window](#usage) was opened. (Remarks and hints about macOS are welcome since I do not know macOS.)
+Tested with extract_otp_secrets_2.8.1_macos_x86_64 on macOS Sequoia 15.1 beta. Source: [#283](https://github.com/scito/extract_otp_secrets/issues/283)
 
 ## Usage
 
