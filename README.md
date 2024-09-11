@@ -525,6 +525,14 @@ Install [devbox](https://github.com/jetpack-io/devbox), which is a wrapper for n
 devbox shell
 ```
 
+### devbox
+
+Install [devbox](https://devenv.sh), which is a wrapper for nix. Then enter the environment with Python and the packages installed with:
+
+```
+devenv shell
+```
+
 ### docker
 
 Install [Docker](https://docs.docker.com/get-docker/).
