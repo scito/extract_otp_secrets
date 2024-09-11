@@ -35,3 +35,12 @@ extract_otp_secrets.build/
 extract_otp_secrets.dist/
 extract_otp_secrets.onefile-build/
 extract_otp_secrets.bin
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
