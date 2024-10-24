@@ -239,6 +239,17 @@ jobs:
             UPLOAD: true
             CMD_BUILD: |
               pyinstaller -y --add-data "$($Env:pythonLocation)\__yolo_v3_qr_detector:__yolo_v3_qr_detector" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libiconv.dll:pyzbar" --add-binary "$($Env:pythonLocation)\Lib\site-packages\pyzbar\libzbar-64.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcr120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\msvcp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcamp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vcomp120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\vccorlib120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120u.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120chs.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120cht.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120deu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120enu.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120esn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120fra.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120ita.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120jpn.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120kor.dll:pyzbar" --add-binary "$($Env:WinDir)\system32\mfc120rus.dll:pyzbar" --onefile --version-file build\win_file_version_info.txt --name extract_otp_secrets.exe src\extract_otp_secrets.py
+          - os: ubuntu-latest
+            TARGET: linux
+            EXE: extract_otp_secrets_ubuntu
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64_ubuntu_latest
+            ASSET_MIME: application/x-executable
+            UPLOAD: false
+            CMD_BUILD: |
+                pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_ubuntu src/extract_otp_secrets.py
+        exclude:
+          # TODO temp disable macos releases to due
+          # FileNotFoundError: Icon input file /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/PyInstaller/bootloader/images/icon-windowed.icns not found
           - os: macos-12
             TARGET: macos
             # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
@@ -252,14 +263,6 @@ jobs:
               VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2023' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
               pyinstaller -y extract_otp_secrets_macos.spec
               installer/build_dmg.sh
-          - os: ubuntu-latest
-            TARGET: linux
-            EXE: extract_otp_secrets_ubuntu
-            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64_ubuntu_latest
-            ASSET_MIME: application/x-executable
-            UPLOAD: false
-            CMD_BUILD: |
-                pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_ubuntu src/extract_otp_secrets.py
     steps:
       - name: Output path
         if: runner.os == 'Windows'
