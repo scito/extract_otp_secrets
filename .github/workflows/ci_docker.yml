@@ -83,7 +83,7 @@ jobs:
           # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
           build-args: |
-            BASE_IMAGE=python:3.12-slim-bookworm
+            BASE_IMAGE=python:3.13-slim-bookworm
           pull: true
           tags: |
             scit0/extract_otp_secrets:latest
@@ -239,7 +239,7 @@ jobs:
           file: docker/Dockerfile
           # builder: ${{ steps.buildx.outputs.name }}
           build-args: |
-            BASE_IMAGE=python:3.12-slim-bullseye
+            BASE_IMAGE=python:3.13-slim-bullseye
           # Note: tags has to be all lower-case
           pull: true
           tags: |
