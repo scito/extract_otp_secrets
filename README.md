@@ -36,6 +36,9 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 
 ## Table of contents
 
+## Table of contents
+
+- [Table of contents](#table-of-contents)
 - [Download and run binary executable (🆕 since v2.1)](#download-and-run-binary-executable--since-v21)
   - [MacOS](#macos)
 - [Usage](#usage)
@@ -46,7 +49,7 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
   - [Installation of optional shared system libraries (recommended)](#installation-of-optional-shared-system-libraries-recommended)
 - [Program help: arguments and options](#program-help-arguments-and-options)
 - [Examples](#examples)
-  - [Printing otp secrets from text file](#printing-otp-secrets-form-text-file)
+  - [Printing otp secrets from text file](#printing-otp-secrets-from-text-file)
   - [Printing otp secrets from image file](#printing-otp-secrets-from-image-file)
   - [Writing otp secrets to csv file](#writing-otp-secrets-to-csv-file)
   - [Writing otp secrets to json file](#writing-otp-secrets-to-json-file)
@@ -66,7 +69,8 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
   - [pipenv](#pipenv)
   - [Visual Studio Code Remote - Containers / VSCode devcontainer](#visual-studio-code-remote---containers--vscode-devcontainer)
   - [venv](#venv)
-  - [devbox](#devbox)
+  - [devbox 1](#devbox-1)
+  - [devbox 2](#devbox-2)
   - [docker](#docker)
   - [More docker examples](#more-docker-examples)
 - [Tests](#tests)
@@ -280,7 +284,7 @@ python extract_otp_secrets.py = < example_export.png</pre>
 
 ## Examples
 
-### Printing otp secrets form text file
+### Printing otp secrets from text file
 
     python src/extract_otp_secrets.py example_export.txt
 
@@ -517,7 +521,7 @@ Alternatively, you can use a python virtual env for the dependencies:
 The requirements\*.txt files contain all the dependencies (also the optional ones).
 To leave the python virtual env just call `deactivate`.
 
-### devbox
+### devbox 1
 
 Install [devbox](https://github.com/jetpack-io/devbox), which is a wrapper for nix. Then enter the environment with Python and the packages installed with:
 
@@ -525,7 +529,7 @@ Install [devbox](https://github.com/jetpack-io/devbox), which is a wrapper for n
 devbox shell
 ```
 
-### devbox
+### devbox 2
 
 Install [devbox](https://devenv.sh), which is a wrapper for nix. Then enter the environment with Python and the packages installed with:
 
