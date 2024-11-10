@@ -36,8 +36,6 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 
 ## Table of contents
 
-## Table of contents
-
 - [Table of contents](#table-of-contents)
 - [Download and run binary executable (🆕 since v2.1)](#download-and-run-binary-executable--since-v21)
   - [MacOS](#macos)
