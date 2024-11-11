@@ -603,12 +603,12 @@
         },
         "wheel": {
             "hashes": [
-                "sha256:2376a90c98cc337d18623527a97c31797bd02bad0033d41547043a1cbfbe448f",
-                "sha256:a29c3f2817e95ab89aa4660681ad547c0e9547f20e75b0562fe7723c9a2a9d49"
+                "sha256:52f0baa5e6522155090a09c6bd95718cc46956d1b51d537ea5454249edb671c7",
+                "sha256:a57353941a3183b3d5365346b567a260a0602a0f8a635926a7dede41b94c674a"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==0.44.0"
+            "version": "==0.45.0"
         },
         "zstandard": {
             "hashes": [
