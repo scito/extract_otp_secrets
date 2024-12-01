@@ -2,9 +2,11 @@ QReader installed: True
 CV2 version: 4.10.0
 QR reading mode: ZBAR
 
-Version: extract_otp_secrets 2.8.1.post17+git.3dc7d1c2.dirty Linux x86_64 Python 3.11.9 (CPython/called as script)
+Version: extract_otp_secrets 2.8.4.post4+git.7ce765dd.dirty Linux x86_64 Python 3.11.10 (CPython/called as script)
 
 Input files: ['example_export.txt']
+[36m
+DEBUG: Expanded input files: ['example_export.txt'] [39m
 [36mProcessing infile example_export.txt[39m
 Reading lines of example_export.txt
 [36m# 2FA example from https://www.raspberrypi.org/blog/setting-up-two-factor-authentication-on-your-raspberry-pi/[39m

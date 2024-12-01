@@ -869,19 +869,8 @@ def test_wrong_content(capsys: pytest.CaptureFixture[str]) -> None:
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = '''
-WARN: input is not a otpauth-migration:// url
-source: tests/data/test_export_wrong_content.txt
-input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-Maybe a wrong file was given
-
-ERROR: could not parse query parameter in input url
-source: tests/data/test_export_wrong_content.txt
-url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-'''
-
     assert captured.out == ''
-    assert captured.err == expected_stderr
+    assert captured.err == EXPECTED_STDERR_OTP_URL_WRONG
 
 
 def test_one_wrong_file(capsys: pytest.CaptureFixture[str]) -> None:
@@ -891,19 +880,8 @@ def test_one_wrong_file(capsys: pytest.CaptureFixture[str]) -> None:
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = '''
-WARN: input is not a otpauth-migration:// url
-source: tests/data/test_export_wrong_content.txt
-input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-Maybe a wrong file was given
-
-ERROR: could not parse query parameter in input url
-source: tests/data/test_export_wrong_content.txt
-url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-'''
-
     assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
-    assert captured.err == expected_stderr
+    assert captured.err == EXPECTED_STDERR_OTP_URL_WRONG
 
 
 def test_one_wrong_file_colored(capsys: pytest.CaptureFixture[str]) -> None:
@@ -913,19 +891,8 @@ def test_one_wrong_file_colored(capsys: pytest.CaptureFixture[str]) -> None:
     # Assert
     captured = capsys.readouterr()
 
-    expected_stderr = f'''{colorama.Fore.RED}
-WARN: input is not a otpauth-migration:// url
-source: tests/data/test_export_wrong_content.txt
-input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-Maybe a wrong file was given{colorama.Fore.RESET}
-{colorama.Fore.RED}
-ERROR: could not parse query parameter in input url
-source: tests/data/test_export_wrong_content.txt
-url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.{colorama.Fore.RESET}
-'''
-
     assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT
-    assert captured.err == expected_stderr
+    assert captured.err == EXPECTED_STDERR_COLORED_OTP_URL_WRONG
 
 
 def test_one_wrong_line(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
@@ -998,6 +965,46 @@ def test_img_qr_reader_from_file_happy_path(capsys: pytest.CaptureFixture[str]) 
 
 
 @pytest.mark.qreader
+def test_img_qr_reader_but_no_otp_from_file(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-n', 'tests/data/qr_but_without_otp.png'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == ''
+    assert captured.err == EXPECTED_STDERR_NO_OTP_URL
+
+
+@pytest.mark.qreader
+def test_img_qr_reader_from_wildcard(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-n', 'tests/data/*.png'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
+    assert normalize_testfile_path(captured.err) == EXPECTED_STDERR_NO_OTP_URL
+
+
+def normalize_testfile_path(text: str):
+    return text.replace('tests/data\\', 'tests/data/') if sys.platform.startswith("win") else text
+
+
+@pytest.mark.qreader
+def test_img_qr_reader_from_multiple_files(capsys: pytest.CaptureFixture[str]) -> None:
+    # Act
+    extract_otp_secrets.main(['-n', 'tests/data/test_googleauth_export.png', 'tests/data/text_masquerading_as_image.jpeg'])
+
+    # Assert
+    captured = capsys.readouterr()
+
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
+    assert captured.err == EXPECTED_STDERR_BAD_IMAGE
+
+
+@pytest.mark.qreader
 def test_img_qr_reader_by_parameter(capsys: pytest.CaptureFixture[str], qr_mode: str) -> None:
     # Act
     start_s = time.process_time()
@@ -1041,24 +1048,7 @@ def test_img_qr_reader_from_stdin(capsys: pytest.CaptureFixture[str], monkeypatc
     # Assert
     captured = capsys.readouterr()
 
-    expected_stdout = '''Name:    Test1:test1@example1.com
-Secret:  JBSWY3DPEHPK3PXP
-Issuer:  Test1
-Type:    totp
-
-Name:    Test2:test2@example2.com
-Secret:  JBSWY3DPEHPK3PXQ
-Issuer:  Test2
-Type:    totp
-
-Name:    Test3:test3@example3.com
-Secret:  JBSWY3DPEHPK3PXR
-Issuer:  Test3
-Type:    totp
-
-'''
-
-    assert captured.out == expected_stdout
+    assert captured.out == EXPECTED_STDOUT_FROM_EXAMPLE_EXPORT_PNG
     assert captured.err == ''
 
 
@@ -1143,19 +1133,9 @@ def test_non_image_file(capsys: pytest.CaptureFixture[str]) -> None:
 
     # Assert
     captured = capsys.readouterr()
-    expected_stderr = '''
-WARN: input is not a otpauth-migration:// url
-source: tests/data/text_masquerading_as_image.jpeg
-input: This is just a text file masquerading as an image file.
-Maybe a wrong file was given
 
-ERROR: could not parse query parameter in input url
-source: tests/data/text_masquerading_as_image.jpeg
-url: This is just a text file masquerading as an image file.
-'''
-
-    assert captured.err == expected_stderr
     assert captured.out == ''
+    assert captured.err == EXPECTED_STDERR_BAD_IMAGE
 
 
 def test_next_valid_qr_mode() -> None:
@@ -1208,4 +1188,48 @@ Secret:  JBSWY3DPEHPK3PXR
 Issuer:  Test3
 Type:    totp
 
+'''
+
+EXPECTED_STDERR_OTP_URL_WRONG = '''
+WARN: input is not a otpauth-migration:// url
+source: tests/data/test_export_wrong_content.txt
+input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+Maybe a wrong file was given
+
+ERROR: could not parse query parameter in input url
+source: tests/data/test_export_wrong_content.txt
+url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+'''
+
+EXPECTED_STDERR_COLORED_OTP_URL_WRONG = f'''{colorama.Fore.RED}
+WARN: input is not a otpauth-migration:// url
+source: tests/data/test_export_wrong_content.txt
+input: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+Maybe a wrong file was given{colorama.Fore.RESET}
+{colorama.Fore.RED}
+ERROR: could not parse query parameter in input url
+source: tests/data/test_export_wrong_content.txt
+url: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.{colorama.Fore.RESET}
+'''
+
+EXPECTED_STDERR_NO_OTP_URL = '''
+WARN: input is not a otpauth-migration:// url
+source: tests/data/qr_but_without_otp.png
+input: NOT A otpauth-migration:// URL
+Maybe a wrong file was given
+
+ERROR: could not parse query parameter in input url
+source: tests/data/qr_but_without_otp.png
+url: NOT A otpauth-migration:// URL
+'''
+
+EXPECTED_STDERR_BAD_IMAGE = '''
+WARN: input is not a otpauth-migration:// url
+source: tests/data/text_masquerading_as_image.jpeg
+input: This is just a text file masquerading as an image file.
+Maybe a wrong file was given
+
+ERROR: could not parse query parameter in input url
+source: tests/data/text_masquerading_as_image.jpeg
+url: This is just a text file masquerading as an image file.
 '''

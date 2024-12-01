@@ -36,6 +36,7 @@ import argparse
 import base64
 import csv
 import fileinput
+import glob
 import json
 import os
 import platform
@@ -527,14 +528,20 @@ def extract_otps_from_files(args: Args) -> Otps:
 
     files_count = urls_count = otps_count = 0
     if verbose: print(f"Input files: {args.infile}")
-    for infile in args.infile:
-        if verbose >= LogLevel.MORE_VERBOSE: log_verbose(f"Processing infile {infile}")
-        files_count += 1
-        for line in get_otp_urls_from_file(infile, args):
-            if verbose >= LogLevel.MORE_VERBOSE: log_verbose(line)
-            if line.startswith('#') or line == '': continue
-            urls_count += 1
-            otps_count += extract_otp_from_otp_url(line, otps, urls_count, infile, args)
+    for infile_raw in args.infile:
+        expanded_infiles = glob.glob(infile_raw)
+        if not expanded_infiles:
+            expanded_infiles = [infile_raw]
+            if verbose >= LogLevel.DEBUG: log_debug(f"Could not expand input files, fallback to infile")
+        if verbose >= LogLevel.DEBUG: log_debug(f"Expanded input files: {expanded_infiles}")
+        for infile in expanded_infiles:
+            if verbose >= LogLevel.MORE_VERBOSE: log_verbose(f"Processing infile {infile}")
+            files_count += 1
+            for line in get_otp_urls_from_file(infile, args):
+                if verbose >= LogLevel.MORE_VERBOSE: log_verbose(line)
+                if line.startswith('#') or line == '': continue
+                urls_count += 1
+                otps_count += extract_otp_from_otp_url(line, otps, urls_count, infile, args)
     if verbose: print(f"Extracted {otps_count} otp{'s'[:otps_count != 1]} from {urls_count} otp url{'s'[:urls_count != 1]} by reading {files_count} infile{'s'[:files_count != 1]}")
     return otps
 
