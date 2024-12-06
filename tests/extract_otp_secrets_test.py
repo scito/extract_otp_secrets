@@ -988,7 +988,7 @@ def test_img_qr_reader_from_wildcard(capsys: pytest.CaptureFixture[str]) -> None
     assert normalize_testfile_path(captured.err) == EXPECTED_STDERR_NO_OTP_URL
 
 
-def normalize_testfile_path(text: str):
+def normalize_testfile_path(text: str) -> str:
     return text.replace('tests/data\\', 'tests/data/') if sys.platform.startswith("win") else text
 
 
