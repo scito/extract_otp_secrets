@@ -11,7 +11,7 @@ pillow = "*"
 pyzbar = "*"
 protobuf = "*"
 qrcode = "*"
-qreader = "<2.0.0"
+qreader = "<4.0.0"
 
 [dev-packages]
 build = "*"
