@@ -368,7 +368,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
                 if QRMode.CV2:
                     otp_url, raw_pts, _ = cv2_qr.detectAndDecode(img)
                 else:
-                    otp_url, raw_pts = cv2_qr_wechat.detectAndDecode(img)  # type: ignore  # use proper cv2 types
+                    otp_url, raw_pts = cv2_qr_wechat.detectAndDecode(img)
                 if raw_pts is not None:
                     if otp_url:
                         new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
@@ -532,7 +532,7 @@ def extract_otps_from_files(args: Args) -> Otps:
         expanded_infiles = glob.glob(infile_raw)
         if not expanded_infiles:
             expanded_infiles = [infile_raw]
-            if verbose >= LogLevel.DEBUG: log_debug(f"Could not expand input files, fallback to infile")
+            if verbose >= LogLevel.DEBUG: log_debug(f"Could not expand input files, fallback to infile {infile_raw}")
         if verbose >= LogLevel.DEBUG: log_debug(f"Expanded input files: {expanded_infiles}")
         for infile in expanded_infiles:
             if verbose >= LogLevel.MORE_VERBOSE: log_verbose(f"Processing infile {infile}")
