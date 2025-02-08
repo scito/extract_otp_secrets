@@ -779,6 +779,11 @@ FileNotFoundError: Could not find module 'libiconv.dll' (or one of its dependenc
 * [Android OTP Extractor](https://github.com/puddly/android-otp-extractor) can extract your tokens from popular Android OTP apps and export them in a standard format or just display them as QR codes for easy importing. [Requires a _rooted_ Android phone.]
 * [Google Authenticator secret extractor](https://github.com/krissrex/google-authenticator-exporter) is similar project written in JavaScript. It also extracts otp secrets from Google Authenticator.
 
+## Third party documentation
+
+* [TOTP Secret Extraction from QR codes (medium.com)](https://cavalloj.medium.com/totp-secret-extraction-from-qr-codes-ee097b4c687f)
+* [Google Authenticator: OTP-Secrets auslesen (stadt-bremerhaven.de)](https://stadt-bremerhaven.de/google-authenticator-otp-secrets-auslesen/)
+
 ***
 
 # #StandWithUkraine 🇺🇦

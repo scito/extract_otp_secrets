@@ -49,7 +49,7 @@ from typing import (Any, Final, List, Optional, Sequence, TextIO, Tuple,
                     TypedDict, Union)
 
 import colorama
-from qrcode import QRCode  # type: ignore
+from qrcode import QRCode
 
 import protobuf_generated_python.google_auth_pb2 as pb
 
@@ -704,7 +704,7 @@ def save_qr_image_file(otp_url: OtpUrl, name: str) -> None:
     qr.add_data(otp_url)
     img = qr.make_image(fill_color='black', back_color='white')
     if verbose: print(f"Saving to {name}")
-    img.save(name)
+    img.save(name)  # type: ignore
 
 
 def print_qr(otp_url: str, out: Optional[TextIO] = None) -> None:
