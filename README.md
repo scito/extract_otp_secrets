@@ -544,19 +544,19 @@ Prebuilt docker images are available for amd64 and arm64 architectures on [Docke
 Extracting from an QR image file:
 
 ```
-curl -s https://raw.githubusercontent.com/scito/extract_otp_secrets/master/example_export.png | docker run --network none --pull always -i --rm -v "$(pwd)":/files:ro scit0/extract_otp_secrets =
+curl -s https://raw.githubusercontent.com/scito/extract_otp_secrets/master/example_export.png | docker run --network none --pull always -i --rm -v "$(pwd)":/files:ro docker.io/scit0/extract_otp_secrets =
 ```
 
 Capturing from camera in GUI window (X Window system required on host):
 
 ```
-docker run --network none --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro scit0/extract_otp_secrets
+docker run --network none --pull always --rm -v "$(pwd)":/files:ro -i --device="/dev/video0:/dev/video0" --env="DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix:ro docker.io/scit0/extract_otp_secrets
 ```
 
 If only text processing is required, there is a small Image based on Alpine Linux:
 
 ```
-curl -s https://raw.githubusercontent.com/scito/extract_otp_secrets/master/example_export.txt | docker run --network none --pull always -i --rm -v "$(pwd)":/files:ro scit0/extract_otp_secrets:latest-only-txt -
+curl -s https://raw.githubusercontent.com/scito/extract_otp_secrets/master/example_export.txt | docker run --network none --pull always -i --rm -v "$(pwd)":/files:ro docker.io/scit0/extract_otp_secrets:latest-only-txt -
 ```
 
 Docker image from GitHub:
@@ -568,11 +568,11 @@ curl -s https://raw.githubusercontent.com/scito/extract_otp_secrets/master/examp
 
 ### More docker examples
 
-    docker run --network none --pull always --rm -v "$(pwd)":/files:ro scit0/extract_otp_secrets example_export.png
+    docker run --network none --pull always --rm -v "$(pwd)":/files:ro docker.io/scit0/extract_otp_secrets example_export.png
 
-    docker run --network none --pull always --rm -i -v "$(pwd)":/files:ro scit0/extract_otp_secrets_only_txt - < example_export.txt
+    docker run --network none --pull always --rm -i -v "$(pwd)":/files:ro docker.io/scit0/extract_otp_secrets:latest-only-txt - < example_export.txt
 
-    cat example_export.txt | docker run --network none --pull always --rm -i -v "$(pwd)":/files:ro scit0/extract_otp_secrets:latest_only_txt - -c - > example_out.csv
+    cat example_export.txt | docker run --network none --pull always --rm -i -v "$(pwd)":/files:ro docker.io/scit0/extract_otp_secrets:latest-only-txt - -c - > example_out.csv
 
 ## Tests
 

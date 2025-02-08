@@ -173,7 +173,7 @@ jobs:
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
           docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
       - name: Smoke tests linux/amd64
         if: matrix.PLATFORM == 'linux/amd64'
@@ -191,7 +191,7 @@ jobs:
       - name: Smoke tests linux/arm64
         if: matrix.PLATFORM == 'linux/arm64'
         run: |
-          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
+          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
       - name: Load Release URL File from release job
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v4
