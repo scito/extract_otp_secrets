@@ -87,6 +87,7 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 - [Problems and Troubleshooting](#problems-and-troubleshooting)
   - [Windows error message](#windows-error-message)
 - [Related projects](#related-projects)
+- [Third party documentation](#third-party-documentation)
 </details>
 
 ## Download and run binary executable (🆕 since v2.1)

@@ -53,5 +53,6 @@ Generate from file: README.md
 - [Problems and Troubleshooting](#problems-and-troubleshooting)
   - [Windows error message](#windows-error-message)
 - [Related projects](#related-projects)
+- [Third party documentation](#third-party-documentation)
 
 Table of contents generated.
