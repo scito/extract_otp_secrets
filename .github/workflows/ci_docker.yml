@@ -76,7 +76,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: "Build image (Bookworm/Debian 10) and push to Docker Hub and GitHub Container Registry"
+      - name: "Build image (Bookworm/Debian 12) and push to Docker Hub and GitHub Container Registry"
         id: docker_build_qr_reader_latest
         uses: docker/build-push-action@v5
         with:
