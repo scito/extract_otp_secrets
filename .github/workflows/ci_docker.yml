@@ -27,7 +27,15 @@ jobs:
   build-and-push-docker-debian-image:
     name: Build Docker Bookworm image and push to repositories
     # run only when code is compiling and tests are passing
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - DOCKER_PLATFORM: linux/amd64
+            platform: ubuntu-latest
+          - DOCKER_PLATFORM: linux/arm64
+            platform: ubuntu-24.04-arm
+
+    runs-on: ${{ matrix.platform }}
 
     # steps to perform in job
     steps:
@@ -75,7 +83,7 @@ jobs:
         id: docker_build_qr_reader_latest
         uses: docker/build-push-action@v5
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.DOCKER_PLATFORM }}
           # relative path to the place where source code with Dockerfile is located
           # TODO file:, move to docker/
           context: .
@@ -108,7 +116,15 @@ jobs:
   build-and-push-docker-alpine-image:
     name: Build Docker Alpine image and push to repositories
     # run only when code is compiling and tests are passing
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - DOCKER_PLATFORM: linux/amd64
+            platform: ubuntu-latest
+          - DOCKER_PLATFORM: linux/arm64
+            platform: ubuntu-24.04-arm
+
+    runs-on: ${{ matrix.platform }}
 
     # steps to perform in job
     steps:
@@ -152,7 +168,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           # relative path to the place where source code with Dockerfile is located
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.DOCKER_PLATFORM }}
           context: .
           file: docker/Dockerfile_only_txt
           # builder: ${{ steps.buildx.outputs.name }}
@@ -184,7 +200,15 @@ jobs:
   build-and-push-docker-bullseye-image:
     name: Build Docker Bullseye image (for PyInstsaller) and push to repositories
     # run only when code is compiling and tests are passing
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - DOCKER_PLATFORM: linux/amd64
+            platform: ubuntu-latest
+          - DOCKER_PLATFORM: linux/arm64
+            platform: ubuntu-24.04-arm
+
+    runs-on: ${{ matrix.platform }}
 
     # steps to perform in job
     steps:
@@ -228,7 +252,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.DOCKER_PLATFORM }}
           # relative path to the place where source code with Dockerfile is located
           context: .
           file: docker/Dockerfile
