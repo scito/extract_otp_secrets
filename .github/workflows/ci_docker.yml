@@ -33,9 +33,9 @@ jobs:
           - DOCKER_PLATFORM: linux/amd64
             platform: ubuntu-latest
             DIGEST_ARTIFACT_NAME: digests_debian_x86_64
-          - DOCKER_PLATFORM: linux/arm64
-            platform: ubuntu-24.04-arm
-            DIGEST_ARTIFACT_NAME: digests_debian_arm64
+          # - DOCKER_PLATFORM: linux/arm64
+          #   platform: ubuntu-24.04-arm
+          #   DIGEST_ARTIFACT_NAME: digests_debian_arm64
 
     runs-on: ${{ matrix.platform }}
 
@@ -120,9 +120,9 @@ jobs:
           - DOCKER_PLATFORM: linux/amd64
             platform: ubuntu-latest
             DIGEST_ARTIFACT_NAME: digests_alpine_x86_64
-          - DOCKER_PLATFORM: linux/arm64
-            platform: ubuntu-24.04-arm
-            DIGEST_ARTIFACT_NAME: digests_alpine_arm64
+          # - DOCKER_PLATFORM: linux/arm64
+          #   platform: ubuntu-24.04-arm
+          #   DIGEST_ARTIFACT_NAME: digests_alpine_arm64
 
     runs-on: ${{ matrix.platform }}
 
@@ -206,9 +206,9 @@ jobs:
           - DOCKER_PLATFORM: linux/amd64
             platform: ubuntu-latest
             DIGEST_ARTIFACT_NAME: digests_bullseye_x86_64
-          - DOCKER_PLATFORM: linux/arm64
-            platform: ubuntu-24.04-arm
-            DIGEST_ARTIFACT_NAME: digests_bullseye_arm64
+          # - DOCKER_PLATFORM: linux/arm64
+          #   platform: ubuntu-24.04-arm
+          #   DIGEST_ARTIFACT_NAME: digests_bullseye_arm64
 
     runs-on: ${{ matrix.platform }}
 
