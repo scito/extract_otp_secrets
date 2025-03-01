@@ -32,8 +32,10 @@ jobs:
         include:
           - DOCKER_PLATFORM: linux/amd64
             platform: ubuntu-latest
+            DIGEST_ARTIFACT_NAME: digests_debian_x86_64
           - DOCKER_PLATFORM: linux/arm64
             platform: ubuntu-24.04-arm
+            DIGEST_ARTIFACT_NAME: digests_debian_arm64
 
     runs-on: ${{ matrix.platform }}
 
@@ -110,7 +112,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
-          name: debian_digests
+          name: ${{ matrix.DIGEST_ARTIFACT_NAME }}
           path: digests.txt
 
   build-and-push-docker-alpine-image:
@@ -121,8 +123,10 @@ jobs:
         include:
           - DOCKER_PLATFORM: linux/amd64
             platform: ubuntu-latest
+            DIGEST_ARTIFACT_NAME: digests_alpine_x86_64
           - DOCKER_PLATFORM: linux/arm64
             platform: ubuntu-24.04-arm
+            DIGEST_ARTIFACT_NAME: digests_alpine_arm64
 
     runs-on: ${{ matrix.platform }}
 
@@ -194,7 +198,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
-          name: alpine_digests
+          name: ${{ matrix.DIGEST_ARTIFACT_NAME }}
           path: digests.txt
 
   build-and-push-docker-bullseye-image:
@@ -205,8 +209,10 @@ jobs:
         include:
           - DOCKER_PLATFORM: linux/amd64
             platform: ubuntu-latest
+            DIGEST_ARTIFACT_NAME: digests_bullseye_x86_64
           - DOCKER_PLATFORM: linux/arm64
             platform: ubuntu-24.04-arm
+            DIGEST_ARTIFACT_NAME: digests_bullseye_arm64
 
     runs-on: ${{ matrix.platform }}
 
@@ -275,5 +281,5 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
-          name: bullseye_digests
+          name: ${{ matrix.DIGEST_ARTIFACT_NAME }}
           path: digests.txt
