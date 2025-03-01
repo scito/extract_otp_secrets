@@ -239,6 +239,7 @@ jobs:
           pull: true
           tags: |
             scit0/extract_otp_secrets:bullseye
+            ghcr.io/scito/extract_otp_secrets:bullseye
           push: ${{ github.secret_source == 'Actions' }}
 
       - name: Image digest
