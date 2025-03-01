@@ -96,7 +96,7 @@ jobs:
             ghcr.io/scito/extract_otp_secrets:latest-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
           # build on feature branches, push only on master branch
-          push: true # TODO FIX ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
+          push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
 
       - name: Image digest
         # TODO upload digests to assets
@@ -324,7 +324,7 @@ jobs:
 
       - name: "Build image from Bullseye (Debian 11) and push to GitHub Container Registry"
         id: docker_build_bullseye
-        # TODO FIX if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
           platforms: linux/${{ matrix.DOCKER_ARCH }}
@@ -339,7 +339,7 @@ jobs:
           tags: |
             docker.io/scit0/extract_otp_secrets:bullseye-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:bullseye-${{ matrix.PLATFORM_ARCH }}
-          push: true # TODO FIX ${{ github.secret_source == 'Actions' }}
+          push: ${{ github.secret_source == 'Actions' }}
 
       - name: Image digest
         # TODO upload digests to assets
