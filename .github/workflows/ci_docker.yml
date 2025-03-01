@@ -85,7 +85,6 @@ jobs:
         id: docker_build_qr_reader_latest
         uses: docker/build-push-action@v5
         with:
-          platforms: ${{ matrix.DOCKER_PLATFORM }}
           # relative path to the place where source code with Dockerfile is located
           # TODO file:, move to docker/
           context: .
@@ -172,7 +171,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           # relative path to the place where source code with Dockerfile is located
-          platforms: ${{ matrix.DOCKER_PLATFORM }}
           context: .
           file: docker/Dockerfile_only_txt
           # builder: ${{ steps.buildx.outputs.name }}
@@ -258,7 +256,6 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
-          platforms: ${{ matrix.DOCKER_PLATFORM }}
           # relative path to the place where source code with Dockerfile is located
           context: .
           file: docker/Dockerfile
