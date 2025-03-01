@@ -81,7 +81,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: "Build image and push to Docker Hub and GitHub Container Registry"
+      - name: "Build image (Bookworm/Debian 10) and push to Docker Hub and GitHub Container Registry"
         id: docker_build_qr_reader_latest
         uses: docker/build-push-action@v5
         with:
@@ -100,7 +100,7 @@ jobs:
             ghcr.io/scito/extract_otp_secrets:latest
             ghcr.io/scito/extract_otp_secrets:bookworm
           # build on feature branches, push only on master branch
-          push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
+          push: true # TODO FIX ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
 
       - name: Image digest
         # TODO upload digests to assets
@@ -182,7 +182,7 @@ jobs:
             ghcr.io/scito/extract_otp_secrets:only-txt
             ghcr.io/scito/extract_otp_secrets:alpine
           # build on feature branches, push only on master branch
-          push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
+          push: true # ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
           build-args: |
             RUN_TESTS=true
 
@@ -251,9 +251,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: "Build image from Bullseye and push to GitHub Container Registry"
+      - name: "Build image from Bullseye (Debian 11) and push to GitHub Container Registry"
         id: docker_build_bullseye
-        if: github.ref == 'refs/heads/master'
+        # TODO FIX if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
           # relative path to the place where source code with Dockerfile is located
@@ -267,7 +267,7 @@ jobs:
           tags: |
             scit0/extract_otp_secrets:bullseye
             ghcr.io/scito/extract_otp_secrets:bullseye
-          push: ${{ github.secret_source == 'Actions' }}
+          push: true # TODO FIX ${{ github.secret_source == 'Actions' }}
 
       - name: Image digest
         # TODO upload digests to assets
