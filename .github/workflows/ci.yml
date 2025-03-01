@@ -30,7 +30,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        # TODO replace setup-python@main with setup-python@v5 if https://github.com/actions/setup-python/pull/1011 is released (>=v5.5)
+        uses: actions/setup-python@main
         with:
           python-version: ${{ matrix.python-version }}
           check-latest: ${{ github.event_name == 'schedule' }}
