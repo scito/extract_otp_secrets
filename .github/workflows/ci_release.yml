@@ -106,19 +106,22 @@ jobs:
           path: release_id.txt
 
   build-linux-executable-in-docker:
-    name: Build ${{ matrix.PLATFORM }} release in docker container
+    name: Build ${{ matrix.platform }} release in docker container
     # run only when code is compiling and tests are passing
-    runs-on: ubuntu-latest
     needs: create-release
     strategy:
       matrix:
         include:
-          - PLATFORM: linux/amd64
+          - DOCKER_PLATFORM: linux/amd64
+            platform: ubuntu-latest
             EXE: extract_otp_secrets_linux_x86_64
             ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_x86_64
-          - PLATFORM: linux/arm64
+          - DOCKER_PLATFORM: linux/arm64
+            platform: ubuntu-24.04-arm
             EXE: extract_otp_secrets_linux_arm64
             ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_arm64
+
+    runs-on: ${{ matrix.platform }}
 
     # steps to perform in job
     steps:
@@ -145,7 +148,7 @@ jobs:
         # TODO remove workaround when fixed
         with:
           driver-opts: |
-            image=moby/buildkit:v0.10.6
+            image=moby/buildkit:latest
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -172,11 +175,10 @@ jobs:
         # https://hub.docker.com/r/multiarch/qemu-user-static/
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && pyinstaller -y --add-data /usr/local/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
       - name: Smoke tests linux/amd64
-        if: matrix.PLATFORM == 'linux/amd64'
+        if: matrix.DOCKER_PLATFORM == 'linux/amd64'
         run: |
           dist/${{ matrix.EXE }} -V
           dist/${{ matrix.EXE }} -h
@@ -189,9 +191,9 @@ jobs:
           dist/${{ matrix.EXE }} --qr CV2 example_export.png
           dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png
       - name: Smoke tests linux/arm64
-        if: matrix.PLATFORM == 'linux/arm64'
+        if: matrix.DOCKER_PLATFORM == 'linux/arm64'
         run: |
-          docker run --platform ${{ matrix.PLATFORM }} --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
       - name: Load Release URL File from release job
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v4
@@ -247,19 +249,39 @@ jobs:
             UPLOAD: false
             CMD_BUILD: |
                 pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_ubuntu src/extract_otp_secrets.py
-          # TODO temp disable macos releases to due
-          # FileNotFoundError: Icon input file /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/PyInstaller/bootloader/images/icon-windowed.icns not found
-          # - os: macos-12
+          - os: ubuntu-24.04-arm
+            TARGET: linux
+            EXE: extract_otp_secrets_ubuntu_arm64
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_arm64_ubuntu_latest
+            ASSET_MIME: application/x-executable
+            UPLOAD: false
+            CMD_BUILD: |
+                pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_ubuntu_arm64 src/extract_otp_secrets.py
+          - os: macos-13
+            TARGET: macos
+            # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
+            EXE: extract_otp_secrets
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64
+            DMG: extract_otp_secrets.dmg
+            ASSET_NAME_DMG: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64.dmg
+            ASSET_MIME: application/octet-stream
+            UPLOAD: true
+            CMD_BUILD: |
+              VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2025' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
+              pyinstaller -y extract_otp_secrets_macos.spec
+              installer/build_dmg.sh
+          # Disable WARN: Cannot import pyzbar module. This problem is probably due to the missing zbar shared library.
+          # - os: macos-14
           #   TARGET: macos
           #   # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
           #   EXE: extract_otp_secrets
-          #   ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64
+          #   ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_arm64
           #   DMG: extract_otp_secrets.dmg
-          #   ASSET_NAME_DMG: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64.dmg
+          #   ASSET_NAME_DMG: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_arm64.dmg
           #   ASSET_MIME: application/octet-stream
           #   UPLOAD: true
           #   CMD_BUILD: |
-          #     VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2023' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
+          #     VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2025' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
           #     pyinstaller -y extract_otp_secrets_macos.spec
           #     installer/build_dmg.sh
     steps:
@@ -296,7 +318,7 @@ jobs:
         shell: bash
         run: |
               mkdir -p build/
-              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n "s/^([0-9]+).*/\1/p") VERSION_BUILD=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n -e"s/^[0-9]+.+/99/p")$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2023' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt
+              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n "s/^([0-9]+).*/\1/p") VERSION_BUILD=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n -e"s/^[0-9]+.+/99/p")$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2025' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt
       - name: Build with pyinstaller for ${{ matrix.TARGET }}
         env:
           # Reproducible build: https://pyinstaller.org/en/stable/advanced-topics.html#creating-a-reproducible-build
