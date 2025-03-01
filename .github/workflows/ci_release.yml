@@ -247,21 +247,40 @@ jobs:
             UPLOAD: false
             CMD_BUILD: |
                 pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_ubuntu src/extract_otp_secrets.py
-          # TODO temp disable macos releases to due
-          # FileNotFoundError: Icon input file /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/PyInstaller/bootloader/images/icon-windowed.icns not found
-          # - os: macos-12
-          #   TARGET: macos
-          #   # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
-          #   EXE: extract_otp_secrets
-          #   ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64
-          #   DMG: extract_otp_secrets.dmg
-          #   ASSET_NAME_DMG: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64.dmg
-          #   ASSET_MIME: application/octet-stream
-          #   UPLOAD: true
-          #   CMD_BUILD: |
-          #     VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2023' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
-          #     pyinstaller -y extract_otp_secrets_macos.spec
-          #     installer/build_dmg.sh
+          - os: ubuntu-24.04-arm
+            TARGET: linux
+            EXE: extract_otp_secrets_ubuntu
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_linux_arm64_ubuntu_latest
+            ASSET_MIME: application/x-executable
+            UPLOAD: false
+            CMD_BUILD: |
+                pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile --name extract_otp_secrets_ubuntu src/extract_otp_secrets.py
+          - os: macos-13
+            TARGET: macos
+            # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
+            EXE: extract_otp_secrets
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64
+            DMG: extract_otp_secrets.dmg
+            ASSET_NAME_DMG: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_x86_64.dmg
+            ASSET_MIME: application/octet-stream
+            UPLOAD: true
+            CMD_BUILD: |
+              VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2025' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
+              pyinstaller -y extract_otp_secrets_macos.spec
+              installer/build_dmg.sh
+          - os: macos-latest
+            TARGET: macos
+            # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
+            EXE: extract_otp_secrets
+            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_arm64
+            DMG: extract_otp_secrets.dmg
+            ASSET_NAME_DMG: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_arm64.dmg
+            ASSET_MIME: application/octet-stream
+            UPLOAD: true
+            CMD_BUILD: |
+              VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2025' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
+              pyinstaller -y extract_otp_secrets_macos.spec
+              installer/build_dmg.sh
     steps:
       - name: Output path
         if: runner.os == 'Windows'
@@ -296,7 +315,7 @@ jobs:
         shell: bash
         run: |
               mkdir -p build/
-              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n "s/^([0-9]+).*/\1/p") VERSION_BUILD=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n -e"s/^[0-9]+.+/99/p")$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2023' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt
+              VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n "s/^([0-9]+).*/\1/p") VERSION_BUILD=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n -e"s/^[0-9]+.+/99/p")$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2025' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt
       - name: Build with pyinstaller for ${{ matrix.TARGET }}
         env:
           # Reproducible build: https://pyinstaller.org/en/stable/advanced-topics.html#creating-a-reproducible-build
