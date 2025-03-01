@@ -28,14 +28,17 @@ jobs:
             platform: "windows-latest"
           - python-version: "pypy3.11"
             platform: "windows-latest"
+          - python-version: "pypy3.10"
+            platform: "ubuntu-24.04-arm"
+          - python-version: "pypy3.11"
+            platform: "ubuntu-24.04-arm"
 
     runs-on: ${{ matrix.platform }}
 
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        # TODO replace setup-python@main with setup-python@v5 if https://github.com/actions/setup-python/pull/1011 is released (>=v5.5)
-        uses: actions/setup-python@main
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           check-latest: ${{ github.event_name == 'schedule' }}
