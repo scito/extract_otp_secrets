@@ -32,6 +32,10 @@ jobs:
             platform: "ubuntu-24.04-arm"
           - python-version: "pypy3.11"
             platform: "ubuntu-24.04-arm"
+          - python-version: "pypy3.10"
+            platform: "macos-latest"
+          - python-version: "pypy3.11"
+            platform: "macos-latest"
 
     runs-on: ${{ matrix.platform }}
 
