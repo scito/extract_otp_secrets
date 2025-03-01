@@ -16,7 +16,8 @@ COPY requirements*.txt src/ run_pytest.sh pytest.ini tests/ example_*.txt exampl
 
 ARG RUN_TESTS=true
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN uname -a \
+    && apt-get update && apt-get install -y --no-install-recommends \
         libgl1 \
         libglib2.0-0 \
         libsm6 \
@@ -31,6 +32,6 @@ WORKDIR /files
 
 ENTRYPOINT ["python", "/extract/extract_otp_secrets.py"]
 
-LABEL org.opencontainers.image.source https://github.com/scito/extract_otp_secrets
-LABEL org.opencontainers.image.license GPL-3.0+
+LABEL org.opencontainers.image.source=https://github.com/scito/extract_otp_secrets
+LABEL org.opencontainers.image.license=GPL-3.0+
 LABEL maintainer="Scito https://scito.ch, https://github.com/scito"
