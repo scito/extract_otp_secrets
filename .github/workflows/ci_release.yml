@@ -270,19 +270,20 @@ jobs:
               VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2025' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
               pyinstaller -y extract_otp_secrets_macos.spec
               installer/build_dmg.sh
-          - os: macos-latest
-            TARGET: macos
-            # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
-            EXE: extract_otp_secrets
-            ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_arm64
-            DMG: extract_otp_secrets.dmg
-            ASSET_NAME_DMG: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_arm64.dmg
-            ASSET_MIME: application/octet-stream
-            UPLOAD: true
-            CMD_BUILD: |
-              VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2025' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
-              pyinstaller -y extract_otp_secrets_macos.spec
-              installer/build_dmg.sh
+          # Disable WARN: Cannot import pyzbar module. This problem is probably due to the missing zbar shared library.
+          # - os: macos-14
+          #   TARGET: macos
+          #   # https://pyinstaller.org/en/stable/spec-files.html#spec-file-options-for-a-macos-bundle
+          #   EXE: extract_otp_secrets
+          #   ASSET_NAME: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_arm64
+          #   DMG: extract_otp_secrets.dmg
+          #   ASSET_NAME_DMG: extract_otp_secrets${{ needs.create-release.outputs.inline_version }}_macos_arm64.dmg
+          #   ASSET_MIME: application/octet-stream
+          #   UPLOAD: true
+          #   CMD_BUILD: |
+          #     VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2025' envsubst < installer/extract_otp_secrets_macos_template.spec > extract_otp_secrets_macos.spec
+          #     pyinstaller -y extract_otp_secrets_macos.spec
+          #     installer/build_dmg.sh
     steps:
       - name: Output path
         if: runner.os == 'Windows'
