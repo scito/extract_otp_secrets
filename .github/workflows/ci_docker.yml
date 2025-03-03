@@ -112,6 +112,7 @@ jobs:
 
   create-multiarch-debian-manifests:
     name: Create multiarch manifests for Debian image
+    if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
     runs-on: ubuntu-latest
     needs:
       - build-and-push-docker-debian-image
@@ -132,6 +133,7 @@ jobs:
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
       - name: Create multiarch manifests
+        if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
         shell: bash
         run: |
           for tag in \
@@ -234,6 +236,7 @@ jobs:
 
   create-multiarch-alpine-manifests:
     name: Create multiarch manifests for Alpine image
+    if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
     runs-on: ubuntu-latest
     needs:
       - build-and-push-docker-alpine-image
@@ -257,6 +260,7 @@ jobs:
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
       - name: Create multiarch manifests
+        if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
         shell: bash
         run: |
           for tag in \
@@ -356,6 +360,7 @@ jobs:
   create-multiarch-bullseye-manifests:
     name: Create multiarch manifests for Bullseye image
     runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
     needs:
       - build-and-push-docker-bullseye-image
     steps:
@@ -374,7 +379,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: Create multiarch manifests
+      - name:
+        if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
         shell: bash
         run: |
           for tag in \
