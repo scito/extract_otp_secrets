@@ -392,3 +392,15 @@ jobs:
                 $tag-arm64
             done
 
+  container-images-clean-up:
+    name: Cleanup old container images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Container Packages
+        uses: actions/delete-package-versions@v5
+        if: ${{ github.secret_source == 'Actions'}}
+        with:
+          package-name: 'extract_otp_secrets'
+          package-type: 'container'
+          min-versions-to-keep: 1
+          delete-only-untagged-versions: 'true'
