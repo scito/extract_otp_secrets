@@ -95,6 +95,7 @@ jobs:
             docker.io/scit0/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:latest-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
+          provenance: true
           # build on feature branches, push only on master branch
           push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
 
@@ -216,6 +217,7 @@ jobs:
             docker.io/scit0/extract_otp_secrets:alpine-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:only-txt-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:alpine-${{ matrix.PLATFORM_ARCH }}
+          provenance: true
           # build on feature branches, push only on master branch
           push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
           build-args: |
@@ -343,6 +345,7 @@ jobs:
           tags: |
             docker.io/scit0/extract_otp_secrets:bullseye-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:bullseye-${{ matrix.PLATFORM_ARCH }}
+          provenance: true
           push: ${{ github.secret_source == 'Actions' }}
 
       - name: Image digest
