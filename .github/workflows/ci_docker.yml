@@ -78,7 +78,7 @@ jobs:
 
       - name: "Build image (Bookworm/Debian 12) and push to Docker Hub and GitHub Container Registry"
         id: docker_build_qr_reader_latest
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/${{ matrix.DOCKER_ARCH }}
           # relative path to the place where source code with Dockerfile is located
@@ -202,7 +202,7 @@ jobs:
 
       - name: "only_txt: Build image and push to Docker Hub and GitHub Container Registry"
         id: docker_build_only_txt
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/${{ matrix.DOCKER_ARCH }}
           # relative path to the place where source code with Dockerfile is located
@@ -329,7 +329,7 @@ jobs:
       - name: "Build image from Bullseye (Debian 11) and push to GitHub Container Registry"
         id: docker_build_bullseye
         if: github.ref == 'refs/heads/master'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/${{ matrix.DOCKER_ARCH }}
           # relative path to the place where source code with Dockerfile is located
