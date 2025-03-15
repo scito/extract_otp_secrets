@@ -217,7 +217,7 @@ jobs:
             ghcr.io/scito/extract_otp_secrets:only-txt-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:alpine-${{ matrix.PLATFORM_ARCH }}
           # build on feature branches, push only on master branch
-          push: true # ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
+          push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
           build-args: |
             RUN_TESTS=true
 
