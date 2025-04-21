@@ -78,7 +78,7 @@ jobs:
 
       - name: "Build image (Bookworm/Debian 12) and push to Docker Hub and GitHub Container Registry"
         id: docker_build_qr_reader_latest
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/${{ matrix.DOCKER_ARCH }}
           # relative path to the place where source code with Dockerfile is located
@@ -95,6 +95,8 @@ jobs:
             docker.io/scit0/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:latest-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
+          provenance: true
+          sbom: true
           # build on feature branches, push only on master branch
           push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
 
@@ -202,7 +204,7 @@ jobs:
 
       - name: "only_txt: Build image and push to Docker Hub and GitHub Container Registry"
         id: docker_build_only_txt
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/${{ matrix.DOCKER_ARCH }}
           # relative path to the place where source code with Dockerfile is located
@@ -216,8 +218,10 @@ jobs:
             docker.io/scit0/extract_otp_secrets:alpine-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:only-txt-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:alpine-${{ matrix.PLATFORM_ARCH }}
+          provenance: true
+          sbom: true
           # build on feature branches, push only on master branch
-          push: true # ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
+          push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
           build-args: |
             RUN_TESTS=true
 
@@ -329,7 +333,7 @@ jobs:
       - name: "Build image from Bullseye (Debian 11) and push to GitHub Container Registry"
         id: docker_build_bullseye
         if: github.ref == 'refs/heads/master'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/${{ matrix.DOCKER_ARCH }}
           # relative path to the place where source code with Dockerfile is located
@@ -343,6 +347,8 @@ jobs:
           tags: |
             docker.io/scit0/extract_otp_secrets:bullseye-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:bullseye-${{ matrix.PLATFORM_ARCH }}
+          provenance: true
+          sbom: true
           push: ${{ github.secret_source == 'Actions' }}
 
       - name: Image digest
@@ -392,3 +398,15 @@ jobs:
                 $tag-arm64
             done
 
+  container-images-clean-up:
+    name: Cleanup old container images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Container Packages
+        uses: actions/delete-package-versions@v5
+        if: ${{ github.secret_source == 'Actions'}}
+        with:
+          package-name: 'extract_otp_secrets'
+          package-type: 'container'
+          min-versions-to-keep: 1
+          delete-only-untagged-versions: 'true'
