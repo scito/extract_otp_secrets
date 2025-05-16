@@ -241,6 +241,15 @@
             ],
             "index": "pypi",
             "version": "==1.3.2"
+        },
+        "setuptools": {
+            "hashes": [
+                "sha256:ca5cc1069b85dc23070a6628e6bcecb3292acac802399c7f8edc0100619f9009",
+                "sha256:f6ffc5f0142b1bd8d0ca94ee91b30c0ca862ffd50826da1ea85258a06fd94552"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==80.7.1"
         }
     },
     "develop": {
