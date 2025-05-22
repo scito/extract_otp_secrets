@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-colorama = ">=0.4.6"
+colorama = ">0.4.5"
 opencv-contrib-python = "*"
 # for macOS: opencv-contrib-python = "<=4.7.0"
 pillow = "*"
