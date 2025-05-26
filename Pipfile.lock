@@ -546,12 +546,12 @@
         },
         "pytest-mock": {
             "hashes": [
-                "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f",
-                "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0"
+                "sha256:159e9edac4c451ce77a5cdb9fc5d1100708d2dd4ba3c3df572f14097351af80e",
+                "sha256:178aefcd11307d874b4cd3100344e7e2d888d9791a6a1d9bfe90fbc1b74fd1d0"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==3.14.0"
+            "version": "==3.14.1"
         },
         "setuptools": {
             "hashes": [
