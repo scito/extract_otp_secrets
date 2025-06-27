@@ -449,7 +449,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.csv',
                 filetypes=[('CSV', '*.csv'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_csv(file_name, otps)
     elif (key == ord('j') or key == ord('J')) and is_not_headless():
@@ -461,7 +461,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.json',
                 filetypes=[('JSON', '*.json'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_json(file_name, otps)
     elif (key == ord('k') or key == ord('K')) and is_not_headless():
@@ -473,7 +473,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.csv',
                 filetypes=[('CSV', '*.csv'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_keepass_csv(file_name, otps)
     elif (key == ord('t') or key == ord('T')) and is_not_headless():
@@ -485,7 +485,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.txt',
                 filetypes=[('Text', '*.txt'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_txt(file_name, otps, True)
     elif (key == ord('u') or key == ord('U')) and is_not_headless():
@@ -497,7 +497,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.txt',
                 filetypes=[('Text', '*.txt'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_urls(file_name, otps)
     elif key == 32:
@@ -837,7 +837,7 @@ def check_file_exists(filename: str) -> None:
 def has_no_otps_show_warning(otps: Otps) -> bool:
     if len(otps) == 0:
         tkinter.messagebox.showinfo(title="No data", message="There are no otp secrets to write")
-        tk_root.update()  # dispose dialog
+        tk_root.update()  # dispose dialog # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
     return len(otps) == 0
 
 
