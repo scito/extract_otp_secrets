@@ -380,14 +380,21 @@ def extract_otps_from_camera(args: Args) -> Otps:
             qr_mode = next_qr_mode(qr_mode)
             continue
 
-        cv2_print_text(img, f"Mode: {qr_mode.name} (Hit SPACE to change)", 0, TextPosition.LEFT, FONT_COLOR, 20)
-        cv2_print_text(img, "Press ESC to quit", 1, TextPosition.LEFT, FONT_COLOR, 17)
-        cv2_print_text(img, "Press c,j,k,t,u to save as csv/json/keepass/txt/urls file", 2, TextPosition.LEFT, FONT_COLOR, None)
+        try:
+            cv2_print_text(img, f"Mode: {qr_mode.name} (Hit SPACE to change)", 0, TextPosition.LEFT, FONT_COLOR, 20)
+            cv2_print_text(img, "Press ESC to quit", 1, TextPosition.LEFT, FONT_COLOR, 17)
+            cv2_print_text(img, "Press c,j,k,t,u to save as csv/json/keepass/txt/urls file", 2, TextPosition.LEFT, FONT_COLOR, None)
 
-        cv2_print_text(img, f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured", 0, TextPosition.RIGHT, FONT_COLOR)
-        cv2_print_text(img, f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted", 1, TextPosition.RIGHT, FONT_COLOR)
+            cv2_print_text(img, f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured", 0, TextPosition.RIGHT, FONT_COLOR)
+            cv2_print_text(img, f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted", 1, TextPosition.RIGHT, FONT_COLOR)
 
-        cv2.imshow(WINDOW_NAME, img)
+            cv2.imshow(WINDOW_NAME, img)
+        except cv2.error as e:
+            if e.code == cv2.Error.StsNullPtr:
+                # Window closed
+                break
+            else:
+                raise e
 
         quit, qr_mode = cv2_handle_pressed_keys(qr_mode, otps)
         if quit:
@@ -503,9 +510,6 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
     elif key == 32:
         qr_mode = next_valid_qr_mode(qr_mode, zbar_available)
         if verbose >= LogLevel.MORE_VERBOSE: print(f"QR reading mode: {qr_mode}")
-    if cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
-        # Window close clicked
-        quit = True
     return quit, qr_mode
 
 
