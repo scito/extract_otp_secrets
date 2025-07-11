@@ -390,6 +390,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
 
             cv2.imshow(WINDOW_NAME, img)
         except cv2.error as e:
+            # Workaround due to Gtk2/3 problem, see #444
             if e.code == cv2.Error.StsNullPtr:
                 # Window closed
                 break
@@ -510,6 +511,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
     elif key == 32:
         qr_mode = next_valid_qr_mode(qr_mode, zbar_available)
         if verbose >= LogLevel.MORE_VERBOSE: print(f"QR reading mode: {qr_mode}")
+    # Do not check for invisible window due to Gtk2/3 problem, see #444
     return quit, qr_mode
 
 
