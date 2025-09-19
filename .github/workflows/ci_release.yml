@@ -57,7 +57,7 @@ jobs:
       tag_message: ${{ steps.meta.outputs.tag_message }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set meta data
         id: meta
         # Writing to env with >> $GITHUB_ENV is an alternative
@@ -126,7 +126,7 @@ jobs:
     # steps to perform in job
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # avoid building if there are testing errors
       - name: Run smoke test
@@ -196,7 +196,7 @@ jobs:
           docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
       - name: Load Release URL File from release job
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: release_url
       - name: Display structure of files
@@ -291,12 +291,12 @@ jobs:
       - name: List Windir
         if: runner.os == 'Windows'
         run: ls "$($Env:WinDir)\system32"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set macos macos_python_path
         # TODO use variable for Python version
         run: echo "macos_python_path=/Library/Frameworks/Python.framework/Versions/3.13" >> $GITHUB_ENV
       - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.13
           check-latest: true
@@ -341,12 +341,12 @@ jobs:
           dist/${{ matrix.EXE }} - < example_export.txt
       - name: Load Release URL File from release job
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: release_url
       - name: Load Release Id File from release job
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: release_id
       - name: Display structure of files
@@ -389,7 +389,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Load Release Id File from release job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: release_id
       - name: Set meta data
