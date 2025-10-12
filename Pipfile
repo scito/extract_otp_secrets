@@ -24,9 +24,7 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-mock = "*"
-setuptools-git-versioning = "*"
 types-protobuf = "*"
-wheel = "*"
 
 [requires]
 python_version = "3.11"
