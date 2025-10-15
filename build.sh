@@ -381,7 +381,7 @@ if $build_local; then
 
             $PIPENV --version
 
-            cmd="$PIPENV --rm && $PIPENV update && $PIPENV install"
+            cmd="rm Pipfile.lock; $PIPENV --rm && $PIPENV install && $PIPENV update"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
