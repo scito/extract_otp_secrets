@@ -599,12 +599,12 @@
         },
         "pylint": {
             "hashes": [
-                "sha256:196b92a85204bb0c0a416a6bb324f6185e59ff1d687ee1d614bf0abf34a348e8",
-                "sha256:62da212808c0681e49ffb125f0a994c685d912cf19ae373075649ebb5870ec28"
+                "sha256:06db6a1fda3cedbd7aee58f09d241e40e5f14b382fd035ed97be320f11728a84",
+                "sha256:6077ac21d01b7361eae6ed0f38d9024c02732fdc635d9e154d4fe6063af8ac56"
             ],
             "index": "pypi",
             "markers": "python_full_version >= '3.10.0'",
-            "version": "==4.0.0"
+            "version": "==4.0.1"
         },
         "pyproject-hooks": {
             "hashes": [
