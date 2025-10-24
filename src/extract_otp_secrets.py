@@ -49,6 +49,7 @@ from typing import (Any, Final, List, Optional, Sequence, TextIO, Tuple,
                     TypedDict, Union)
 
 import colorama
+import numpy as np
 from qrcode import QRCode
 
 import protobuf_generated_python.google_auth_pb2 as pb
@@ -59,7 +60,6 @@ headless: bool = False
 
 
 try:
-    import numpy as np
     import cv2
     import cv2.typing
 
