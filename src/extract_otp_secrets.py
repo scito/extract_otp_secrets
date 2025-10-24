@@ -59,8 +59,8 @@ headless: bool = False
 
 
 try:
-    import cv2
     import numpy as np
+    import cv2
     import cv2.typing
 
     try:
