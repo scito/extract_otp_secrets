@@ -42,7 +42,7 @@ jobs:
     # steps to perform in job
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # avoid building if there are testing errors
       - name: Run smoke test
@@ -88,7 +88,7 @@ jobs:
           # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
           build-args: |
-            BASE_IMAGE=python:3.13-slim-bookworm
+            BASE_IMAGE=python:3.14-slim-trixie
           pull: true
           tags: |
             docker.io/scit0/extract_otp_secrets:latest-${{ matrix.PLATFORM_ARCH }}
@@ -168,7 +168,7 @@ jobs:
     # steps to perform in job
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # avoid building if there are testing errors
       - name: Run smoke test
@@ -296,7 +296,7 @@ jobs:
     # steps to perform in job
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # avoid building if there are testing errors
       - name: Run smoke test

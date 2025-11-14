@@ -173,8 +173,9 @@ done
 BIN="$HOME/bin"
 DOWNLOADS="$HOME/downloads"
 
-PYTHON="python3.11"
-PIP="pip3.11"
+# Set python und pip if not already set in environment
+PYTHON="${PYTHON:=python}"
+PIP="${PIP:=pip}"
 PIPENV="$PYTHON -m pipenv"
 FLAKE8="$PYTHON -m flake8"
 MYPY="$PYTHON -m mypy"
@@ -237,7 +238,7 @@ if $build_local; then
     echo -e "\nProtoc remote version $VERSION\n"
     echo -e "Protoc local version: $OLDVERSION\n"
 
-    if [ "$OLDVERSION" != "$VERSION" ] || ! $ignore_version_check; then
+    if [ "$OLDVERSION" != "$VERSION" ] && ! $ignore_version_check; then
         echo "Upgrade protoc from $OLDVERSION to $VERSION"
 
         NAME="protoc-$VERSION"
@@ -381,13 +382,46 @@ if $build_local; then
 
             $PIPENV --version
 
-            cmd="$PIPENV --rm && $PIPENV update && $PIPENV install"
+            cmd="rm Pipfile.lock || true; $PIPENV --rm || true"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$PIPENV install --dev"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$PIPENV update --dev"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
             $PIPENV run python --version
 
+            # pip -e install
+
+            cmd="$PIPENV run pip install -U -e ."
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
             cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+
+            cmd="$PIPENV run extract_otp_secrets example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$PIPENV run extract_otp_secrets - < example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            # Test (needs module)
+
+            cmd="$PIPENV run python src/extract_otp_secrets.py example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$PIPENV run python src/extract_otp_secrets.py - < example_export.txt"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
         fi
@@ -508,7 +542,7 @@ if $build_docker; then
         eval "$cmd"
 
         # Build extract_otp_secrets (Debian Bullseye)
-        cmd="docker build . -t extract_otp_secrets:bullseye -t extract_otp_secrets:bullseye-x86_64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.12-slim-bullseye"
+        cmd="docker build . -t extract_otp_secrets:bullseye -t extract_otp_secrets:bullseye-x86_64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.13-slim-bullseye"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -541,7 +575,7 @@ if $build_docker; then
         eval "$cmd"
 
         # Build extract_otp_secrets (Debian Bullseye)
-        cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:bullseye-arm64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.12-slim-bullseye"
+        cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:bullseye-arm64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.13-slim-bullseye"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi

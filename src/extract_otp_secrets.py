@@ -60,8 +60,8 @@ headless: bool = False
 
 try:
     import cv2
-    import numpy as np
     import cv2.typing
+    import numpy as np
 
     try:
         import tkinter
@@ -380,14 +380,22 @@ def extract_otps_from_camera(args: Args) -> Otps:
             qr_mode = next_qr_mode(qr_mode)
             continue
 
-        cv2_print_text(img, f"Mode: {qr_mode.name} (Hit SPACE to change)", 0, TextPosition.LEFT, FONT_COLOR, 20)
-        cv2_print_text(img, "Press ESC to quit", 1, TextPosition.LEFT, FONT_COLOR, 17)
-        cv2_print_text(img, "Press c,j,k,t,u to save as csv/json/keepass/txt/urls file", 2, TextPosition.LEFT, FONT_COLOR, None)
+        try:
+            cv2_print_text(img, f"Mode: {qr_mode.name} (Hit SPACE to change)", 0, TextPosition.LEFT, FONT_COLOR, 20)
+            cv2_print_text(img, "Press ESC to quit", 1, TextPosition.LEFT, FONT_COLOR, 17)
+            cv2_print_text(img, "Press c,j,k,t,u to save as csv/json/keepass/txt/urls file", 2, TextPosition.LEFT, FONT_COLOR, None)
 
-        cv2_print_text(img, f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured", 0, TextPosition.RIGHT, FONT_COLOR)
-        cv2_print_text(img, f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted", 1, TextPosition.RIGHT, FONT_COLOR)
+            cv2_print_text(img, f"{len(otp_urls)} QR code{'s'[:len(otp_urls) != 1]} captured", 0, TextPosition.RIGHT, FONT_COLOR)
+            cv2_print_text(img, f"{len(otps)} otp{'s'[:len(otps) != 1]} extracted", 1, TextPosition.RIGHT, FONT_COLOR)
 
-        cv2.imshow(WINDOW_NAME, img)
+            cv2.imshow(WINDOW_NAME, img)
+        except cv2.error as e:
+            # Workaround due to Gtk2/3 problem, see #444
+            if e.code == cv2.Error.StsNullPtr:
+                # Window closed
+                break
+            else:
+                raise e
 
         quit, qr_mode = cv2_handle_pressed_keys(qr_mode, otps)
         if quit:
@@ -449,7 +457,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.csv',
                 filetypes=[('CSV', '*.csv'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_csv(file_name, otps)
     elif (key == ord('j') or key == ord('J')) and is_not_headless():
@@ -461,7 +469,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.json',
                 filetypes=[('JSON', '*.json'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_json(file_name, otps)
     elif (key == ord('k') or key == ord('K')) and is_not_headless():
@@ -473,7 +481,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.csv',
                 filetypes=[('CSV', '*.csv'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_keepass_csv(file_name, otps)
     elif (key == ord('t') or key == ord('T')) and is_not_headless():
@@ -485,7 +493,7 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.txt',
                 filetypes=[('Text', '*.txt'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_txt(file_name, otps, True)
     elif (key == ord('u') or key == ord('U')) and is_not_headless():
@@ -497,15 +505,13 @@ def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
                 defaultextension='.txt',
                 filetypes=[('Text', '*.txt'), ('All', '*.*')]
             )
-            tk_root.update()
+            tk_root.update()  # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
             if len(file_name) > 0:
                 write_urls(file_name, otps)
     elif key == 32:
         qr_mode = next_valid_qr_mode(qr_mode, zbar_available)
         if verbose >= LogLevel.MORE_VERBOSE: print(f"QR reading mode: {qr_mode}")
-    if cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
-        # Window close clicked
-        quit = True
+    # Do not check for invisible window due to Gtk2/3 problem, see #444
     return quit, qr_mode
 
 
@@ -837,7 +843,7 @@ def check_file_exists(filename: str) -> None:
 def has_no_otps_show_warning(otps: Otps) -> bool:
     if len(otps) == 0:
         tkinter.messagebox.showinfo(title="No data", message="There are no otp secrets to write")
-        tk_root.update()  # dispose dialog
+        tk_root.update()  # dispose dialog # noqa: F821 # workaround flake8 false positive, tk_root is defined globally
     return len(otps) == 0
 
 

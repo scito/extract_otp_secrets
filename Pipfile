@@ -4,14 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-colorama = ">=0.4.6"
+colorama = "0.4.6"
 opencv-contrib-python = "*"
+numpy = "2.3.4"
 # for macOS: opencv-contrib-python = "<=4.7.0"
 pillow = "*"
 pyzbar = "*"
 protobuf = "*"
 qrcode = "*"
-qreader = "<2.0.0"
+qreader = "1.3.2"
 
 [dev-packages]
 build = "*"
@@ -24,9 +25,7 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-mock = "*"
-setuptools-git-versioning = "*"
 types-protobuf = "*"
-wheel = "*"
 
 [requires]
-python_version = "3.11"
+python_version = "3.14"
