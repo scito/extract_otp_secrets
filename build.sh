@@ -382,7 +382,15 @@ if $build_local; then
 
             $PIPENV --version
 
-            cmd="rm Pipfile.lock || true; $PIPENV --rm || true; $PIPENV install --dev && $PIPENV update --dev"
+            cmd="rm Pipfile.lock || true; $PIPENV --rm || true"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+            
+            cmd="$PIPENV install --dev"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$PIPENV update --dev"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
