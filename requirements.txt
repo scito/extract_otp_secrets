@@ -1,6 +1,9 @@
 colorama>=0.4.6
 opencv-contrib-python
-numpy==2.3.4
+numpy==1.26.* ; python_version >= "3.9" and python_version < "3.10"
+numpy==2.0.*  ; python_version >= "3.10" and python_version < "3.11"
+numpy==2.2.*  ; python_version >= "3.11" and python_version < "3.13"
+numpy==2.3.*  ; python_version >= "3.13" and python_version <= "3.14"
 Pillow
 protobuf
 pyzbar
