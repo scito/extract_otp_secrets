@@ -295,11 +295,11 @@ jobs:
       - uses: actions/checkout@v5
       - name: Set macos macos_python_path
         # TODO use variable for Python version
-        run: echo "macos_python_path=/Library/Frameworks/Python.framework/Versions/3.13" >> $GITHUB_ENV
-      - name: Set up Python 3.13
+        run: echo "macos_python_path=/Library/Frameworks/Python.framework/Versions/3.14" >> $GITHUB_ENV
+      - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
-          python-version: 3.13
+          python-version: 3.14
           check-latest: true
       - name: Install zbar shared lib for QReader (Linux)
         if: runner.os == 'Linux'

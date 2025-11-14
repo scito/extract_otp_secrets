@@ -385,7 +385,7 @@ if $build_local; then
             cmd="rm Pipfile.lock || true; $PIPENV --rm || true"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
-            
+
             cmd="$PIPENV install --dev"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
@@ -542,7 +542,7 @@ if $build_docker; then
         eval "$cmd"
 
         # Build extract_otp_secrets (Debian Bullseye)
-        cmd="docker build . -t extract_otp_secrets:bullseye -t extract_otp_secrets:bullseye-x86_64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.12-slim-bullseye"
+        cmd="docker build . -t extract_otp_secrets:bullseye -t extract_otp_secrets:bullseye-x86_64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.13-slim-bullseye"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -575,7 +575,7 @@ if $build_docker; then
         eval "$cmd"
 
         # Build extract_otp_secrets (Debian Bullseye)
-        cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:bullseye-arm64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.12-slim-bullseye"
+        cmd="docker buildx build --platform=linux/arm64 . -t extract_otp_secrets:bullseye-arm64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.13-slim-bullseye"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi
