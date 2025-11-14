@@ -382,13 +382,38 @@ if $build_local; then
 
             $PIPENV --version
 
-            cmd="rm Pipfile.lock || true; $PIPENV --rm || true; $PIPENV install && $PIPENV update"
+            cmd="rm Pipfile.lock || true; $PIPENV --rm || true; $PIPENV install --dev && $PIPENV update --dev"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
             $PIPENV run python --version
 
+            # pip -e install
+
+            cmd="$PIPENV run pip install -U -e ."
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
             cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+
+            cmd="$PIPENV run extract_otp_secrets example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$PIPENV run extract_otp_secrets - < example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            # Test (needs module)
+
+            cmd="$PIPENV run python src/extract_otp_secrets.py example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$PIPENV run python src/extract_otp_secrets.py - < example_export.txt"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
         fi
