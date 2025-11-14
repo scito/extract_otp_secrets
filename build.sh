@@ -173,8 +173,9 @@ done
 BIN="$HOME/bin"
 DOWNLOADS="$HOME/downloads"
 
-PYTHON="python3.11"
-PIP="pip3.11"
+# Set python und pip if not already set in environment
+PYTHON="${PYTHON:=python}"
+PIP="${PIP:=pip}"
 PIPENV="$PYTHON -m pipenv"
 FLAKE8="$PYTHON -m flake8"
 MYPY="$PYTHON -m mypy"
@@ -237,7 +238,7 @@ if $build_local; then
     echo -e "\nProtoc remote version $VERSION\n"
     echo -e "Protoc local version: $OLDVERSION\n"
 
-    if [ "$OLDVERSION" != "$VERSION" ] || ! $ignore_version_check; then
+    if [ "$OLDVERSION" != "$VERSION" ] && ! $ignore_version_check; then
         echo "Upgrade protoc from $OLDVERSION to $VERSION"
 
         NAME="protoc-$VERSION"
@@ -381,7 +382,7 @@ if $build_local; then
 
             $PIPENV --version
 
-            cmd="rm Pipfile.lock; $PIPENV --rm && $PIPENV install && $PIPENV update"
+            cmd="rm Pipfile.lock || true; $PIPENV --rm || true; $PIPENV install && $PIPENV update"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 

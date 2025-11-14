@@ -1,5 +1,6 @@
 colorama>=0.4.6
 opencv-contrib-python
+numpy==2.3.4
 Pillow
 protobuf
 pyzbar
