@@ -2,7 +2,7 @@
 
 [![CI tests](https://github.com/scito/extract_otp_secrets/actions/workflows/ci.yml/badge.svg)](https://github.com/scito/extract_otp_secrets/actions/workflows/ci.yml)
 [![CI docker](https://github.com/scito/extract_otp_secrets/actions/workflows/ci_docker.yml/badge.svg)](https://github.com/scito/extract_otp_secrets/actions/workflows/ci_docker.yml)
-![coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)
+![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
 [![License](https://img.shields.io/github/license/scito/extract_otp_secrets)](https://github.com/scito/extract_otp_secrets/blob/master/LICENSE)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/scito/extract_otp_secrets?sort=semver)](https://github.com/scito/extract_otp_secrets/releases/latest)  
 ![python versions](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue)
@@ -695,6 +695,10 @@ There is a Bash script for a full local build including linting and type checkin
 
 ```bash
 ./build.sh
+```
+or 
+```bash
+PYTHON=python3.11 PIP=pip3.11 DOCKER="podman" ./build.sh -d
 ```
 
 The options of the build script:
