@@ -88,7 +88,7 @@ jobs:
           # builder: ${{ steps.buildx.outputs.name }}
           # Note: tags has to be all lower-case
           build-args: |
-            BASE_IMAGE=python:3.13-slim-bookworm
+            BASE_IMAGE=python:3.14-slim-trixie
           pull: true
           tags: |
             docker.io/scit0/extract_otp_secrets:latest-${{ matrix.PLATFORM_ARCH }}
