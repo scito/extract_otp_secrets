@@ -397,7 +397,11 @@ if $build_local; then
 
             $PIPENV --version
 
-            cmd="rm Pipfile.lock || true; $PIPENV --rm || true"
+            cmd="rm Pipfile.lock || echo 'No Pipfile.lock to remove'"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="# $PIPENV --rm || echo 'No virtualenv to remove'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -498,8 +502,7 @@ if $build_local; then
     fi
 
     # Generate README.md TOC
-
-    cmd="gfm-toc -s 2 -e 3 -t -o README.md > docs/README_TOC.md"
+    cmd="env -u MSYS_NO_PATHCONV gfm-toc -s 2 -e 3 -t -o README.md > docs/README_TOC.md"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -509,7 +512,7 @@ if $build_local; then
     eval "$cmd"
 
     # create macOS extract_otp_secrets_macos.spec from extract_otp_secrets_macos_template.spec
-    cmd="VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-2023' envsubst < installer/extract_otp_secrets_macos_template.spec > build/extract_otp_secrets_macos.spec"
+    cmd="VERSION_STR=$(setuptools-git-versioning) COPYRIGHT_YEARS='2020-$(date +%Y)' envsubst < installer/extract_otp_secrets_macos_template.spec > build/extract_otp_secrets_macos.spec"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 fi

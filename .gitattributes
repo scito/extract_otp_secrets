@@ -1,4 +1,7 @@
 * text eol=lf
+*.csv text eol=auto
+*.txt text eol=auto
+*.md text eol=auto
 *.sh text eol=lf
 *.bat text eol=crlf
 *.cmd text eol=crlf
