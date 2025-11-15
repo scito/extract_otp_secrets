@@ -700,6 +700,10 @@ or
 ```bash
 PYTHON=python3.11 PIP=pip3.11 DOCKER="podman" ./build.sh -d
 ```
+Git for Windows:
+```bash
+MSYS_NO_PATHCONV=1 DOCKER="podman" ./build.sh -d
+```
 
 The options of the build script:
 
