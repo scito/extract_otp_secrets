@@ -10,6 +10,7 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**.md'
+      - 'build.sh'
   # pull_request:
   schedule:
     # Run daily on default branch
