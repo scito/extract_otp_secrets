@@ -216,7 +216,7 @@ For a detailed installation documentation of [pyzbar](https://github.com/Natural
 
 #### Linux (Debian, Ubuntu, …)
 
-    sudo apt-get install libzbar0
+    sudo apt-get install libgl1 libzbar0
 
 #### Linux (OpenSUSE)
 
@@ -224,8 +224,7 @@ For a detailed installation documentation of [pyzbar](https://github.com/Natural
 
 #### Linux (Fedora)
 
-    sudo dnf install mesa-libGL
-    sudo dnf install zbar
+    sudo dnf install mesa-libGL zbar
 
 #### Linux (Arch Linux)
 
@@ -732,6 +731,17 @@ Options:
 -r                      Generate result files
 -h, --help              Show help and quit
 ```
+
+#### Additional requirements
+
+* envsubst
+* git
+* perl
+* pip
+
+##### Fedora
+
+sudo dnf install python3-pip perl envsubst
 
 ## Technical background
 
