@@ -240,7 +240,7 @@ if $clean; then
 fi
 
 if $build_local; then
-    cmd="$PIP install --use-pep517 -U -r requirements-dev.txt"
+    cmd="$PIP install -U -r requirements-dev.txt"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -314,7 +314,7 @@ if $build_local; then
 
     $PIP --version
 
-    cmd="$PIP install --use-pep517 -U -r requirements.txt"
+    cmd="$PIP install -U -r requirements.txt"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
