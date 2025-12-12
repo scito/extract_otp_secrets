@@ -93,6 +93,7 @@ build_local=true
 build_exe=false
 build_nuitka_exe=false
 run_pipenv=true
+run_uv=true
 run_gui=false
 generate_result_files=false
 PYTHONHASHSEED=31
@@ -115,6 +116,7 @@ while test $# -gt 0; do
             echo "-X                      Do not build x86_64"
             echo "-B                      Do not build base"
             echo "-V                      Do not run pipenv"
+            echo "-U                      Do not run uv"
             echo "-g                      Start extract_otp_secrets.py in GUI mode"
             echo "-c                      Clean everything"
             echo "-r                      Generate result files"
@@ -162,6 +164,10 @@ while test $# -gt 0; do
             run_pipenv=false
             shift
             ;;
+        -U)
+            run_uv=false
+            shift
+            ;;
         -g)
             run_gui=true
             shift
@@ -184,10 +190,12 @@ DOWNLOADS="$HOME/downloads"
 # Set python und pip if not already set in environment
 PYTHON="${PYTHON:=python}"
 PIP="${PIP:=pip}"
+UV="${PIP:=uv}"
 PIPENV="$PYTHON -m pipenv"
 FLAKE8="$PYTHON -m flake8"
 MYPY="$PYTHON -m mypy"
 DOCKER="${DOCKER:=docker}"
+PYTHON_VERSION=$($PYTHON --version 2>&1 | cut -d " " -f2 | cut -d "." -f1-2)
 
 if $LINUX; then
     PWD=pwd
@@ -441,6 +449,63 @@ if $build_local; then
             eval "$cmd"
 
             cmd="$PIPENV run python src/extract_otp_secrets.py - < example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+        fi
+
+        # uv
+
+        if $run_uv; then
+            cmd="$PIP install -U uv"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            $UV --version
+
+            cmd="$UV venv --python $PYTHON_VERSION --clear"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            $UV run python --version
+
+            cmd="$UV pip install -U -r requirements.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$UV pip install -U -r requirements-dev.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            # pip -e install
+
+            cmd="$UV run pip install -U -e ."
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$UV run pytest tests/"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+
+            cmd="$UV run extract_otp_secrets example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$UV run extract_otp_secrets - < example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            # Test (needs module)
+
+            cmd="$UV run python src/extract_otp_secrets.py example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$UV run python src/extract_otp_secrets.py example_export.txt"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="$UV run python src/extract_otp_secrets.py - < example_export.txt"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
         fi
