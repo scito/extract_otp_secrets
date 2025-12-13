@@ -190,7 +190,7 @@ DOWNLOADS="$HOME/downloads"
 # Set python und pip if not already set in environment
 PYTHON="${PYTHON:=python}"
 PIP="${PIP:=pip}"
-UV="${PIP:=uv}"
+UV="${UV:=uv}"
 PIPENV="$PYTHON -m pipenv"
 FLAKE8="$PYTHON -m flake8"
 MYPY="$PYTHON -m mypy"
@@ -242,19 +242,32 @@ if $clean; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
+    cmd="$UV cache clean || true"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="rm -rf .venv || true"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
     cmd="mkdir -p dist"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 fi
 
 if $build_local; then
+    cmd="rm -rf .venv || true"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+    
     cmd="$PIP install -U -r requirements-dev.txt"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
     echo -e "\n\nChecking Protoc version..."
-    VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest | grep -E "<title>" | perl -pe's%.*Protocol Buffers v(\d+\.\d+(\.\d+)?).*%\1%')
-    BASEVERSION=4
+    cmd="VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest | grep -E '<title>' | perl -pe's%.*Protocol Buffers v(\d+\.\d+(\.\d+)?).*%\1%')"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
     echo
 
     OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
@@ -314,19 +327,18 @@ if $build_local; then
         echo -e "\nVersion has not changed. Quit"
     fi
 
-    # Upgrade pip requirements
-
-    cmd="pip install -U pip"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
-
-    $PIP --version
-
-    cmd="$PIP install -U -r requirements.txt"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
-
     if $build_base; then
+        # Upgrade pip requirements
+        cmd="pip install -U pip"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        $PIP --version
+
+        cmd="$PIP install -U -r requirements.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
         # Lint
 
         LINT_OUT_FILE="tests/reports/flake8_results.txt"
@@ -396,126 +408,131 @@ if $build_local; then
         echo -e "Update code coverage in README.md"
         TOTAL_COVERAGE=$(cat $COVERAGE_OUT_FILE | grep 'TOTAL' | perl -ne 'print "$&" if /\b(\d{1,3})%/') && perl -i -pe "s/coverage-(\d{1,3}%)25-/coverage-${TOTAL_COVERAGE}25-/" README.md
 
-        # Pipenv
-
-        if $run_pipenv; then
-            cmd="$PIP install -U pipenv"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            $PIPENV --version
-
-            cmd="rm Pipfile.lock || echo 'No Pipfile.lock to remove'"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="# $PIPENV --rm || echo 'No virtualenv to remove'"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$PIPENV install --dev"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$PIPENV update --dev"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            $PIPENV run python --version
-
-            # pip -e install
-
-            cmd="$PIPENV run pip install -U -e ."
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-
-            cmd="$PIPENV run extract_otp_secrets example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$PIPENV run extract_otp_secrets - < example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            # Test (needs module)
-
-            cmd="$PIPENV run python src/extract_otp_secrets.py example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$PIPENV run python src/extract_otp_secrets.py - < example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-        fi
-
-        # uv
-
-        if $run_uv; then
-            cmd="$PIP install -U uv"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            $UV --version
-
-            cmd="$UV venv --python $PYTHON_VERSION --clear"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            $UV run python --version
-
-            cmd="$UV pip install -U -r requirements.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$UV pip install -U -r requirements-dev.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            # pip -e install
-
-            cmd="$UV run pip install -U -e ."
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$UV run pytest tests/"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-
-            cmd="$UV run extract_otp_secrets example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$UV run extract_otp_secrets - < example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            # Test (needs module)
-
-            cmd="$UV run python src/extract_otp_secrets.py example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$UV run python src/extract_otp_secrets.py example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="$UV run python src/extract_otp_secrets.py - < example_export.txt"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-        fi
-
         # Build wheel
 
         cmd="$PIP wheel ."
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi
+
+    # Pipenv
+    if $run_pipenv; then
+        cmd="$PIP install -U pipenv"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        $PIPENV --version
+
+        cmd="rm Pipfile.lock || echo 'No Pipfile.lock to remove'"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="# $PIPENV --rm || echo 'No virtualenv to remove'"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$PIPENV install --dev"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$PIPENV update --dev"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        $PIPENV run python --version
+
+        # pip -e install
+
+        cmd="$PIPENV run pip install -U -e ."
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+
+        cmd="$PIPENV run extract_otp_secrets example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$PIPENV run extract_otp_secrets - < example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        # Test (needs module)
+
+        cmd="$PIPENV run python src/extract_otp_secrets.py example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$PIPENV run python src/extract_otp_secrets.py - < example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+    fi
+
+    # uv
+
+    if $run_uv; then
+        cmd="rm -rf .venv || true"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$PIP install -U uv"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        $UV --version
+
+        # cmd="$UV venv --python $PYTHON_VERSION --clear"
+        cmd="$UV venv --clear"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        $UV run python --version
+
+        cmd="$UV pip install -U -r requirements.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV pip install -U -r requirements-dev.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        # pip -e install
+
+        cmd="$UV run pip install -U -e ."
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV run pytest tests/"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+
+        cmd="$UV run extract_otp_secrets example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV run extract_otp_secrets - < example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        # Test (needs module)
+
+        cmd="$UV run python src/extract_otp_secrets.py example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV run python src/extract_otp_secrets.py example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV run python src/extract_otp_secrets.py - < example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+    fi
+
 
     # Build executable
     if $build_exe; then
