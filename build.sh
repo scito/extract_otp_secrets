@@ -484,16 +484,16 @@ if $build_local; then
 
         $UV --version
 
-        # cmd="$UV venv --python $PYTHON_VERSION --clear"
-        cmd="$UV venv --clear"
+        # cmd="$UV venv --clear"
+        cmd="$UV venv --python $PYTHON_VERSION --clear"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
         $UV run python --version
 
-        cmd="$UV pip install -U -r requirements.txt"
-        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-        eval "$cmd"
+        # cmd="$UV pip install -U -r requirements.txt"
+        # if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        # eval "$cmd"
 
         cmd="$UV pip install -U -r requirements-dev.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
@@ -508,7 +508,6 @@ if $build_local; then
         cmd="$UV run pytest tests/"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
-
 
         cmd="$UV run extract_otp_secrets example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
