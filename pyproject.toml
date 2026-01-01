@@ -43,7 +43,7 @@ dependencies = [
   "opencv-contrib-python",
   "numpy>=2.0,<2.1 ; python_version >= '3.9' and python_version < '3.10'",
   "numpy>=2.2,<2.3 ; python_version >= '3.10' and python_version < '3.11'",
-  "numpy>=2.3,<3.0 ; python_version >= '3.11'",
+  "numpy>=2.4,<3.0 ; python_version >= '3.11'",
   "Pillow",
   "protobuf",
   "pyzbar",
