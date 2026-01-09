@@ -283,12 +283,12 @@
         },
         "build": {
             "hashes": [
-                "sha256:698edd0ea270bde950f53aed21f3a0135672206f3911e0176261a31e0e07b397",
-                "sha256:7145f0b5061ba90a1500d60bd1b13ca0a8a4cebdd0cc16ed8adf1c0e739f43b4"
+                "sha256:6a07c1b8eb6f2b311b96fcbdbce5dab5fe637ffda0fd83c9cac622e927501596",
+                "sha256:f1b91b925aa322be454f8330c6fb48b465da993d1e7e7e6fa35027ec49f3c936"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9'",
-            "version": "==1.3.0"
+            "version": "==1.4.0"
         },
         "colorama": {
             "hashes": [
