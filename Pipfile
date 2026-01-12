@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 colorama = "0.4.6"
 opencv-contrib-python = "*"
-numpy = "2.4.0"
+numpy = "2.4.1"
 # for macOS: opencv-contrib-python = "<=4.7.0"
 pillow = "*"
 pyzbar = "*"
