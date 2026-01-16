@@ -3,34 +3,34 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.message
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
 if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+    from typing import TypeAlias as _TypeAlias
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class MigrationPayload(google.protobuf.message.Message):
+@_typing.final
+class MigrationPayload(_message.Message):
     """Copied from: https://github.com/beemdevelopment/Aegis/blob/master/app/src/main/proto/google_auth.proto"""
 
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Algorithm:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _AlgorithmEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[MigrationPayload._Algorithm.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _AlgorithmEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[MigrationPayload._Algorithm.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         ALGO_INVALID: MigrationPayload._Algorithm.ValueType  # 0
         ALGO_SHA1: MigrationPayload._Algorithm.ValueType  # 1
 
@@ -39,11 +39,11 @@ class MigrationPayload(google.protobuf.message.Message):
     ALGO_SHA1: MigrationPayload.Algorithm.ValueType  # 1
 
     class _OtpType:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _OtpTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[MigrationPayload._OtpType.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _OtpTypeEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[MigrationPayload._OtpType.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         OTP_INVALID: MigrationPayload._OtpType.ValueType  # 0
         OTP_HOTP: MigrationPayload._OtpType.ValueType  # 1
         OTP_TOTP: MigrationPayload._OtpType.ValueType  # 2
@@ -53,57 +53,59 @@ class MigrationPayload(google.protobuf.message.Message):
     OTP_HOTP: MigrationPayload.OtpType.ValueType  # 1
     OTP_TOTP: MigrationPayload.OtpType.ValueType  # 2
 
-    @typing.final
-    class OtpParameters(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    @_typing.final
+    class OtpParameters(_message.Message):
+        DESCRIPTOR: _descriptor.Descriptor
 
-        SECRET_FIELD_NUMBER: builtins.int
-        NAME_FIELD_NUMBER: builtins.int
-        ISSUER_FIELD_NUMBER: builtins.int
-        ALGORITHM_FIELD_NUMBER: builtins.int
-        DIGITS_FIELD_NUMBER: builtins.int
-        TYPE_FIELD_NUMBER: builtins.int
-        COUNTER_FIELD_NUMBER: builtins.int
-        secret: builtins.bytes
-        name: builtins.str
-        issuer: builtins.str
-        algorithm: global___MigrationPayload.Algorithm.ValueType
-        digits: builtins.int
-        type: global___MigrationPayload.OtpType.ValueType
-        counter: builtins.int
+        SECRET_FIELD_NUMBER: _builtins.int
+        NAME_FIELD_NUMBER: _builtins.int
+        ISSUER_FIELD_NUMBER: _builtins.int
+        ALGORITHM_FIELD_NUMBER: _builtins.int
+        DIGITS_FIELD_NUMBER: _builtins.int
+        TYPE_FIELD_NUMBER: _builtins.int
+        COUNTER_FIELD_NUMBER: _builtins.int
+        secret: _builtins.bytes
+        name: _builtins.str
+        issuer: _builtins.str
+        algorithm: Global___MigrationPayload.Algorithm.ValueType
+        digits: _builtins.int
+        type: Global___MigrationPayload.OtpType.ValueType
+        counter: _builtins.int
         def __init__(
             self,
             *,
-            secret: builtins.bytes = ...,
-            name: builtins.str = ...,
-            issuer: builtins.str = ...,
-            algorithm: global___MigrationPayload.Algorithm.ValueType = ...,
-            digits: builtins.int = ...,
-            type: global___MigrationPayload.OtpType.ValueType = ...,
-            counter: builtins.int = ...,
+            secret: _builtins.bytes = ...,
+            name: _builtins.str = ...,
+            issuer: _builtins.str = ...,
+            algorithm: Global___MigrationPayload.Algorithm.ValueType = ...,
+            digits: _builtins.int = ...,
+            type: Global___MigrationPayload.OtpType.ValueType = ...,
+            counter: _builtins.int = ...,
         ) -> None: ...
-        def ClearField(self, field_name: typing.Literal["algorithm", b"algorithm", "counter", b"counter", "digits", b"digits", "issuer", b"issuer", "name", b"name", "secret", b"secret", "type", b"type"]) -> None: ...
+        _ClearFieldArgType: _TypeAlias = _typing.Literal["algorithm", b"algorithm", "counter", b"counter", "digits", b"digits", "issuer", b"issuer", "name", b"name", "secret", b"secret", "type", b"type"]  # noqa: Y015
+        def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
 
-    OTP_PARAMETERS_FIELD_NUMBER: builtins.int
-    VERSION_FIELD_NUMBER: builtins.int
-    BATCH_SIZE_FIELD_NUMBER: builtins.int
-    BATCH_INDEX_FIELD_NUMBER: builtins.int
-    BATCH_ID_FIELD_NUMBER: builtins.int
-    version: builtins.int
-    batch_size: builtins.int
-    batch_index: builtins.int
-    batch_id: builtins.int
-    @property
-    def otp_parameters(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MigrationPayload.OtpParameters]: ...
+    OTP_PARAMETERS_FIELD_NUMBER: _builtins.int
+    VERSION_FIELD_NUMBER: _builtins.int
+    BATCH_SIZE_FIELD_NUMBER: _builtins.int
+    BATCH_INDEX_FIELD_NUMBER: _builtins.int
+    BATCH_ID_FIELD_NUMBER: _builtins.int
+    version: _builtins.int
+    batch_size: _builtins.int
+    batch_index: _builtins.int
+    batch_id: _builtins.int
+    @_builtins.property
+    def otp_parameters(self) -> _containers.RepeatedCompositeFieldContainer[Global___MigrationPayload.OtpParameters]: ...
     def __init__(
         self,
         *,
-        otp_parameters: collections.abc.Iterable[global___MigrationPayload.OtpParameters] | None = ...,
-        version: builtins.int = ...,
-        batch_size: builtins.int = ...,
-        batch_index: builtins.int = ...,
-        batch_id: builtins.int = ...,
+        otp_parameters: _abc.Iterable[Global___MigrationPayload.OtpParameters] | None = ...,
+        version: _builtins.int = ...,
+        batch_size: _builtins.int = ...,
+        batch_index: _builtins.int = ...,
+        batch_id: _builtins.int = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["batch_id", b"batch_id", "batch_index", b"batch_index", "batch_size", b"batch_size", "otp_parameters", b"otp_parameters", "version", b"version"]) -> None: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["batch_id", b"batch_id", "batch_index", b"batch_index", "batch_size", b"batch_size", "otp_parameters", b"otp_parameters", "version", b"version"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
 
-global___MigrationPayload = MigrationPayload
+Global___MigrationPayload: _TypeAlias = MigrationPayload  # noqa: Y015
