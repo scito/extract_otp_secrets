@@ -106,17 +106,19 @@
         },
         "opencv-contrib-python": {
             "hashes": [
-                "sha256:194841c664ceaa0692410b4ed0af557425608e33db3a181ded28b87acb66748d",
-                "sha256:4ff773dab44911da366b906621c9592d4eb96f6ad3777098933a23f064aab38e",
-                "sha256:654758a9ae8ca9a75fca7b64b19163636534f0eedffe1e14c3d7218988625c8d",
-                "sha256:c47c0ef1098461cdc6fa1cdce4c942b8ec974c87423f4b5951443d26bb9ae407",
-                "sha256:d911cedc511d98f79994580b245d59fc97f57f0f9923a99945d8b92c7ac671f6",
-                "sha256:e10a293af18aa5f842d012fa14e87345b3ee06db4c29bd592ff94b51f7ffca2b",
-                "sha256:f21034bc8b00eb286a0a0a92b99767bf596bfe426cf4bc2e79647d64ad0dd6da"
+                "sha256:177d75b048021df8a2632cb5998b3827a30143f88540be2791cac5497e8592dd",
+                "sha256:2f7ac460620f5a03924be96d9770c076e2807366a03941bdf38b29431305bfd4",
+                "sha256:334c10e5b191cac919206f797f9b84a2809ab39db20458b993edf8d204379341",
+                "sha256:3b95f67bd2539309459057fe6d239603754994155957cee0ce3b82e0f0d8d8a5",
+                "sha256:3c693f1fb7a25eae73eb9bc1c2fdbc08ad3df51c31589f1f9a8377f2a4368b1c",
+                "sha256:8ab59de69d1eee39787aa496cfdb2e6e6685733c54c97d416d58e70261836f58",
+                "sha256:8e7c74869e329636727298f3cab858f015160b2980f4726b538744732d4ab526",
+                "sha256:c9268888a1592875cb1119f2dc444ff8581a92c27dec65cbe694551b2952d834",
+                "sha256:e000908d262f479042677ef91475cecb1801341ea985af5cb3b9dcde4bb78029"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.6'",
-            "version": "==4.11.0.86"
+            "version": "==4.13.0.90"
         },
         "opencv-python": {
             "hashes": [
