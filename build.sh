@@ -97,6 +97,8 @@ run_uv=true
 run_gui=false
 generate_result_files=false
 PYTHONHASHSEED=31
+verbose=false
+VERBOSE=''
 
 while test $# -gt 0; do
     case $1 in
@@ -110,16 +112,17 @@ while test $# -gt 0; do
             echo "-C                      Ignore version check of protobuf/protoc"
             echo "-e                      Build exe"
             echo "-n                      Build nuitka exe"
-            echo "-L                      Do not run protoc and base build locally incl. exes"
             echo "-d                      Build docker"
             echo "-a                      Build arm"
             echo "-X                      Do not build x86_64"
             echo "-B                      Do not build base"
             echo "-V                      Do not run pipenv"
             echo "-U                      Do not run uv"
+            echo "-L                      Do not run protoc and base build locally incl. exes (implies -B -V -U)"
             echo "-g                      Start extract_otp_secrets.py in GUI mode"
             echo "-c                      Clean everything"
             echo "-r                      Generate result files"
+            echo "-v                      Verbose"
             echo "-h, --help              Show help and quit"
             quit
             ;;
@@ -176,6 +179,11 @@ while test $# -gt 0; do
             generate_result_files=true
             shift
             ;;
+        -v)
+            verbose=true
+            VERBOSE="-v"
+            shift
+            ;;
         -c)
             clean=true
             clean_flag="--clean"
@@ -196,6 +204,7 @@ FLAKE8="$PYTHON -m flake8"
 MYPY="$PYTHON -m mypy"
 DOCKER="${DOCKER:=docker}"
 PYTHON_VERSION=$($PYTHON --version 2>&1 | cut -d " " -f2 | cut -d "." -f1-2)
+UVENV='.uvenv'
 
 if $LINUX; then
     PWD=pwd
@@ -210,6 +219,10 @@ fi
 DEST="protoc"
 
 if $clean; then
+    cmd="deactivate || true"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+    
     cmd="$DOCKER image prune -f || echo 'No docker image pruned'"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
@@ -256,7 +269,11 @@ if $clean; then
 fi
 
 if $build_local; then
-    cmd="rm -rf .venv || true"
+    cmd="deactivate || true"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="rm -rf .venv $UVENV || true"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
     
@@ -264,17 +281,17 @@ if $build_local; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
-    echo -e "\n\nChecking Protoc version..."
-    cmd="VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest | grep -E '<title>' | perl -pe's%.*Protocol Buffers v(\d+\.\d+(\.\d+)?).*%\1%')"
-    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-    eval "$cmd"
-    echo
-
-    OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
-    echo -e "\nProtoc remote version $VERSION\n"
-    echo -e "Protoc local version: $OLDVERSION\n"
-
     if ! $ignore_version_check; then
+        echo -e "\n\nChecking Protoc version..."
+        cmd="VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest | grep -E '<title>' | perl -pe's%.*Protocol Buffers v(\d+\.\d+(\.\d+)?).*%\1%')"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+        echo
+
+        OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
+        echo -e "\nProtoc remote version $VERSION\n"
+        echo -e "Protoc local version: $OLDVERSION\n"
+
         if [ "$OLDVERSION" != "$VERSION" ]; then
             echo "Upgrade protoc from $OLDVERSION to $VERSION"
 
@@ -478,7 +495,7 @@ if $build_local; then
     # uv
 
     if $run_uv; then
-        cmd="rm -rf .venv || true"
+        cmd="rm -rf $UVENV || true"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -488,50 +505,73 @@ if $build_local; then
 
         $UV --version
 
-        # cmd="$UV venv --clear"
-        cmd="$UV venv --python $PYTHON_VERSION --clear"
+        cmd="rm uv.lock || echo 'No uv.lock to remove'"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        $UV run python --version
-
-        # cmd="$UV pip install -U -r requirements.txt"
-        # if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-        # eval "$cmd"
-
-        cmd="$UV pip install -U -r requirements-dev.txt"
+        cmd="$UV venv $UVENV $VERBOSE --python $PYTHON_VERSION --clear"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        # pip -e install
-
-        cmd="$UV run pip install -U -e ."
+        cmd="source $UVENV/bin/activate"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+        
+        cmd="$UV pip install $VERBOSE -U -r requirements.txt --exclude excludes.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$UV run pytest tests/"
+        cmd="$UV pip install $VERBOSE -U -r requirements-dev.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$UV run extract_otp_secrets example_export.txt"
+        cmd="$UV pip install $VERBOSE -U -e . --exclude excludes.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$UV run extract_otp_secrets - < example_export.txt"
+        cmd="$UV lock --refresh $VERBOSE"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV sync --active $VERBOSE"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV pip uninstall $VERBOSE opencv-python"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV run --active python --version"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV run  $VERBOSE --active pytest tests/"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV run  $VERBOSE --active extract_otp_secrets example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="$UV run $VERBOSE --active extract_otp_secrets - < example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
         # Test (needs module)
 
-        cmd="$UV run python src/extract_otp_secrets.py example_export.txt"
+        cmd="$UV run --active python src/extract_otp_secrets.py example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$UV run python src/extract_otp_secrets.py example_export.txt"
+        cmd="$UV run --active python src/extract_otp_secrets.py example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$UV run python src/extract_otp_secrets.py - < example_export.txt"
+        cmd="$UV run --active python src/extract_otp_secrets.py - < example_export.txt"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+
+        cmd="deactivate"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi

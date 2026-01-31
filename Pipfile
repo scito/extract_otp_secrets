@@ -5,12 +5,12 @@ name = "pypi"
 
 [packages]
 colorama = "0.4.6"
-opencv-contrib-python = "*"
+opencv-contrib-python = "4.13.0.90"
 numpy = "2.4.1"
 # for macOS: opencv-contrib-python = "<=4.7.0"
 pillow = "*"
 pyzbar = "*"
-protobuf = "*"
+protobuf = "6.33.5"
 qrcode = "*"
 qreader = "1.3.2"
 
