@@ -208,8 +208,10 @@ UVENV='.uvenv'
 
 if $LINUX; then
     PWD=pwd
+    UV_BIN_PATH="$UVENV/bin"
 else
     PWD="pwd -W"
+    UV_BIN_PATH="$UVENV/Scripts"
 fi
 
 # sudo ln -s /usr/bin/python3.11 /usr/bin/python
@@ -513,7 +515,7 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="source $UVENV/bin/activate"
+        cmd="source $UV_BIN_PATH/activate"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
         
