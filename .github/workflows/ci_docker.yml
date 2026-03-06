@@ -48,6 +48,7 @@ jobs:
       # avoid building if there are testing errors
       - name: Run smoke test
         run: |
+          sudo apt-get update
           sudo apt-get install -y libzbar0
           python -m pip install --upgrade pip
           pip install -U -r requirements-dev.txt
@@ -174,6 +175,7 @@ jobs:
       # avoid building if there are testing errors
       - name: Run smoke test
         run: |
+          sudo apt-get update
           sudo apt-get install -y libzbar0
           python -m pip install --upgrade pip
           pip install -U -r requirements-dev.txt
@@ -302,6 +304,7 @@ jobs:
       # avoid building if there are testing errors
       - name: Run smoke test
         run: |
+          sudo apt-get update
           sudo apt-get install -y libzbar0
           python -m pip install --upgrade pip
           pip install -U -r requirements-dev.txt
