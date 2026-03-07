@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4b19cf2fa3e1ba934463575b4ea590abf0670b156d3b5aad521f54c281db0873"
+            "sha256": "57139dd3a5d88ca79d3738630e0c1aafc4b1c2fc7d1d145783391935b359b56b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -233,20 +233,18 @@
         },
         "protobuf": {
             "hashes": [
-                "sha256:3093804752167bcab3998bec9f1048baae6e29505adaf1afd14a37bddede533c",
-                "sha256:69915a973dd0f60f31a08b8318b73eab2bd6a392c79184b3612226b0a3f8ec02",
-                "sha256:6ddcac2a081f8b7b9642c09406bc6a4290128fce5f471cddd165960bb9119e5c",
-                "sha256:8afa18e1d6d20af15b417e728e9f60f3aa108ee76f23c3b2c07a2c3b546d3afd",
-                "sha256:8f04fa32763dcdb4973d537d6b54e615cc61108c7cb38fe59310c3192d29510a",
-                "sha256:9b71e0281f36f179d00cbcb119cb19dec4d14a81393e5ea220f64b286173e190",
-                "sha256:a3157e62729aafb8df6da2c03aa5c0937c7266c626ce11a278b6eb7963c4e37c",
-                "sha256:a5cb85982d95d906df1e2210e58f8e4f1e3cdc088e52c921a041f9c9a0386de5",
-                "sha256:cbf16ba3350fb7b889fca858fb215967792dc125b35c7976ca4818bee3521cf0",
-                "sha256:d71b040839446bac0f4d162e758bea99c8251161dae9d0983a3b88dee345153b"
+                "sha256:3871a3df67c710aaf7bb8d214cc997342e63ceebd940c8c7fc65c9b3d697591a",
+                "sha256:4a72a8ec94e7a9f7ef7fe818ed26d073305f347f8b3b5ba31e22f81fd85fca02",
+                "sha256:8e329966799f2c271d5e05e236459fe1cbfdb8755aaa3b0914fa60947ddea408",
+                "sha256:964cf977e07f479c0697964e83deda72bcbc75c3badab506fb061b352d991b01",
+                "sha256:9d7a5005fb96f3c1e64f397f91500b0eb371b28da81296ae73a6b08a5b76cdd6",
+                "sha256:9f9079f1dde4e32342ecbd1c118d76367090d4aaa19da78230c38101c5b3dd40",
+                "sha256:e3b914dd77fa33fa06ab2baa97937746ab25695f389869afdf03e81f34e45dc7",
+                "sha256:f791ec509707a1d91bd02e07df157e75e4fb9fbdad12a81b7396201ec244e2e3"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.9'",
-            "version": "==6.33.5"
+            "markers": "python_version >= '3.10'",
+            "version": "==7.34.0"
         },
         "pyzbar": {
             "hashes": [
