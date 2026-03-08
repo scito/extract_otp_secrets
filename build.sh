@@ -420,7 +420,7 @@ if $build_local; then
         eval "$cmd"
 
         COVERAGE_OUT_FILE="tests/reports/pytest-coverage.txt"
-        cmd="pytest --cov=extract_otp_secrets_test --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT_FILE"
+        cmd="pytest --cov=extract_otp_secrets --junitxml=tests/reports/pytest.xml --cov-report html:tests/reports/html --cov-report=term-missing tests/ | tee $COVERAGE_OUT_FILE"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -470,7 +470,7 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$PIPENV run pytest --cov=extract_otp_secrets_test tests/"
+        cmd="$PIPENV run pytest --cov=extract_otp_secrets tests/"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 

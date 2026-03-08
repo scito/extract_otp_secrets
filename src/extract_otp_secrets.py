@@ -46,7 +46,7 @@ import urllib.parse as urlparse
 from enum import Enum, IntEnum
 from importlib.metadata import PackageNotFoundError, version
 from typing import (Any, Final, List, Optional, Sequence, TextIO, Tuple,
-                    TypedDict, Union)
+                    TypedDict)
 
 import colorama
 from qrcode import QRCode
@@ -85,9 +85,8 @@ Exception: {e}\n""", file=sys.stderr)
             raise e
 
     # Types
-    # workaround for PYTHON <= 3.9: Final[tuple[int]]
-    ColorBGR = Tuple[int, int, int]  # RGB Color specified as Blue, Green, Red
-    Point = Tuple[int, int]
+    ColorBGR = tuple[int, int, int]  # RGB Color specified as Blue, Green, Red
+    Point = tuple[int, int]
 
     # CV2 camera capture constants
     FONT: Final[int] = cv2.FONT_HERSHEY_PLAIN
@@ -120,17 +119,12 @@ except ImportError as e:
     if debug_mode:
         raise e
 
-# Workaround for PYTHON <= 3.9: Generally Union[int, None] used instead of int | None
-
 # Types
 Args = argparse.Namespace
 OtpUrl = str
-# Workaround for PYTHON <= 3.9: Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': int | None, 'url': OtpUrl})
-Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': Union[int, None], 'url': OtpUrl})
-# workaround for PYTHON <= 3.9: Otps = list[Otp]
-Otps = List[Otp]
-# workaround for PYTHON <= 3.9: OtpUrls = list[OtpUrl]
-OtpUrls = List[OtpUrl]
+Otp = TypedDict('Otp', {'name': str, 'secret': str, 'issuer': str, 'type': str, 'counter': int | None, 'url': OtpUrl})
+Otps = list[Otp]
+OtpUrls = list[OtpUrl]
 
 QRMode = Enum('QRMode', ['ZBAR', 'QREADER', 'QREADER_DEEP', 'CV2', 'CV2_WECHAT'], start=0)
 LogLevel = IntEnum('LogLevel', ['QUIET', 'NORMAL', 'VERBOSE', 'MORE_VERBOSE', 'DEBUG'], start=-1)
@@ -192,8 +186,7 @@ def main(sys_args: list[str]) -> None:
     write_urls(args.urls, otps)
 
 
-# workaround for PYTHON <= 3.9 use: pb.MigrationPayload | None
-def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> Optional[pb.MigrationPayload]:
+def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> pb.MigrationPayload | None:
     '''Extracts the otp migration payload from an otp url. This function is the core of the this appliation.'''
     if not is_opt_url(otp_url, source):
         return None
@@ -569,11 +562,7 @@ def get_otp_urls_from_file(filename: str, args: Args) -> OtpUrls:
 
 def read_lines_from_text_file(filename: str) -> list[str]:
     if verbose >= LogLevel.DEBUG: print(f"Reading lines of {filename}")
-    # workaround for PYTHON <= 3.9 support encoding
-    if sys.version_info >= (3, 10):
-        finput = fileinput.input(filename, encoding='utf-8')
-    else:
-        finput = fileinput.input(filename)
+    finput = fileinput.input(filename, encoding='utf-8')
     try:
         lines = []
         for line in (line.strip() for line in finput):
@@ -891,7 +880,7 @@ class PrintVersionAction(argparse.Action):
     def __init__(self, option_strings: Sequence[str], dest: str, nargs: int = 0, **kwargs: Any) -> None:
         super().__init__(option_strings, dest, nargs, **kwargs)
 
-    def __call__(self, parser: argparse.ArgumentParser, namespace: Args, values: Union[str, Sequence[Any], None], option_string: Optional[str] = None) -> None:
+    def __call__(self, parser: argparse.ArgumentParser, namespace: Args, values: str | Sequence[Any] | None, option_string: str | None = None) -> None:
         print_version()
         parser.exit()
 
@@ -926,8 +915,7 @@ def get_raw_version() -> str:
         return ''
 
 
-# workaround for PYTHON <= 3.9 use: BaseException | None
-def log_debug(*values: object, sep: Optional[str] = ' ') -> None:
+def log_debug(*values: object, sep: str | None = ' ') -> None:
     if os.name == 'nt':
         # Workaround "Windows fatal exception: access violation"
         print(f"\nDEBUG: {str(values[0])}")
@@ -939,24 +927,21 @@ def log_debug(*values: object, sep: Optional[str] = ' ') -> None:
         print(f"\nDEBUG: {str(values[0])}", *values[1:], sep=sep)
 
 
-# workaround for PYTHON <= 3.9 use: BaseException | None
 def log_verbose(msg: str) -> None:
     print(color(msg, colorama.Fore.CYAN))
 
 
-# workaround for PYTHON <= 3.9 use: BaseException | None
-def log_warn(msg: str, exception: Optional[BaseException] = None) -> None:
+def log_warn(msg: str, exception: BaseException | None = None) -> None:
     exception_text = "\nException: "
     eprint(color(f"\nWARN: {msg}{(exception_text + str(exception)) if exception else ''}", colorama.Fore.RED))
 
 
-# workaround for PYTHON <= 3.9 use: BaseException | None
-def log_error(msg: str, exception: Optional[BaseException] = None) -> None:
+def log_error(msg: str, exception: BaseException | None = None) -> None:
     exception_text = "\nException: "
     eprint(color(f"\nERROR: {msg}{(exception_text + str(exception)) if exception else ''}", colorama.Fore.RED))
 
 
-def color(msg: str, color: Optional[str] = None) -> str:
+def color(msg: str, color: str | None = None) -> str:
     return f"{color if colored and color else ''}{msg}{colorama.Fore.RESET if colored and color else ''}"
 
 
@@ -965,8 +950,7 @@ def eprint(*values: object, **kwargs: Any) -> None:
     print(*values, file=sys.stderr, **kwargs)
 
 
-# workaround for PYTHON <= 3.9 use: BaseException | None
-def abort(msg: str, exception: Optional[BaseException] = None) -> None:
+def abort(msg: str, exception: BaseException | None = None) -> None:
     log_error(msg, exception)
     sys.exit(1)
 

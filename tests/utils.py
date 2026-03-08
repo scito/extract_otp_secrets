@@ -23,12 +23,11 @@ import re
 import shutil
 import sys
 import pathlib
-from typing import BinaryIO, Any, Union, List
+from typing import BinaryIO, Any, List
 
 
 # Types
-# workaround for PYTHON <= 3.9: Workaround for str | pathlib.Path
-PathLike = Union[str, pathlib.Path]
+PathLike = str | pathlib.Path
 
 
 # Ref. https://stackoverflow.com/a/16571630
