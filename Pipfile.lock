@@ -614,10 +614,10 @@
         },
         "nuitka": {
             "hashes": [
-                "sha256:284a4b3e7d670bb2833fdc0a29134d2e598f3cedf45142ebc29c808e6b0c1e44"
+                "sha256:45e7d90266e76fe64eeb8d196c17666d7cd7cffbf68d6a24f233c3c03b6feaa8"
             ],
             "index": "pypi",
-            "version": "==4.0.3"
+            "version": "==4.0.5"
         },
         "packaging": {
             "hashes": [
