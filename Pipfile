@@ -10,7 +10,7 @@ numpy = "2.4.3"
 # for macOS: opencv-contrib-python = "<=4.7.0"
 pillow = "*"
 pyzbar = "*"
-protobuf = "7.34.0"
+protobuf = "7.34.1"
 qrcode = "*"
 qreader = "1.3.2"
 
