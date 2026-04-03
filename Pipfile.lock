@@ -750,12 +750,12 @@
         },
         "types-protobuf": {
             "hashes": [
-                "sha256:5a1094907ca0d19202f7bca6db06ff69779873db695ddd73f2dde718cd8df1fa",
-                "sha256:7270594b4bc28dfe85602d97849b28a2fe7905d77b1d91b418924ed6f83f857c"
+                "sha256:16d9bbca52ab0f306279958878567df2520f3f5579059419b0ce149a0ad1e332",
+                "sha256:8d7881867888e667eb9563c08a916fccdc12bdb5f9f34c31d217cce876e36765"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==7.34.1.20260402"
+            "version": "==7.34.1.20260403"
         },
         "typing-extensions": {
             "hashes": [
