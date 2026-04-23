@@ -283,12 +283,12 @@
         },
         "build": {
             "hashes": [
-                "sha256:1bc22b19b383303de8f2c8554c9a32894a58d3f185fe3756b0b20d255bee9a38",
-                "sha256:5aa4231ae0e807efdf1fd0623e07366eca2ab215921345a2e38acdd5d0fa0a74"
+                "sha256:8c3f48a6090b39edec1a273d2d57949aaf13723b01e02f9d518396887519f64d",
+                "sha256:f832ae053061f3fb524af812dc94b8b84bac6880cd587630e3b5d91a6a9c1703"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9'",
-            "version": "==1.4.3"
+            "version": "==1.4.4"
         },
         "coverage": {
             "extras": [
@@ -627,11 +627,11 @@
         },
         "packaging": {
             "hashes": [
-                "sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4",
-                "sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529"
+                "sha256:5d9c0669c6285e491e0ced2eee587eaf67b670d94a19e94e3984a481aba6802f",
+                "sha256:f042152b681c4bfac5cae2742a55e103d27ab2ec0f3d88037136b6bfe7c9c5de"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==26.0"
+            "version": "==26.1"
         },
         "pathspec": {
             "hashes": [
