@@ -786,12 +786,12 @@
         },
         "types-protobuf": {
             "hashes": [
-                "sha256:1c93e8c294281b76a5255fc21c747db0004694463ac6ea9866ee06da969fa555",
-                "sha256:a5d647381f8651bd505304ed1148b8a7b342781796e0f80e0284c774c2262a09"
+                "sha256:28cfaded25889cb83ebfb63cfb0a43628f0b6f3785767bec17287dc6468795f2",
+                "sha256:a0a5337413347166439c0e07cbc26c6164d091401c6f01b1dfd8cdb966c4dd8f"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==7.34.1.20260508"
+            "version": "==7.34.1.20260518"
         },
         "typing-extensions": {
             "hashes": [
