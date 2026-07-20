@@ -1,21 +1,25 @@
-* text eol=lf
-*.csv text eol=auto
-*.txt text eol=auto
-*.md text eol=auto
-*.sh text eol=lf
+* text eol=auto
+*.7z binary
 *.bat text eol=crlf
 *.cmd text eol=crlf
-*.ps1 text eol=crlf
-*.png binary
-*.webp binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.ico binary
-*.zip binary
-*.tar binary
-*.gz binary
-*.7z binary
-*.exe binary
+*.csv text eol=lf
 *.dll binary
+*.exe binary
+*.gif binary
+*.gz binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.md text eol=auto
 *.pdf binary
+*.png binary
+*.ps1 text eol=crlf
+*.sh text eol=lf
+*.tar binary
+*.tif binary
+*.ttf binary
+*.txt text eol=auto
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.zip binary
