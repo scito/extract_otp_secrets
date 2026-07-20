@@ -588,7 +588,10 @@ def convert_img_to_otp_urls(filename: str, args: Args) -> OtpUrls:
     if verbose: print(f"Reading image {filename}")
     try:
         if filename != '=':
-            img = cv2.imread(filename)
+            try:
+                img = cv2.imread(filename)
+            except cv2.error:
+                img = None
         else:
             try:
                 stdin = sys.stdin.buffer.read()
