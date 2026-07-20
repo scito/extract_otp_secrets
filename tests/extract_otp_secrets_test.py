@@ -859,7 +859,14 @@ data=XXXX
 Exception: Error parsing message with type 'MigrationPayload'
 '''
 
-    assert captured.err == first_expected_stderr or captured.err == second_expected_stderr or captured.err == third_expected_stderr
+    #
+    fourth_expected_stderr = '''
+ERROR: Cannot decode otpauth-migration migration payload.
+data=XXXX
+Exception: Error parsing message with type 'MigrationPayload': Wire format was corrupt
+'''
+
+    assert captured.err == first_expected_stderr or captured.err == second_expected_stderr or captured.err == third_expected_stderr or captured.err == fourth_expected_stderr
     assert captured.out == ''
     assert e.value.code == 1
     assert e.type == SystemExit
