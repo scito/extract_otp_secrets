@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0191a45b729b3f232ce5046bef3da83f0cd67f7ab4891a1945b79c5f87bdea3e"
+            "sha256": "753714550b4eaa175d8ea92703222d967e3c4913b03ca4a8902e57a3df4208e8"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -78,18 +78,19 @@
         },
         "opencv-contrib-python": {
             "hashes": [
-                "sha256:1973d0fc773873f9d1b5bf0d1b65895da2f47b06ba033b7d58393f5c28ba0778",
-                "sha256:53c8ab81376210dda5836307eb6bda7266f39a3820a9a070c7131510ba815fe1",
-                "sha256:5f9cb522dd9e465dfca3536c15288f7936b9827432fb9c885eaf94dc5f88c2a3",
-                "sha256:a3c54377c5cf9c45d9b1a207df26dc8fe4f1042d07036cb17d80930c04b25d97",
-                "sha256:cb694dcf76bb2c8d7fa573fc1a99339e8b6640194d7778381e74cc3445369e45",
-                "sha256:f5d02357f4d5575c300eab3ec1c7ecfed3a9a53e55a76927bab7cfc9e0a67b68",
-                "sha256:f9ceec5886419860a31b518991a99e978e5a6a78dca1470103ad4ede0155f156",
-                "sha256:fc5ee50e2be9d40e913536f7f20cc6f87f25d8e413ebb32a3335ab6edf245d3e"
+                "sha256:29b916da864002a921c79b6df4cfb2dcf79870f166ddf3ce1179b558bc7313d7",
+                "sha256:3ebb8e0506573f36f54038116321a086c97aeda8ef154198931f3ea18b435cc7",
+                "sha256:45a1ce7c68828907348e649edd471a7dc5244d3d0ac21989e67c63d2f4fa629a",
+                "sha256:461622db95c964652d4d8fda171034961c3de270f78a6095aaad31050771774a",
+                "sha256:8427dcb0561dc3ba32f3771c627f52b87c29932c265bea28ffcb54804c3c3fec",
+                "sha256:b84f0b0fcdbd2421b5819e517542463e71eed7f41e0a0c4ec280ed88b7269a66",
+                "sha256:cac609c9a4fce67feb287837c671a2c4da9467df8e47fa0cce7bdc453d12a529",
+                "sha256:da0ba61096b08c63cb4440d8fd6f323835cbb78b714c5ba22a39e1db68c83166",
+                "sha256:dd8a80a04a8610c033757135b7846ad2027ba2d3bf9faf2f83f3dc6ed9e3814a"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.6'",
-            "version": "==4.13.0.92"
+            "version": "==5.0.0.93"
         },
         "opencv-python": {
             "hashes": [
