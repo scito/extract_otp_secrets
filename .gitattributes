@@ -1,5 +1,5 @@
-* text eol=lf
-*.csv text eol=auto
+* text eol=auto
+*.csv text eol=lf
 *.txt text eol=auto
 *.md text eol=auto
 *.sh text eol=lf
@@ -19,3 +19,6 @@
 *.exe binary
 *.dll binary
 *.pdf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
