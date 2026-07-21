@@ -122,9 +122,9 @@ However, the bare executable can be executed from the command line:
 1. Download executable for macOS platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
 2. Open `Terminal` application
 3. Change to Downloads folder in Terminal: `cd $HOME/Downloads`
-4. Remove quarantine bit for the downloaded file: `xattr -r -d com.apple.quarantine extract_otp_secrets_X.Y.Z_macos_x86_64`
-5. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_X.Y.Z_macos_x86_64`
-6. Start executable from command line for the first time: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
+4. Remove quarantine bit for the downloaded file: `xattr -r -d com.apple.quarantine extract_otp_secrets_X.Y.Z_macos_arm64`
+5. Set executable bit for the downloaded file: `chmod +x extract_otp_secrets_X.Y.Z_macos_arm64`
+6. Start executable from command line for the first time: `./extract_otp_secrets_X.Y.Z_macos_arm64`
 7. Wait approximately 30 seconds to 1 minute on the first run. Terminal will display the following error:
     ```
     OpenCV: not authorized to capture video (status 0), requesting...
@@ -132,13 +132,11 @@ However, the bare executable can be executed from the command line:
     ```
 8. macOS will then prompt to request camera access.
 9. After allowing camera access, rerun the program.
-10. On the second run, the GUI prompt shows correctly and is fully operable: `./extract_otp_secrets_X.Y.Z_macos_x86_64`
+10. On the second run, the GUI prompt shows correctly and is fully operable: `./extract_otp_secrets_X.Y.Z_macos_arm64`
 
-:information_source: Replace `X.Y.Z` in above commands with the version number of your downloaded file, e.g. `extract_otp_secrets_2.4.0_macos_x86_64`
+:information_source: Replace `X.Y.Z` in above commands with the version number of your downloaded file, e.g. `extract_otp_secrets_2.4.0_macos_arm64`
 
 :information_source: If Rosetta2 emulation is installed, these steps work also for M1 and M2 Apple Silicon processors and the program can be executed directly.
-
-Tested with extract_otp_secrets_2.8.1_macos_x86_64 on macOS Sequoia 15.1 beta. Source: [#283](https://github.com/scito/extract_otp_secrets/issues/283)
 
 ## Usage
 
@@ -363,9 +361,9 @@ python extract_otp_secrets.py = < example_export.png</pre>
     * extract_otp_secrets_linux_x86_64 (requires glibc >= 2.31)
     * extract_otp_secrets_linux_arm64 (requires glibc >= 2.31)
     * extract_otp_secrets_win_x86_64.exe
-    * extract_otp_secrets_macos_x86_64 (optional [libzbar](#installation-of-optional-shared-system-libraries-recommended) needs to be installed manually if needed)
-        * extract_otp_secrets_macos_x86_64.dmg N/A, see [why](#macos)
-        * extract_otp_secrets_macos_x86_64.pkg N/A, see [why](#macos)
+    * extract_otp_secrets_macos_arm64 (optional [libzbar](#installation-of-optional-shared-system-libraries-recommended) needs to be installed manually if needed)
+        * extract_otp_secrets_macos_arm64.dmg N/A, see [why](#macos)
+        * extract_otp_secrets_macos_arm64.pkg N/A, see [why](#macos)
 * Prebuilt Docker images provided for amd64 and arm64 on [Docker Hub](https://hub.docker.com/repository/docker/scit0/extract_otp_secrets) and [GitHub Packages](https://github.com/users/scito/packages/container/package/extract_otp_secrets) (🆕 since v2.0)
 * Many ways to run the script:
     * Native Python
