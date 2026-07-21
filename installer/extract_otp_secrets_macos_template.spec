@@ -3,13 +3,18 @@
 # https://www.pythonguis.com/tutorials/packaging-pyqt5-applications-pyinstaller-macos-dmg/
 # https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html
 
+import os
+import qrdet
+
 block_cipher = None
+
+qrdet_model_dir = os.path.join(os.path.dirname(qrdet.__file__), '.model')
 
 a = Analysis(
     ['src/extract_otp_secrets.py'],
     pathex=[],
     binaries=[],
-    datas=[('$macos_python_path/__yolo_v3_qr_detector/', '__yolo_v3_qr_detector/')],
+    datas=[(qrdet_model_dir, 'qrdet/.model')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
