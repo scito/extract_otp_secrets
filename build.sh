@@ -653,15 +653,15 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network none --rm -v \"$($PWD):/files:ro\" extract_otp_secrets_only_txt example_export.txt"
+        cmd="$DOCKER run --network none --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets_only_txt example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network none --rm -i -v \"$($PWD):/files:ro\" extract_otp_secrets_only_txt - < example_export.txt"
+        cmd="$DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets_only_txt - < example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network=host --entrypoint '/extract/run_pytest.sh' --rm -v \"$($PWD):/files:ro\" extract_otp_secrets_only_txt extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
+        cmd="$DOCKER run --network=host --entrypoint '/extract/run_pytest.sh' --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets_only_txt extract_otp_secrets_test.py -k 'not qreader' -vvv --relaxed"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -670,19 +670,19 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network none --rm -v \"$($PWD):/files:ro\" extract_otp_secrets example_export.txt"
+        cmd="$DOCKER run --network none --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="cat example_export.txt | $DOCKER run --network none --rm -i -v \"$($PWD):/files:ro\" extract_otp_secrets - -c - > example_output.csv"
+        cmd="cat example_export.txt | $DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets - -c - > example_output.csv"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network none --rm -i -v \"$($PWD):/files:ro\" extract_otp_secrets = < example_export.png"
+        cmd="$DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets = < example_export.png"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network=host --entrypoint /extract/run_pytest.sh --rm -v \"$($PWD):/files:ro\" extract_otp_secrets"
+        cmd="$DOCKER run --network=host --entrypoint /extract/run_pytest.sh --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -691,19 +691,19 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network none --rm -v \"$($PWD):/files:ro\" extract_otp_secrets:bullseye example_export.txt"
+        cmd="$DOCKER run --network none --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bullseye example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="cat example_export.txt | $DOCKER run --network none --rm -i -v \"$($PWD):/files:ro\" extract_otp_secrets:bullseye - -c - > example_output.csv"
+        cmd="cat example_export.txt | $DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bullseye - -c - > example_output.csv"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network none --rm -i -v \"$($PWD):/files:ro\" extract_otp_secrets:bullseye = < example_export.png"
+        cmd="$DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bullseye = < example_export.png"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network=host --entrypoint /extract/run_pytest.sh --rm -v \"$($PWD):/files:ro\" extract_otp_secrets:bullseye"
+        cmd="$DOCKER run --network=host --entrypoint /extract/run_pytest.sh --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bullseye"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -825,7 +825,7 @@ if $build_docker; then
 
     # Run GUI from Docker
     if $build_x86_64 && $run_gui; then
-        cmd="$DOCKER run --network none --rm -v "$($PWD):/files:ro" --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro extract_otp_secrets &"
+        cmd="$DOCKER run --network none --rm -v "$($PWD):/files:ro,z" --device=\"/dev/video0:/dev/video0\" --env=\"DISPLAY\" -v /tmp/.X11-unix:/tmp/.X11-unix:ro,z extract_otp_secrets &"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi
