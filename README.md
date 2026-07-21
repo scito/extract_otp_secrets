@@ -675,7 +675,8 @@ docker run --entrypoint /extract/run_pytest.sh --rm -v "$(pwd)":/files:ro extrac
 #### Linux
 
 ```bash
-pyinstaller -y --add-data $pythonLocation/__yolo_v3_qr_detector/:__yolo_v3_qr_detector/ --onefile src/extract_otp_secrets.py
+QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))")/.model
+pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile src/extract_otp_secrets.py
 ```
 
 Output is executable `dist/extract_otp_secrets`
@@ -683,7 +684,7 @@ Output is executable `dist/extract_otp_secrets`
 #### Windows
 
 ```
-pyinstaller -y --add-data "%pythonLocation%\__yolo_v3_qr_detector;__yolo_v3_qr_detector" --add-binary "%pythonLocation%\pyzbar\libiconv.dll;pyzbar" --add-binary "%pythonLocation%\pyzbar\libzbar-64.dll;pyzbar" --add-binary "%windir%\system32\msvcr120.dll;pyzbar" --add-binary "%windir%\system32\msvcp120.dll;pyzbar" --add-binary "%windir%\system32\vcamp120.dll;pyzbar" --add-binary "%windir%\system32\vcomp120.dll;pyzbar" --add-binary "%windir%\system32\vccorlib120.dll;pyzbar" --add-binary "%windir%\system32\mfc120.dll;pyzbar" --add-binary "%windir%\system32\mfc120u.dll;pyzbar" --add-binary "%windir%\system32\mfc120chs.dll;pyzbar" --add-binary "%windir%\system32\mfc120cht.dll;pyzbar" --add-binary "%windir%\system32\mfc120deu.dll;pyzbar" --add-binary "%windir%\system32\mfc120enu.dll;pyzbar" --add-binary "%windir%\system32\mfc120esn.dll;pyzbar" --add-binary "%windir%\system32\mfc120fra.dll;pyzbar" --add-binary "%windir%\system32\mfc120ita.dll;pyzbar" --add-binary "%windir%\system32\mfc120jpn.dll;pyzbar" --add-binary "%windir%\system32\mfc120kor.dll;pyzbar" --add-binary "%windir%\system32\mfc120rus.dll;pyzbar" --onefile --version-file build\file_version_info.txt src\extract_otp_secrets.py
+pyinstaller -y --add-data "%pythonLocation%\Lib\site-packages\qrdet\.model;qrdet\.model" --add-binary "%pythonLocation%\pyzbar\libiconv.dll;pyzbar" --add-binary "%pythonLocation%\pyzbar\libzbar-64.dll;pyzbar" --add-binary "%windir%\system32\msvcr120.dll;pyzbar" --add-binary "%windir%\system32\msvcp120.dll;pyzbar" --add-binary "%windir%\system32\vcamp120.dll;pyzbar" --add-binary "%windir%\system32\vcomp120.dll;pyzbar" --add-binary "%windir%\system32\vccorlib120.dll;pyzbar" --add-binary "%windir%\system32\mfc120.dll;pyzbar" --add-binary "%windir%\system32\mfc120u.dll;pyzbar" --add-binary "%windir%\system32\mfc120chs.dll;pyzbar" --add-binary "%windir%\system32\mfc120cht.dll;pyzbar" --add-binary "%windir%\system32\mfc120deu.dll;pyzbar" --add-binary "%windir%\system32\mfc120enu.dll;pyzbar" --add-binary "%windir%\system32\mfc120esn.dll;pyzbar" --add-binary "%windir%\system32\mfc120fra.dll;pyzbar" --add-binary "%windir%\system32\mfc120ita.dll;pyzbar" --add-binary "%windir%\system32\mfc120jpn.dll;pyzbar" --add-binary "%windir%\system32\mfc120kor.dll;pyzbar" --add-binary "%windir%\system32\mfc120rus.dll;pyzbar" --onefile --version-file build\file_version_info.txt src\extract_otp_secrets.py
 ```
 
 Output is `dist\extract_otp_secrets.exe`
