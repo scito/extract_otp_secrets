@@ -840,7 +840,10 @@ if $build_docker; then
 fi
 
 if $run_gui; then
-    cmd="$PYTHON src/extract_otp_secrets.py &"
+    # cv2 ships its own Qt plugins (no wayland plugin included), which causes
+    # "Could not find the Qt platform plugin wayland" warnings when running
+    # under a Wayland session. Force xcb to avoid this.
+    cmd="QT_QPA_PLATFORM=xcb $PYTHON src/extract_otp_secrets.py &"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 fi
