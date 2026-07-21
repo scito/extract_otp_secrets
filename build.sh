@@ -208,6 +208,12 @@ DOCKER="${DOCKER:=docker}"
 PYTHON_VERSION=$($PYTHON --version 2>&1 | cut -d " " -f2 | cut -d "." -f1-2)
 UVENV='.uvenv'
 
+# cv2 bundles its own Qt plugins but ships no fonts, which causes
+# "QFontDatabase: Cannot find font directory .../cv2/qt/fonts" warnings as
+# soon as a CV2 window is opened. QT_QPA_FONTDIR is ignored by this Qt build,
+# so silence the (harmless) warning instead via the default logging category.
+export QT_LOGGING_RULES="${QT_LOGGING_RULES:+$QT_LOGGING_RULES;}default.warning=false"
+
 if $LINUX; then
     PWD=pwd
     UV_BIN_PATH="$UVENV/bin"
