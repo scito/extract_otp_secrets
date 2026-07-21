@@ -7,4 +7,4 @@ Pillow
 protobuf==7.35.1
 pyzbar
 qrcode
-qreader<2.0.0
+qreader>=3.16,<4.0
