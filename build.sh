@@ -2,6 +2,8 @@
 
 # Upgrades Protoc from https://github.com/protocolbuffers/protobuf/releases
 
+SECONDS=0
+
 black='\e[0;30m'
 blackBold='\e[1;30m'
 blackBackground='\e[1;40m'
@@ -861,5 +863,9 @@ line=$(printf '#%.0s' $(eval echo {1..$(( ($COLUMNS - 10) / 2))}))
 echo -e "\n${greenBold}$line SUCCESS $line${reset}"
 
 git status
+
+duration=$SECONDS
+printf -v build_time '%02d:%02d:%02d' $((duration / 3600)) $((duration % 3600 / 60)) $((duration % 60))
+echo -e "\n${blueBold}Total build time: ${build_time}${reset}"
 
 quit
