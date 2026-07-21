@@ -47,7 +47,7 @@ dependencies = [
   "protobuf==7.35.1",
   "pyzbar",
   "qrcode",
-  "qreader<2.0.0",
+  "qreader>=3.16,<4.0",
 ]
 description = "Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps such as 'Google Authenticator'"
 dynamic = ["version"]

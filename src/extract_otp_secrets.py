@@ -46,7 +46,7 @@ import urllib.parse as urlparse
 from enum import Enum, IntEnum
 from importlib.metadata import PackageNotFoundError, version
 from typing import (Any, Final, List, Optional, Sequence, TextIO, Tuple,
-                    TypedDict)
+                    TypedDict, cast)
 
 import colorama
 from qrcode import QRCode
@@ -72,7 +72,7 @@ try:
 
     try:
         import pyzbar.pyzbar as zbar  # type: ignore
-        from qreader import QReader  # type: ignore
+        from qreader import QReader
         zbar_available = True
     except Exception as e:
         if not quiet:
@@ -343,14 +343,20 @@ def extract_otps_from_camera(args: Args) -> Otps:
             break
         try:
             if qr_mode in [QRMode.QREADER, QRMode.QREADER_DEEP]:
-                found, bbox = qreader.detect(img)
+                detections = qreader.detect(img)
+                detection = detections[0] if detections else None
+                bbox: Tuple[int, int, int, int] | None = None
+                if detection is not None:
+                    bbox_xyxy = cast('np.ndarray', detection['bbox_xyxy'])
+                    bbox = (int(bbox_xyxy[0]), int(bbox_xyxy[1]), int(bbox_xyxy[2]), int(bbox_xyxy[3]))
                 if qr_mode == QRMode.QREADER_DEEP:
-                    otp_url = qreader.detect_and_decode(img, True)
+                    results = cast(Tuple[Optional[str], ...], qreader.detect_and_decode(img))
+                    otp_url = next((result for result in results if result), None)
                 elif qr_mode == QRMode.QREADER:
-                    otp_url = qreader.decode(img, bbox) if found else None
+                    otp_url = qreader.decode(img, detection) if detection is not None else None
                 if otp_url:
                     new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
-                if found:
+                if bbox is not None:
                     cv2_draw_box(img, [(bbox[0], bbox[1]), (bbox[2], bbox[1]), (bbox[2], bbox[3]), (bbox[0], bbox[3])], get_color(new_otps_count, otp_url))
             elif qr_mode == QRMode.ZBAR:
                 for qrcode in zbar.decode(img, symbols=[zbar.ZBarSymbol.QRCODE]):
@@ -400,7 +406,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
     return otps
 
 
-def get_color(new_otps_count: int, otp_url: str) -> ColorBGR:
+def get_color(new_otps_count: int, otp_url: Optional[str]) -> ColorBGR:
     if new_otps_count:
         return SUCCESS_COLOR
     else:
@@ -623,8 +629,13 @@ def convert_img_to_otp_urls(filename: str, args: Args) -> OtpUrls:
 def decode_qr_img_otp_urls(img: Any, qr_mode: QRMode) -> OtpUrls:
     otp_urls: OtpUrls = []
     if qr_mode in [QRMode.QREADER, QRMode.QREADER_DEEP]:
-        otp_url = QReader().detect_and_decode(img, qr_mode == QRMode.QREADER_DEEP)
-        otp_urls.append(otp_url)
+        qreader_instance = QReader()
+        if qr_mode == QRMode.QREADER_DEEP:
+            results = cast(Tuple[Optional[str], ...], qreader_instance.detect_and_decode(img))
+            otp_urls += [otp_url for otp_url in results if otp_url]
+        else:
+            detections = qreader_instance.detect(img)
+            otp_urls += [otp_url for detection in detections if (otp_url := qreader_instance.decode(img, detection))]
     elif qr_mode == QRMode.CV2:
         otp_url, _, _ = cv2.QRCodeDetector().detectAndDecode(img)
         otp_urls.append(otp_url)

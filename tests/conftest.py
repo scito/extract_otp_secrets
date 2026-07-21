@@ -3,6 +3,22 @@ from typing import Any
 import pytest
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _preload_qreader_weights() -> None:
+    """
+    Instantiating QReader() for the first time triggers a one-time download of
+    the YOLO detection weights, whose progress bar is written to stderr. If
+    that happens inside a test that asserts on captured stdout/stderr (e.g. via
+    capsys), the test fails spuriously. Pre-load the weights once per test
+    session, before any test starts capturing output, so the cache is warm.
+    """
+    try:
+        from qreader import QReader
+        QReader()
+    except Exception:
+        pass
+
+
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption("--relaxed", action='store_true', help="run tests in relaxed mode")
     parser.addoption("--fast", action="store_true", help="faster execution, do not run all combinations")

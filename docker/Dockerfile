@@ -25,6 +25,19 @@ RUN uname -a \
         python3-tk \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir -U pip -r requirements.txt \
+    # Pre-warm QReader/Ultralytics at build time: this downloads the YOLO
+    # weights and creates the Ultralytics settings.json once, baking both
+    # into the image. Without this, the first QReader() instantiation in
+    # every ephemeral (--rm) container writes a "not writable" warning
+    # (since /root/.config doesn't exist yet) and a "Creating new
+    # Ultralytics Settings" notice to stdout, polluting piped/redirected
+    # CLI output; and with --network none it would have no weights to fall
+    # back to. /root/.config must exist first, otherwise Ultralytics
+    # resolves and writes settings.json under /tmp instead, at a path that
+    # no longer matches once /root/.config gets created later (e.g. by
+    # matplotlib), causing the settings to be "created" again at runtime.
+    && mkdir -p /root/.config \
+    && python -c "from qreader import QReader; QReader()" \
     && if [ "$RUN_TESTS" = "true" ]; then /extract/run_pytest.sh; else echo "Not running tests..."; fi \
     && echo 'test -s /extract/.alias && . /extract/.alias || true' >> ~/.bashrc
 
