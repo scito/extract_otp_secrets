@@ -236,10 +236,10 @@
         },
         "cuda-pathfinder": {
             "hashes": [
-                "sha256:1503af579d8379c24bdd65528379bc57039b0455be9f5f9686cf8e473a1fce51"
+                "sha256:7e4c07c117b78ba1fb35dac4c444d21f3677b1b1ff56175c53a8e3025c5b43c0"
             ],
             "markers": "python_version >= '3.10'",
-            "version": "==1.6.0"
+            "version": "==1.5.6"
         },
         "cuda-toolkit": {
             "extras": [
@@ -271,11 +271,11 @@
         },
         "filelock": {
             "hashes": [
-                "sha256:7be2ad23a14607ccc71808e68fe30848aeace7058ace17852f68e2a68e310402",
-                "sha256:d396bea984af47333ef05e50eae7eff88c84256de6112aea0ec48a233c064fe3"
+                "sha256:18a4179901809ad1905c6631d907f1c3a41806c0d3506f7f9862565576a81a16",
+                "sha256:e6d35965c709527915a184837a8421826d18bc3f9d7e9a5a0c8114a782475d66"
             ],
-            "markers": "python_version >= '3.10'",
-            "version": "==3.32.0"
+dddddddddd            "markers": "python_version >= '3.10'",
+            "version": "==3.31.2"
         },
         "fonttools": {
             "hashes": [
@@ -1948,5 +1948,7 @@
             "markers": "python_version >= '3.9'",
             "version": "==4.16.0"
         }
+
+
     }
 }
