@@ -374,6 +374,12 @@ jobs:
         run: |
               mkdir -p build/
               VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n "s/^([0-9]+).*/\1/p") VERSION_BUILD=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n -e"s/^[0-9]+.+/99/p")$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2025' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt
+      - name: Install UPX (Windows)
+        # PyInstaller auto-detects upx on PATH and compresses the collected
+        # DLLs/exe with it (no extra pyinstaller flag needed). windows-latest
+        # does not ship upx by default, unlike strip on Linux/macOS.
+        if: runner.os == 'Windows'
+        run: choco install upx -y
       - name: Build with pyinstaller for ${{ matrix.TARGET }}
         env:
           # Reproducible build: https://pyinstaller.org/en/stable/advanced-topics.html#creating-a-reproducible-build
