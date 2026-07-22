@@ -144,7 +144,7 @@ jobs:
       - name: Run smoke test
         run: |
           sudo apt-get update
-          sudo apt-get install -y libzbar0
+          sudo apt-get install -y libzbar0 libgl1
           python -m pip install --upgrade pip
           pip install -U -r requirements-dev.txt
           pip install -U .
@@ -320,7 +320,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libzbar0
+          sudo apt-get install -y libzbar0 libgl1
       - name: Install zbar shared lib for QReader (macOS)
         if: runner.os == 'macOS'
         env:
