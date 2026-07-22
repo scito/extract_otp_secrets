@@ -300,6 +300,11 @@ jobs:
           sudo apt-get install -y libzbar0
       - name: Install zbar shared lib for QReader (macOS)
         if: runner.os == 'macOS'
+        env:
+          # GitHub-hosted macOS runners ship with an untrusted aws/tap, which makes
+          # brew refuse to install anything since Homebrew now requires tap trust.
+          # See https://docs.brew.sh/Tap-Trust
+          HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
         run: |
           brew install zbar create-dmg
           # Homebrew on Apple Silicon installs into /opt/homebrew, which is not part of the
