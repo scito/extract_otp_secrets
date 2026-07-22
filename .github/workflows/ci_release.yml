@@ -128,6 +128,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
       # avoid building if there are testing errors
       - name: Run smoke test
         run: |
@@ -288,6 +300,17 @@ jobs:
         if: runner.os == 'Windows'
         run: ls "$($Env:WinDir)\system32"
       - uses: actions/checkout@v5
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
       - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
