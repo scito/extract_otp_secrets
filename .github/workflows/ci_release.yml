@@ -89,9 +89,15 @@ jobs:
             --silent \
             --show-error \
             -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"## Executables\n\nDownload the executable for your platform and execute it, see [README.md](https://github.com/scito/extract_otp_secrets#readme)\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.31) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.31), huge binary (2.7GB) due to included dependencies |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | MacOS arm64 (bare executable, see [README.md](https://github.com/scito/extract_otp_secrets#readme); optional libzbar must be installed manually, see [README.md](https://github.com/scito/extract_otp_secrets#readme)), huge binary (2.7GB) due to included dependencies |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.dmg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.pkg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n","draft":true,"prerelease":false,"generate_release_notes":true}')
+          release_id=$(jq -r '.id' <<< "$response")
+          if [ "$release_id" == "null" ] || [ -z "$release_id" ]; then
+            echo "::error::Failed to create release, no id in response:"
+            echo "$response"
+            exit 1
+          fi
           echo upload_url=$(jq '.upload_url' <<< "$response") >> $GITHUB_OUTPUT
           echo $(jq -r '.upload_url' <<< "$response") > release_url.txt
-          echo $(jq -r '.id' <<< "$response") > release_id.txt
+          echo "$release_id" > release_id.txt
       - name: Save Release URL File for publish
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v7
@@ -229,7 +235,7 @@ jobs:
         id: upload-release-asset
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          response=$(curl \
+          http_status=$(curl \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Content-Type: application/x-executable" \
@@ -237,7 +243,15 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             --silent \
             --show-error \
-            --upload-file dist/${{ matrix.EXE }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }})
+            --output response.json \
+            --write-out "%{http_code}" \
+            --upload-file dist/${{ matrix.EXE }} "${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}")
+          echo "HTTP status: $http_status"
+          cat response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "::error::Failed to upload release asset ${{ matrix.ASSET_NAME }} (HTTP $http_status)"
+            exit 1
+          fi
 
   build-native-executables:
     name: Build native packages
@@ -405,7 +419,13 @@ jobs:
         id: upload-release-asset
         if: matrix.UPLOAD && startsWith(github.ref, 'refs/tags/v')
         run: |
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --upload-file dist/${{ matrix.EXE }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}
+          http_status=$(curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --output response.json --write-out "%{http_code}" --upload-file dist/${{ matrix.EXE }} "${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}")
+          echo "HTTP status: $http_status"
+          cat response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "::error::Failed to upload release asset ${{ matrix.ASSET_NAME }} (HTTP $http_status)"
+            exit 1
+          fi
       - name: Upload Release Asset DMG (macOS)
         id: upload-release-asset-dmg
         if: false && matrix.UPLOAD && startsWith(github.ref, 'refs/tags/v') && runner.os == 'macOS'
@@ -460,7 +480,19 @@ jobs:
                   $asset_url
           done
           (cd assets/ && sha256sum * > ../sha256_hashes.txt)
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @sha256_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha256_hashes.txt
+          http_status=$(curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --output response.json --write-out "%{http_code}" --data-binary @sha256_hashes.txt "${{ steps.meta.outputs.upload_url }}=sha256_hashes.txt")
+          echo "HTTP status: $http_status"
+          cat response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "::error::Failed to upload sha256_hashes.txt (HTTP $http_status)"
+            exit 1
+          fi
 
           (cd assets/ && sha512sum * > ../sha512_hashes.txt)
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @sha512_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha512_hashes.txt
+          http_status=$(curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --output response.json --write-out "%{http_code}" --data-binary @sha512_hashes.txt "${{ steps.meta.outputs.upload_url }}=sha512_hashes.txt")
+          echo "HTTP status: $http_status"
+          cat response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "::error::Failed to upload sha512_hashes.txt (HTTP $http_status)"
+            exit 1
+          fi
