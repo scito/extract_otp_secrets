@@ -237,7 +237,7 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             --silent \
             --show-error \
-            --upload-file dist/${{ matrix.EXE }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}
+            --upload-file dist/${{ matrix.EXE }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }})
 
   build-native-executables:
     name: Build native packages
