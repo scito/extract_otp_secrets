@@ -18,11 +18,11 @@
     "default": {
         "certifi": {
             "hashes": [
-                "sha256:024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432",
-                "sha256:2227dcbaafe0d2f59279d1762ddddc37783ed4354594f194ffc31d20f41fc3db"
+                "sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+                "sha256:741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==2026.6.17"
+            "version": "==2026.7.22"
         },
         "charset-normalizer": {
             "hashes": [
@@ -236,10 +236,10 @@
         },
         "cuda-pathfinder": {
             "hashes": [
-                "sha256:7e4c07c117b78ba1fb35dac4c444d21f3677b1b1ff56175c53a8e3025c5b43c0"
+                "sha256:1503af579d8379c24bdd65528379bc57039b0455be9f5f9686cf8e473a1fce51"
             ],
             "markers": "python_version >= '3.10'",
-            "version": "==1.5.6"
+            "version": "==1.6.0"
         },
         "cuda-toolkit": {
             "extras": [
@@ -271,11 +271,11 @@
         },
         "filelock": {
             "hashes": [
-                "sha256:18a4179901809ad1905c6631d907f1c3a41806c0d3506f7f9862565576a81a16",
-                "sha256:e6d35965c709527915a184837a8421826d18bc3f9d7e9a5a0c8114a782475d66"
+                "sha256:7be2ad23a14607ccc71808e68fe30848aeace7058ace17852f68e2a68e310402",
+                "sha256:d396bea984af47333ef05e50eae7eff88c84256de6112aea0ec48a233c064fe3"
             ],
-dddddddddd            "markers": "python_version >= '3.10'",
-            "version": "==3.31.2"
+            "markers": "python_version >= '3.10'",
+            "version": "==3.32.0"
         },
         "fonttools": {
             "hashes": [
@@ -1404,11 +1404,11 @@ dddddddddd            "markers": "python_version >= '3.10'",
         },
         "ultralytics": {
             "hashes": [
-                "sha256:5bf553dcbb9853445847bca713e3247894c06120e87fb0a58201901213b436a2",
-                "sha256:bfd423cf74f9be902d4688fd1fbbafac5c7097330a8c1e7e4ced3b45aa633793"
+                "sha256:2625e73863b06dd882b4024b7a3a033ce712d200e3de58af5252939fb74aa403",
+                "sha256:98e15ec09a917f1baacd531a4048ea8c6d54d70162accae51e5b532b573b56b8"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==8.4.103"
+            "version": "==8.4.104"
         },
         "ultralytics-thop": {
             "hashes": [
@@ -1948,7 +1948,5 @@ dddddddddd            "markers": "python_version >= '3.10'",
             "markers": "python_version >= '3.9'",
             "version": "==4.16.0"
         }
-
-
     }
 }

@@ -37,8 +37,8 @@ name: release
 
 on:
   push:
-    tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    # tags:
+    #   - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
   pull_request:
   schedule:
     # Run weekly on default branch
@@ -194,7 +194,7 @@ jobs:
         # https://hub.docker.com/r/multiarch/qemu-user-static/
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir -U -r /files/requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir -U -r /files/requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && pip show torch torchvision | grep -E "^(Name|Version|Location)" && SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])") && du -sh "$SITE_PACKAGES"/* 2>/dev/null | sort -rh | head -30 && (pip list 2>/dev/null | grep -i nvidia || echo "no nvidia packages installed") && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
       - name: Smoke tests linux/amd64
         if: matrix.DOCKER_PLATFORM == 'linux/amd64'
