@@ -234,7 +234,8 @@ jobs:
       - name: Compress executable for release (binaries exceed GitHub's 2GB asset limit uncompressed)
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          tar -czf dist/${{ matrix.EXE }}.tar.gz -C dist ${{ matrix.EXE }}
+          sudo tar -czf dist/${{ matrix.EXE }}.tar.gz -C dist ${{ matrix.EXE }}
+          sudo chown $(id -u):$(id -g) dist/${{ matrix.EXE }}.tar.gz
           ls -lh dist/${{ matrix.EXE }} dist/${{ matrix.EXE }}.tar.gz
       - name: Upload Release Asset
         id: upload-release-asset
