@@ -194,7 +194,7 @@ jobs:
         # https://hub.docker.com/r/multiarch/qemu-user-static/
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir -U -r /files/requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
       - name: Smoke tests linux/amd64
         if: matrix.DOCKER_PLATFORM == 'linux/amd64'
@@ -241,8 +241,10 @@ jobs:
         id: upload-release-asset
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          UPLOAD_FILE="dist/${{ matrix.EXE }}.tar.gz"
-          UPLOAD_NAME="${{ matrix.ASSET_NAME }}.tar.gz"
+          UPLOAD_FILE="dist/${{ matrix.EXE }}"
+          UPLOAD_NAME="${{ matrix.ASSET_NAME }}"
+          # UPLOAD_FILE="dist/${{ matrix.EXE }}.tar.gz"
+          # UPLOAD_NAME="${{ matrix.ASSET_NAME }}.tar.gz"
           CONTENT_TYPE="application/gzip"
           http_status=$(curl \
             -X POST \
@@ -363,21 +365,12 @@ jobs:
           # GitHub Actions run: steps don't source ~/.zprofile (where `brew shellenv` would
           # normally export this). Without it, pyzbar raises "Unable to find zbar shared library".
           echo "DYLD_LIBRARY_PATH=$(brew --prefix zbar)/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-      - name: Install CPU-only PyTorch (Linux)
-        # qreader pulls in ultralytics -> torch. The default PyPI torch wheels for
-        # Linux bundle/pull in full CUDA runtime libraries (several GB), which
-        # PyInstaller then bundles into the onefile binary. This tool only runs
-        # inference on CPU, so install the much smaller CPU-only build first;
-        # the later requirements install is then satisfied and won't replace it.
-        if: runner.os == 'Linux'
-        run: |
-          pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
       - name: Install dependencies
         # TODO fix --use-pep517
         run: |
           python -m pip install --upgrade pip
-          pip install -U -r requirements-dev.txt
-          pip install -U .
+          pip install -U -r requirements-dev.txt --extra-index-url https://download.pytorch.org/whl/cpu
+          pip install -U . --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Create Windows win_file_version_info.txt
         shell: bash
         run: |
