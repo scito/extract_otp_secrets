@@ -366,7 +366,11 @@ if $build_local; then
 
         $PIP --version
 
-        cmd="$PIP install -U -r requirements.txt"
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            cmd="$PIP install -U -r requirements.txt \"torch==2.13.0+cpu\" \"torchvision==0.28.0+cpu\" --extra-index-url https://download.pytorch.org/whl/cpu"
+        else
+            cmd="$PIP install -U -r requirements.txt"
+        fi
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -527,7 +531,11 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
         
-        cmd="$UV pip install $VERBOSE -U -r requirements.txt --exclude excludes.txt"
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            cmd="$UV pip install $VERBOSE -U -r requirements.txt \"torch==2.13.0+cpu\" \"torchvision==0.28.0+cpu\" --extra-index-url https://download.pytorch.org/whl/cpu --exclude excludes.txt"
+        else
+            cmd="$UV pip install $VERBOSE -U -r requirements.txt --exclude excludes.txt"
+        fi
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -535,7 +543,11 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$UV pip install $VERBOSE -U -e . --exclude excludes.txt"
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            cmd="$UV pip install $VERBOSE -U -e . \"torch==2.13.0+cpu\" \"torchvision==0.28.0+cpu\" --extra-index-url https://download.pytorch.org/whl/cpu --exclude excludes.txt"
+        else
+            cmd="$UV pip install $VERBOSE -U -e . --exclude excludes.txt"
+        fi
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -598,6 +610,10 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
+        extra_ex=""
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            extra_ex="--exclude-module triton --exclude-module nvidia --exclude-module tensorboard"
+        fi
         cmd="time pyinstaller -y --specpath installer --add-data \"$QRDET_MODEL_DIR:qrdet/.model\" --onefile $clean_flag src/extract_otp_secrets.py"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
@@ -743,7 +759,7 @@ if $build_docker; then
 
     if $build_exe; then
         if $build_x86_64; then
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64_bookworm --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt \"torch==2.13.0+cpu\" \"torchvision==0.28.0+cpu\" --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --exclude-module triton --exclude-module nvidia --exclude-module tensorboard --name extract_otp_secrets_linux_x86_64_bookworm --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -759,7 +775,7 @@ if $build_docker; then
             BULLSEYE_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
             echo "Bullseye glibc: $BULLSEYE_GLIBC_VERSION"
 
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt \"torch==2.13.0+cpu\" \"torchvision==0.28.0+cpu\" --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --exclude-module triton --exclude-module nvidia --exclude-module tensorboard --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -774,7 +790,7 @@ if $build_docker; then
 
         if $build_arm; then
             # build linux/arm64
-            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye-arm64 -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller --specpath installer -y --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye-arm64 -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt \"torch==2.13.0+cpu\" \"torchvision==0.28.0+cpu\" --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller --specpath installer -y --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --exclude-module triton --exclude-module nvidia --exclude-module tensorboard --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
