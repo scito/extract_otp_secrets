@@ -743,7 +743,7 @@ if $build_docker; then
 
     if $build_exe; then
         if $build_x86_64; then
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --strip --name extract_otp_secrets_linux_x86_64_bookworm --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64_bookworm --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
