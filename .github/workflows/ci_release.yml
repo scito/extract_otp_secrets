@@ -194,7 +194,7 @@ jobs:
         # https://hub.docker.com/r/multiarch/qemu-user-static/
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --strip --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
 
       - name: Smoke tests linux/amd64
         if: matrix.DOCKER_PLATFORM == 'linux/amd64'
@@ -231,25 +231,33 @@ jobs:
         with:
           name: ${{ matrix.EXE }}
           path: dist/${{ matrix.EXE }}
+      - name: Compress executable for release (binaries exceed GitHub's 2GB asset limit uncompressed)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          tar -czf dist/${{ matrix.EXE }}.tar.gz -C dist ${{ matrix.EXE }}
+          ls -lh dist/${{ matrix.EXE }} dist/${{ matrix.EXE }}.tar.gz
       - name: Upload Release Asset
         id: upload-release-asset
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
+          UPLOAD_FILE="dist/${{ matrix.EXE }}.tar.gz"
+          UPLOAD_NAME="${{ matrix.ASSET_NAME }}.tar.gz"
+          CONTENT_TYPE="application/gzip"
           http_status=$(curl \
             -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Content-Type: application/x-executable" \
+            -H "Content-Type: $CONTENT_TYPE" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
             -H "X-GitHub-Api-Version: 2022-11-28" \
             --silent \
             --show-error \
             --output response.json \
             --write-out "%{http_code}" \
-            --upload-file dist/${{ matrix.EXE }} "${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}")
+            --upload-file "$UPLOAD_FILE" "${{ steps.meta.outputs.upload_url }}=$UPLOAD_NAME")
           echo "HTTP status: $http_status"
           cat response.json
           if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
-            echo "::error::Failed to upload release asset ${{ matrix.ASSET_NAME }} (HTTP $http_status)"
+            echo "::error::Failed to upload release asset $UPLOAD_NAME (HTTP $http_status)"
             exit 1
           fi
 
