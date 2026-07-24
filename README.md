@@ -37,7 +37,7 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
-- [Download and run binary executable (🆕 since v2.1)](#download-and-run-binary-executable--since-v21)
+- [Download and run binary executable](#download-and-run-binary-executable)
   - [MacOS](#macos)
 - [Usage](#usage)
   - [Capture QR codes from camera (🆕 since version 2.0)](#capture-qr-codes-from-camera--since-version-20)
@@ -90,7 +90,7 @@ The secrets can be exported to JSON or CSV, or printed as QR codes to console or
 - [Third party documentation](#third-party-documentation)
 </details>
 
-## Download and run binary executable (🆕 since v2.1)
+## Download and run binary executable
 
 1. Download executable for your platform from [latest release](https://github.com/scito/extract_otp_secrets/releases/latest), see assets
 2. Linux and macOS: Set executable bit for the downloaded file, e.g in terminal with `chmod +x extract_otp_secrets_X.Y.Z_OS_ARCH`
@@ -328,7 +328,7 @@ python extract_otp_secrets.py = < example_export.png</pre>
 
 * Free and open source
 * Supports Google Authenticator exports (and compatible apps like Aegis Authenticator)
-* Captures the the QR codes directly from the camera using different QR code libraries (based on OpenCV) (🆕 since v2.0)
+* Captures the the QR codes directly from the camera using different QR code libraries (based on OpenCV)
     * ZBAR: [pyzbar](https://github.com/NaturalHistoryMuseum/pyzbar) - fast and reliable, good for images and video capture (default and recommended) [if [libzbar](#installation-of-optional-shared-system-libraries-recommended) is installed]
     * QREADER: [QReader](https://github.com/Eric-Canas/QReader) [if [libzbar](#installation-of-optional-shared-system-libraries-recommended) is installed]
     * QREADER_DEEP: [QReader](https://github.com/Eric-Canas/QReader) - very slow in GUI [if [libzbar](#installation-of-optional-shared-system-libraries-recommended) is installed]
@@ -346,8 +346,8 @@ python extract_otp_secrets.py = < example_export.png</pre>
     * Dedicated CSV for KeePass
     * QR code images
 * Supports reading from stdin and writing to stdout, thus pipes can be used
-* Handles multiple input files (🆕 since v2.0)
-* Reads QR codes images: (See [OpenCV docu](https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56)) (🆕 since v2.0)
+* Handles multiple input files
+* Reads QR codes images: (See [OpenCV docu](https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56))
     * Portable Network Graphics - *.png
     * WebP - *.webp
     * JPEG files - *.jpeg, *.jpg, *.jpe
@@ -355,16 +355,16 @@ python extract_otp_secrets.py = < example_export.png</pre>
     * Windows bitmaps - *.bmp, *.dib
     * JPEG 2000 files - *.jp2
     * Portable image format - *.pbm, *.pgm, *.ppm *.pxm, *.pnm
-* Prints errors and warnings to stderr (🆕 since v2.0)
-* Prints colored output (🆕 since v2.0)
-* Startable as executable (script, Python, and all dependencies packed in one executable) (🆕 since v2.1)
+* Prints errors and warnings to stderr
+* Prints colored output
+* Startable as executable (script, Python, and all dependencies packed in one executable)
     * extract_otp_secrets_linux_x86_64 (requires glibc >= 2.31)
     * extract_otp_secrets_linux_arm64 (requires glibc >= 2.31)
     * extract_otp_secrets_win_x86_64.exe
     * extract_otp_secrets_macos_arm64 (optional [libzbar](#installation-of-optional-shared-system-libraries-recommended) needs to be installed manually if needed)
         * extract_otp_secrets_macos_arm64.dmg N/A, see [why](#macos)
         * extract_otp_secrets_macos_arm64.pkg N/A, see [why](#macos)
-* Prebuilt Docker images provided for amd64 and arm64 on [Docker Hub](https://hub.docker.com/repository/docker/scit0/extract_otp_secrets) and [GitHub Packages](https://github.com/users/scito/packages/container/package/extract_otp_secrets) (🆕 since v2.0)
+* Prebuilt Docker images provided for amd64 and arm64 on [Docker Hub](https://hub.docker.com/repository/docker/scit0/extract_otp_secrets) and [GitHub Packages](https://github.com/users/scito/packages/container/package/extract_otp_secrets)
 * Many ways to run the script:
     * Native Python
     * pipenv

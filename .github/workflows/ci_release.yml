@@ -88,10 +88,16 @@ jobs:
             https://api.github.com/repos/scito/extract_otp_secrets/releases \
             --silent \
             --show-error \
-            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"${{ steps.meta.outputs.tag_message }}\n\n## Executables\n\nDownload the executable for your platform and execute it, see [README.md](https://github.com/scito/extract_otp_secrets#readme)\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.31) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.31), huge binary (2.7GB) due to included dependencies |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | MacOS arm64 (bare executable, see [README.md](https://github.com/scito/extract_otp_secrets#readme); optional libzbar must be installed manually, see [README.md](https://github.com/scito/extract_otp_secrets#readme)), huge binary (2.7GB) due to included dependencies |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.dmg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.pkg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n","draft":true,"prerelease":false,"generate_release_notes":true}')
+            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"## Executables\n\nDownload the executable for your platform and execute it, see [README.md](https://github.com/scito/extract_otp_secrets#readme)\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.31) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.31) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | MacOS arm64 (bare executable, see [README.md](https://github.com/scito/extract_otp_secrets#readme); optional libzbar must be installed manually, see [README.md](https://github.com/scito/extract_otp_secrets#readme)) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.dmg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.pkg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n","draft":true,"prerelease":false,"generate_release_notes":true}')
+          release_id=$(jq -r '.id' <<< "$response")
+          if [ "$release_id" == "null" ] || [ -z "$release_id" ]; then
+            echo "::error::Failed to create release, no id in response:"
+            echo "$response"
+            exit 1
+          fi
           echo upload_url=$(jq '.upload_url' <<< "$response") >> $GITHUB_OUTPUT
           echo $(jq -r '.upload_url' <<< "$response") > release_url.txt
-          echo $(jq -r '.id' <<< "$response") > release_id.txt
+          echo "$release_id" > release_id.txt
       - name: Save Release URL File for publish
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v7
@@ -128,11 +134,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
       # avoid building if there are testing errors
       - name: Run smoke test
         run: |
           sudo apt-get update
-          sudo apt-get install -y libzbar0
+          sudo apt-get install -y libzbar0 libgl1
           python -m pip install --upgrade pip
           pip install -U -r requirements-dev.txt
           pip install -U .
@@ -145,11 +163,6 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v4
-        # Workaround for failing builds: https://github.com/docker/build-push-action/issues/761#issuecomment-1383822381
-        # TODO remove workaround when fixed
-        with:
-          driver-opts: |
-            image=moby/buildkit:latest
 
       - name: Login to DockerHub
         uses: docker/login-action@v4
@@ -176,8 +189,18 @@ jobs:
         # https://hub.docker.com/r/multiarch/qemu-user-static/
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U -r /files/requirements.txt && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
-
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir -U -r /files/requirements.txt torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+      - name: Check binary size
+        shell: bash
+        run: |
+          MAX_SIZE_MB=900
+          FILE="dist/${{ matrix.EXE }}"
+          SIZE_MB=$(du -m "$FILE" | cut -f1)
+          echo "$FILE size: ${SIZE_MB}MB"
+          if [ "$SIZE_MB" -gt "$MAX_SIZE_MB" ]; then
+            echo "::error::$FILE is ${SIZE_MB}MB, exceeds limit of ${MAX_SIZE_MB}MB"
+            exit 1
+          fi
       - name: Smoke tests linux/amd64
         if: matrix.DOCKER_PLATFORM == 'linux/amd64'
         run: |
@@ -195,13 +218,19 @@ jobs:
         if: matrix.DOCKER_PLATFORM == 'linux/arm64'
         run: |
           docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets -c 'dist/${{ matrix.EXE }} -V && dist/${{ matrix.EXE }} -h && dist/${{ matrix.EXE }} example_export.png && dist/${{ matrix.EXE }} - < example_export.txt && dist/${{ matrix.EXE }} --qr ZBAR example_export.png && dist/${{ matrix.EXE }} --qr QREADER example_export.png && dist/${{ matrix.EXE }} --qr QREADER_DEEP example_export.png && dist/${{ matrix.EXE }} --qr CV2 example_export.png && dist/${{ matrix.EXE }} --qr CV2_WECHAT example_export.png'
-      - name: Load Release URL File from release job
+      - name: Load Release Id File from release job
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v8
         with:
-          name: release_url
+          name: release_id
       - name: Display structure of files
         run: ls -R
+      - name: Set meta data
+        id: meta
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "release_id=$(cat release_id.txt)" >> $GITHUB_OUTPUT
+          echo "upload_url=https://uploads.github.com/repos/scito/extract_otp_secrets/releases/$(cat release_id.txt)/assets?name=" >> $GITHUB_OUTPUT
       - name: Upload EXE to artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -211,7 +240,9 @@ jobs:
         id: upload-release-asset
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          response=$(curl \
+          UPLOAD_FILE="dist/${{ matrix.EXE }}"
+          UPLOAD_NAME="${{ matrix.ASSET_NAME }}"
+          http_status=$(curl \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Content-Type: application/x-executable" \
@@ -219,8 +250,15 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             --silent \
             --show-error \
-            --data-binary @dist/${{ matrix.EXE }} \
-            $(cat release_url.txt)=${{ matrix.ASSET_NAME }})
+            --output response.json \
+            --write-out "%{http_code}" \
+            --upload-file "$UPLOAD_FILE" "${{ steps.meta.outputs.upload_url }}=$UPLOAD_NAME")
+          echo "HTTP status: $http_status"
+          cat response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "::error::Failed to upload release asset $UPLOAD_NAME (HTTP $http_status)"
+            exit 1
+          fi
 
   build-native-executables:
     name: Build native packages
@@ -288,6 +326,17 @@ jobs:
         if: runner.os == 'Windows'
         run: ls "$($Env:WinDir)\system32"
       - uses: actions/checkout@v5
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
       - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
@@ -297,9 +346,14 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libzbar0
+          sudo apt-get install -y libzbar0 libgl1
       - name: Install zbar shared lib for QReader (macOS)
         if: runner.os == 'macOS'
+        env:
+          # GitHub-hosted macOS runners ship with an untrusted aws/tap, which makes
+          # brew refuse to install anything since Homebrew now requires tap trust.
+          # See https://docs.brew.sh/Tap-Trust
+          HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
         run: |
           brew install zbar create-dmg
           # Homebrew on Apple Silicon installs into /opt/homebrew, which is not part of the
@@ -311,18 +365,35 @@ jobs:
         # TODO fix --use-pep517
         run: |
           python -m pip install --upgrade pip
-          pip install -U -r requirements-dev.txt
-          pip install -U .
+          pip install -U -r requirements-dev.txt --extra-index-url https://download.pytorch.org/whl/cpu
+          pip install -U . --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Create Windows win_file_version_info.txt
         shell: bash
         run: |
               mkdir -p build/
               VERSION_STR=$(setuptools-git-versioning) VERSION_MAJOR=$(cut -d '.' -f 1 <<< "$(setuptools-git-versioning)") VERSION_MINOR=$(cut -d '.' -f 2 <<< "$(setuptools-git-versioning)") VERSION_PATCH=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n "s/^([0-9]+).*/\1/p") VERSION_BUILD=$(echo $(cut -d '.' -f 3 <<< "$(setuptools-git-versioning)") | sed -E -n -e"s/^[0-9]+.+/99/p")$(($(git rev-list --count $(git tag | sort -V -r | sed '1!d')..HEAD))) COPYRIGHT_YEARS='2020-2025' envsubst < installer/win_file_version_info_template.txt > build/win_file_version_info.txt
+      - name: Install UPX (Windows)
+        # PyInstaller auto-detects upx on PATH and compresses the collected
+        # DLLs/exe with it (no extra pyinstaller flag needed). windows-latest
+        # does not ship upx by default, unlike strip on Linux/macOS.
+        if: runner.os == 'Windows'
+        run: choco install upx -y
       - name: Build with pyinstaller for ${{ matrix.TARGET }}
         env:
           # Reproducible build: https://pyinstaller.org/en/stable/advanced-topics.html#creating-a-reproducible-build
           PYTHONHASHSEED: 31
         run: ${{ matrix.CMD_BUILD }}
+      - name: Check EXE size
+        shell: bash
+        run: |
+          MAX_SIZE_MB=900
+          FILE="dist/${{ matrix.EXE }}"
+          SIZE_MB=$(du -m "$FILE" | cut -f1)
+          echo "$FILE size: ${SIZE_MB}MB"
+          if [ "$SIZE_MB" -gt "$MAX_SIZE_MB" ]; then
+            echo "::error::$FILE is ${SIZE_MB}MB, exceeds limit of ${MAX_SIZE_MB}MB"
+            exit 1
+          fi
       - name: Smoke tests for generated exe (general)
         run: |
           dist/${{ matrix.EXE }} -V
@@ -362,6 +433,18 @@ jobs:
         with:
           name: ${{ matrix.EXE }}
           path: dist/${{ matrix.EXE }}
+      - name: Check DMG size
+        shell: bash
+        if: runner.os == 'macOS'
+        run: |
+          MAX_SIZE_MB=900
+          FILE="dist/${{ matrix.DMG }}"
+          SIZE_MB=$(du -m "$FILE" | cut -f1)
+          echo "$FILE size: ${SIZE_MB}MB"
+          if [ "$SIZE_MB" -gt "$MAX_SIZE_MB" ]; then
+            echo "::error::$FILE is ${SIZE_MB}MB, exceeds limit of ${MAX_SIZE_MB}MB"
+            exit 1
+          fi
       - name: Upload DMG to artifacts
         uses: actions/upload-artifact@v7
         if: runner.os == 'macOS'
@@ -371,13 +454,20 @@ jobs:
       - name: Upload Release Asset
         id: upload-release-asset
         if: matrix.UPLOAD && startsWith(github.ref, 'refs/tags/v')
+        shell: bash
         run: |
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @dist/${{ matrix.EXE }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}
+          http_status=$(curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --output response.json --write-out "%{http_code}" --upload-file dist/${{ matrix.EXE }} "${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME }}")
+          echo "HTTP status: $http_status"
+          cat response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "::error::Failed to upload release asset ${{ matrix.ASSET_NAME }} (HTTP $http_status)"
+            exit 1
+          fi
       - name: Upload Release Asset DMG (macOS)
         id: upload-release-asset-dmg
         if: false && matrix.UPLOAD && startsWith(github.ref, 'refs/tags/v') && runner.os == 'macOS'
         run: |
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @dist/${{ matrix.DMG }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME_DMG }}
+          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: ${{ matrix.ASSET_MIME }}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --upload-file dist/${{ matrix.DMG }} ${{ steps.meta.outputs.upload_url }}=${{ matrix.ASSET_NAME_DMG }}
 
   upload-hashes:
     name: Upload hashes
@@ -427,7 +517,19 @@ jobs:
                   $asset_url
           done
           (cd assets/ && sha256sum * > ../sha256_hashes.txt)
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @sha256_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha256_hashes.txt
+          http_status=$(curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --output response.json --write-out "%{http_code}" --data-binary @sha256_hashes.txt "${{ steps.meta.outputs.upload_url }}=sha256_hashes.txt")
+          echo "HTTP status: $http_status"
+          cat response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "::error::Failed to upload sha256_hashes.txt (HTTP $http_status)"
+            exit 1
+          fi
 
           (cd assets/ && sha512sum * > ../sha512_hashes.txt)
-          curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --data-binary @sha512_hashes.txt ${{ steps.meta.outputs.upload_url }}=sha512_hashes.txt
+          http_status=$(curl -X POST -H "Accept: application/vnd.github+json" -H "Content-Type: text/plain" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" --show-error --output response.json --write-out "%{http_code}" --data-binary @sha512_hashes.txt "${{ steps.meta.outputs.upload_url }}=sha512_hashes.txt")
+          echo "HTTP status: $http_status"
+          cat response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "::error::Failed to upload sha512_hashes.txt (HTTP $http_status)"
+            exit 1
+          fi

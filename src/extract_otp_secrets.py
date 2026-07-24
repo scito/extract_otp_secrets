@@ -38,6 +38,7 @@ import csv
 import fileinput
 import glob
 import json
+import logging
 import os
 import platform
 import re
@@ -74,6 +75,13 @@ try:
         import pyzbar.pyzbar as zbar  # type: ignore
         from qreader import QReader
         zbar_available = True
+        # qrdet (a QReader dependency, unmaintained since 2024) still calls
+        # ultralytics' model.predict(half=False, ...), which newer ultralytics
+        # releases log as a deprecation warning ("'half' is deprecated ... Use
+        # 'quantize' instead."). This is harmless (equivalent to quantize=None)
+        # and not something we control, so silence just this one message.
+        logging.getLogger('ultralytics').addFilter(
+            lambda record: "'half' is deprecated" not in record.getMessage())
     except Exception as e:
         if not quiet:
             print(f"""

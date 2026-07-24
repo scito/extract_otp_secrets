@@ -24,7 +24,7 @@ RUN uname -a \
         libzbar0 \
         python3-tk \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir -U pip -r requirements.txt \
+    && pip install --no-cache-dir -U pip -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu \
     # Pre-warm QReader/Ultralytics at build time: this downloads the YOLO
     # weights and creates the Ultralytics settings.json once, baking both
     # into the image. Without this, the first QReader() instantiation in
