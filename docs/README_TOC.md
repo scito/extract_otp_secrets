@@ -3,7 +3,7 @@ Generate from file: README.md
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
-- [Download and run binary executable (🆕 since v2.1)](#download-and-run-binary-executable--since-v21)
+- [Download and run binary executable](#download-and-run-binary-executable)
   - [MacOS](#macos)
 - [Usage](#usage)
   - [Capture QR codes from camera (🆕 since version 2.0)](#capture-qr-codes-from-camera--since-version-20)
