@@ -2030,12 +2030,12 @@
         },
         "types-protobuf": {
             "hashes": [
-                "sha256:28cfaded25889cb83ebfb63cfb0a43628f0b6f3785767bec17287dc6468795f2",
-                "sha256:a0a5337413347166439c0e07cbc26c6164d091401c6f01b1dfd8cdb966c4dd8f"
+                "sha256:2e3a225b3c21f0022daa34cec155f03858bb9aff9792947b8e71f0e9f1791fdb",
+                "sha256:6f43846e7a3cc2621abfa79e2bb03461e6769a74cdae7462efaddf84580fd5c1"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==7.34.1.20260518"
+            "version": "==7.34.1.20260816"
         },
         "typing-extensions": {
             "hashes": [
