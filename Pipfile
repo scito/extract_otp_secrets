@@ -10,7 +10,7 @@ numpy = ">=2.4"
 # for macOS: opencv-contrib-python = "<=4.7.0"
 pillow = "*"
 pyzbar = "*"
-protobuf = "7.35.1"
+protobuf = "7.36.0"
 qrcode = "*"
 qreader = ">=3.16,<4.0"
 
