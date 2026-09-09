@@ -2258,12 +2258,12 @@
         },
         "types-protobuf": {
             "hashes": [
-                "sha256:5a98c18177cfd968d6a0de55ecfc4221aa829ef88bcd86104298e028516b04af",
-                "sha256:7cc452a012678a6a889287d4cb702ea54b9f90a6ab0f3aa4c019d21f3ae7529b"
+                "sha256:5155e48569e0dabff303fdf578db96cd31ea9a4a63b18018a4ceac6b0ae17462",
+                "sha256:efd1a3862d4c967dad5512ef8d56b1530ac84f182c41735b94004756518c4998"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==7.35.1.20260827"
+            "version": "==7.35.1.20260906"
         },
         "typing-extensions": {
             "hashes": [
