@@ -5,17 +5,23 @@
 
 import os
 import qrdet
+from PyInstaller.utils.hooks import collect_all
 
 block_cipher = None
 
 qrdet_model_dir = os.path.join(os.path.dirname(qrdet.__file__), '.model')
 
+# PyInstaller's default hooks can miss torchvision's compiled ops extension,
+# causing "operator torchvision::nms does not exist" at runtime.
+torch_datas, torch_binaries, torch_hiddenimports = collect_all('torch')
+torchvision_datas, torchvision_binaries, torchvision_hiddenimports = collect_all('torchvision')
+
 a = Analysis(
     ['src/extract_otp_secrets.py'],
     pathex=[],
-    binaries=[],
-    datas=[(qrdet_model_dir, 'qrdet/.model')],
-    hiddenimports=[],
+    binaries=[*torch_binaries, *torchvision_binaries],
+    datas=[(qrdet_model_dir, 'qrdet/.model'), *torch_datas, *torchvision_datas],
+    hiddenimports=[*torch_hiddenimports, *torchvision_hiddenimports],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

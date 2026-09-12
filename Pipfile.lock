@@ -1616,11 +1616,11 @@
         },
         "ultralytics": {
             "hashes": [
-                "sha256:0cd4728b0ba6758d658cdcb5fa0d4cf2a2a47aedcae0e593c2d853856d12ab5a",
-                "sha256:52db9fd0ebb1dec7525763c12a281869aed9b23d3cd5095521173ac265e3df9f"
+                "sha256:71534de12a37556cf001acba60cb15ec83d1757a843e8a8708b497d67434fbda",
+                "sha256:fa158e6413ccf78e2268632b7838d280a172a2a285d0970528b84e3c78a6950f"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==8.4.148"
+            "version": "==8.4.149"
         },
         "ultralytics-platform": {
             "hashes": [
