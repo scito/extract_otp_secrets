@@ -190,7 +190,8 @@ jobs:
         # https://hub.docker.com/r/multiarch/qemu-user-static/
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir -U -r /files/requirements.txt torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          # Force-reinstall torch/torchvision from the CPU-only index alone (no --extra-index-url) so both resolve from the same single index/build flavor - avoids pip mixing a cpu torch with a cuda torchvision (or vice versa), which breaks torchvision's custom ops ("operator torchvision::nms does not exist").
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir -U -r /files/requirements.txt && pip install --no-cache-dir --force-reinstall --no-deps torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
       - name: Check binary size
         shell: bash
         run: |
@@ -362,12 +363,21 @@ jobs:
           # GitHub Actions run: steps don't source ~/.zprofile (where `brew shellenv` would
           # normally export this). Without it, pyzbar raises "Unable to find zbar shared library".
           echo "DYLD_LIBRARY_PATH=$(brew --prefix zbar)/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-      - name: Install dependencies
+      - name: Install dependencies (Linux, CPU-only torch)
         # TODO fix --use-pep517
+        # Force-reinstall from the CPU-only index alone (no pin) so torch/torchvision come from the same build flavor, avoiding mixed cpu/cuda ops.
+        if: runner.os == 'Linux'
         run: |
           python -m pip install --upgrade pip
-          pip install -U -r requirements-dev.txt --extra-index-url https://download.pytorch.org/whl/cpu
-          pip install -U . --extra-index-url https://download.pytorch.org/whl/cpu
+          pip install -U -r requirements-dev.txt
+          pip install -U .
+          pip install --force-reinstall --no-deps torch torchvision --index-url https://download.pytorch.org/whl/cpu
+      - name: Install dependencies (Windows/macOS)
+        if: runner.os != 'Linux'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U -r requirements-dev.txt
+          pip install -U .
       - name: Create Windows win_file_version_info.txt
         shell: bash
         run: |
