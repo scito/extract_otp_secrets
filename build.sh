@@ -204,7 +204,7 @@ UV="${UV:=uv}"
 PIPENV="$PYTHON -m pipenv"
 FLAKE8="$PYTHON -m flake8"
 MYPY="$PYTHON -m mypy"
-DOCKER="${DOCKER:=docker}"
+DOCKER="${DOCKER:=podman}"
 PYTHON_VERSION=$($PYTHON --version 2>&1 | cut -d " " -f2 | cut -d "." -f1-2)
 UVENV='.uvenv'
 
@@ -691,8 +691,8 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        # Build extract_otp_secrets (Debian Bookworm)
-        cmd="$DOCKER build . --network=host -t extract_otp_secrets -t extract_otp_secrets:bookworm --pull -f docker/Dockerfile --build-arg RUN_TESTS=false"
+        # Build extract_otp_secrets (Debian Trixie)
+        cmd="$DOCKER build . --network=host -t extract_otp_secrets -t extract_otp_secrets:trixie --pull -f docker/Dockerfile --build-arg RUN_TESTS=false"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -712,31 +712,31 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        # Build extract_otp_secrets (Debian Bullseye)
-        cmd="$DOCKER build . --network=host -t extract_otp_secrets:bullseye -t extract_otp_secrets:bullseye-x86_64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.13-slim-bullseye"
+        # Build extract_otp_secrets (Debian Bookworm)
+        cmd="$DOCKER build . --network=host -t extract_otp_secrets:bookworm -t extract_otp_secrets:bookworm-x86_64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.13-slim-bookworm"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network none --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bullseye example_export.txt"
+        cmd="$DOCKER run --network none --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bookworm example_export.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="cat example_export.txt | $DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bullseye - -c - > example_output.csv"
+        cmd="cat example_export.txt | $DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bookworm - -c - > example_output.csv"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bullseye = < example_export.png"
+        cmd="$DOCKER run --network none --rm -i -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bookworm = < example_export.png"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$DOCKER run --network=host --entrypoint /extract/run_pytest.sh --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bullseye"
+        cmd="$DOCKER run --network=host --entrypoint /extract/run_pytest.sh --rm -v \"$($PWD):/files:ro,z\" extract_otp_secrets:bookworm"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        # Build executable from Docker latest
+        # Build executable from Docker Trixie
         # sed "1!d" is workaround for head -n 1 since it head procduces exit code != 0
-        BOOKWORM_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
-        echo "Bookworm glibc: $BOOKWORM_GLIBC_VERSION"
+        TRIXIE_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+        echo "Trixie glibc: $TRIXIE_GLIBC_VERSION"
     fi
 
     if $build_arm; then
@@ -745,31 +745,31 @@ if $build_docker; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        # Build extract_otp_secrets (Debian Bullseye)
-        cmd="$DOCKER buildx build --platform=linux/arm64 . -t extract_otp_secrets:bullseye-arm64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.13-slim-bullseye"
+        # Build extract_otp_secrets (Debian Bookworm)
+        cmd="$DOCKER buildx build --platform=linux/arm64 . -t extract_otp_secrets:bookworm-arm64 --pull -f docker/Dockerfile --build-arg RUN_TESTS=false --build-arg BASE_IMAGE=python:3.13-slim-bookworm"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
     fi
 
     if $build_exe; then
         if $build_x86_64; then
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt $DOCKER_EXTRA_INDEX_URL && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64_bookworm --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt $DOCKER_EXTRA_INDEX_URL && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64_trixie --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="dist/extract_otp_secrets_linux_x86_64_bookworm -h || echo 'Could not run exe; see error message above'"
+            cmd="dist/extract_otp_secrets_linux_x86_64_trixie -h || echo 'Could not run exe; see error message above'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="dist/extract_otp_secrets_linux_x86_64_bookworm --qr ZBAR example_export.png || echo 'Could not run exe; see error message above'"
+            cmd="dist/extract_otp_secrets_linux_x86_64_trixie --qr ZBAR example_export.png || echo 'Could not run exe; see error message above'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            # Build executable from Docker bullseye
-            BULLSEYE_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
-            echo "Bullseye glibc: $BULLSEYE_GLIBC_VERSION"
+            # Build executable from Docker Bookworm
+            BOOKWORM_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bookworm -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+            echo "Bookworm glibc: $BOOKWORM_GLIBC_VERSION"
 
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt $DOCKER_EXTRA_INDEX_URL && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt $DOCKER_EXTRA_INDEX_URL && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -784,11 +784,11 @@ if $build_docker; then
 
         if $build_arm; then
             # build linux/arm64
-            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye-arm64 -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt $DOCKER_EXTRA_INDEX_URL && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller --specpath installer -y --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm-arm64 -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt $DOCKER_EXTRA_INDEX_URL && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller --specpath installer -y --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="PLATFORM='linux/arm64' && EXE='dist/extract_otp_secrets_linux_arm64' && $DOCKER run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye-arm64 -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
+            cmd="PLATFORM='linux/arm64' && EXE='dist/extract_otp_secrets_linux_arm64' && $DOCKER run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm-arm64 -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
         fi
@@ -796,7 +796,27 @@ if $build_docker; then
 
     if $build_nuitka_exe; then
         if $build_x86_64; then
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_bookworm_compiled /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_trixie_compiled /files/src/extract_otp_secrets.py'"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_trixie_compiled -h"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_trixie_compiled --qr ZBAR example_export.png"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            cmd="cp build/docker/nuitka/extract_otp_secrets_linux_x86_64_trixie_compiled dist/"
+            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+            eval "$cmd"
+
+            # Build executable from Docker Bookworm
+            BOOKWORM_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bookworm -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
+            echo "Bookworm glibc: $BOOKWORM_GLIBC_VERSION"
+
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_bookworm_compiled /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -811,35 +831,15 @@ if $build_docker; then
             cmd="cp build/docker/nuitka/extract_otp_secrets_linux_x86_64_bookworm_compiled dist/"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
-
-            # Build executable from Docker bullseye
-            BULLSEYE_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bullseye -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
-            echo "Bookworm glibc: $BULLSEYE_GLIBC_VERSION"
-
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_bullseye_compiled /files/src/extract_otp_secrets.py'"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_bullseye_compiled -h"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="build/docker/nuitka/extract_otp_secrets_linux_x86_64_bullseye_compiled --qr ZBAR example_export.png"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
-
-            cmd="cp build/docker/nuitka/extract_otp_secrets_linux_x86_64_bullseye_compiled dist/"
-            if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
-            eval "$cmd"
         fi
 
         if $build_arm; then
             # build linux/arm64
-            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye-arm64 -c 'apt-get update && apt-get -y install binutils build-essential patchelf qt5-default && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_arm64_compiled /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm-arm64 -c 'apt-get update && apt-get -y install binutils build-essential patchelf qt5-default && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_arm64_compiled /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="PLATFORM='linux/arm64' && EXE='build/docker/nuitka/extract_otp_secrets_linux_arm64_compiled' && $DOCKER run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bullseye-arm64 -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
+            cmd="PLATFORM='linux/arm64' && EXE='build/docker/nuitka/extract_otp_secrets_linux_arm64_compiled' && $DOCKER run --platform \"\$PLATFORM\" --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm-arm64 -c \"\$EXE -V && \$EXE -h && \$EXE example_export.png && \$EXE - < example_export.txt && \$EXE --qr ZBAR example_export.png && \$EXE --qr QREADER example_export.png && \$EXE --qr QREADER_DEEP example_export.png && \$EXE --qr CV2 example_export.png && \$EXE --qr CV2_WECHAT example_export.png\""
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 

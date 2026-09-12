@@ -26,7 +26,7 @@ on:
 
 jobs:
   build-and-push-docker-debian-image:
-    name: Build Docker Bookworm image and push to repositories
+    name: Build Docker Trixie image and push to repositories
     # run only when code is compiling and tests are passing
     strategy:
       matrix:
@@ -78,7 +78,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: "Build image (Bookworm/Debian 12) and push to Docker Hub and GitHub Container Registry"
+      - name: "Build image (Trixie/Debian 13) and push to Docker Hub and GitHub Container Registry"
         id: docker_build_qr_reader_latest
         uses: docker/build-push-action@v6
         with:
@@ -94,9 +94,9 @@ jobs:
           pull: true
           tags: |
             docker.io/scit0/extract_otp_secrets:latest-${{ matrix.PLATFORM_ARCH }}
-            docker.io/scit0/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
+            docker.io/scit0/extract_otp_secrets:trixie-${{ matrix.PLATFORM_ARCH }}
             ghcr.io/scito/extract_otp_secrets:latest-${{ matrix.PLATFORM_ARCH }}
-            ghcr.io/scito/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
+            ghcr.io/scito/extract_otp_secrets:trixie-${{ matrix.PLATFORM_ARCH }}
           provenance: true
           sbom: true
           # build on feature branches, push only on master branch
@@ -111,7 +111,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
-          name: digests_bookworm_${{ matrix.PLATFORM_ARCH }}
+          name: digests_trixie_${{ matrix.PLATFORM_ARCH }}
           path: digests.txt
 
   create-multiarch-debian-manifests:
@@ -143,8 +143,8 @@ jobs:
           for tag in \
             docker.io/scit0/extract_otp_secrets:latest \
             ghcr.io/scito/extract_otp_secrets:latest \
-            docker.io/scit0/extract_otp_secrets:bookworm \
-            ghcr.io/scito/extract_otp_secrets:bookworm \
+            docker.io/scit0/extract_otp_secrets:trixie \
+            ghcr.io/scito/extract_otp_secrets:trixie \
           ; do
             docker buildx imagetools create -t $tag \
               $tag-x86_64 \
@@ -281,8 +281,8 @@ jobs:
                 $tag-arm64
             done
 
-  build-and-push-docker-bullseye-image:
-    name: Build Docker Bullseye image (for PyInstsaller) and push to repositories
+  build-and-push-docker-bookworm-image:
+    name: Build Docker Bookworm image (for PyInstsaller) and push to repositories
     # run only when code is compiling and tests are passing
     strategy:
       matrix:
@@ -334,8 +334,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_IO_TOKEN }}
 
-      - name: "Build image from Bullseye (Debian 11) and push to GitHub Container Registry"
-        id: docker_build_bullseye
+      - name: "Build image from Bookworm (Debian 12) and push to GitHub Container Registry"
+        id: docker_build_bookworm
         if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v6
         with:
@@ -345,12 +345,12 @@ jobs:
           file: docker/Dockerfile
           # builder: ${{ steps.buildx.outputs.name }}
           build-args: |
-            BASE_IMAGE=python:3.13-slim-bullseye
+            BASE_IMAGE=python:3.14-slim-bookworm
           # Note: tags has to be all lower-case
           pull: true
           tags: |
-            docker.io/scit0/extract_otp_secrets:bullseye-${{ matrix.PLATFORM_ARCH }}
-            ghcr.io/scito/extract_otp_secrets:bullseye-${{ matrix.PLATFORM_ARCH }}
+            docker.io/scit0/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
+            ghcr.io/scito/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }}
           provenance: true
           sbom: true
           push: ${{ github.secret_source == 'Actions' }}
@@ -358,21 +358,21 @@ jobs:
       - name: Image digest
         # TODO upload digests to assets
         run: |
-          echo "extract_otp_secrets digests: ${{ steps.docker_build_qr_reader_latest.outputs.digest }}"
-          echo "${{ steps.docker_build_qr_reader_latest.outputs.digest }}" > digests.txt
+          echo "extract_otp_secrets digests: ${{ steps.docker_build_bookworm.outputs.digest }}"
+          echo "${{ steps.docker_build_bookworm.outputs.digest }}" > digests.txt
       - name: Save docker digests as artifacts
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
-          name: digests_bullseye_${{ matrix.PLATFORM_ARCH }}
+          name: digests_bookworm_${{ matrix.PLATFORM_ARCH }}
           path: digests.txt
 
-  create-multiarch-bullseye-manifests:
-    name: Create multiarch manifests for Bullseye image
+  create-multiarch-bookworm-manifests:
+    name: Create multiarch manifests for Bookworm image
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
     needs:
-      - build-and-push-docker-bullseye-image
+      - build-and-push-docker-bookworm-image
     steps:
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -394,8 +394,8 @@ jobs:
         shell: bash
         run: |
           for tag in \
-              docker.io/scit0/extract_otp_secrets:bullseye \
-              ghcr.io/scito/extract_otp_secrets:bullseye \
+              docker.io/scit0/extract_otp_secrets:bookworm \
+              ghcr.io/scito/extract_otp_secrets:bookworm \
             ; do
               docker buildx imagetools create -t $tag \
                 $tag-x86_64 \

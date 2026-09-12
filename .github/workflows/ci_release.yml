@@ -28,6 +28,7 @@ name: release
 # - Linux x86_64 glibc 2.35: ubuntu-latest
 # - Linux x86_64 glibc 2.31: extract_otp_secrets:bullseye
 # - Linux x86_64 glibc 2.36: extract_otp_secrets:bookworm
+# - Linux x86_64 glibc 2.41: extract_otp_secrets:trixie
 # - Windows x86_64: windows-latest
 # - MacOS x86_64: macos-11
 # - Linux x86_64 glibc 2.28: extract_otp_secrets:buster
@@ -182,14 +183,14 @@ jobs:
       - name: Image digest
         # TODO upload digests to assets
         run: |
-          echo "extract_otp_secrets: ${{ steps.docker_build_bullseye.outputs.digest }}"
+          echo "extract_otp_secrets: ${{ steps.docker_build_bookworm.outputs.digest }}"
 
         # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
         # https://github.com/multiarch/qemu-user-static
         # https://hub.docker.com/r/multiarch/qemu-user-static/
       - name: Run Pyinstaller in container for ${{ matrix.EXE }}
         run: |
-          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bullseye -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir -U -r /files/requirements.txt torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
+          docker run --pull always --entrypoint /bin/bash --rm -v "$(pwd)":/files -w /files docker.io/scit0/extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils && pip install --no-cache-dir -U -r /files/requirements.txt torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && python -c "from qrdet import QRDetector; QRDetector()" && QRDET_MODEL_DIR=$(python -c "import qrdet, os; print(os.path.dirname(qrdet.__file__))" | tail -n 1)/.model && pyinstaller -y --add-data "$QRDET_MODEL_DIR:qrdet/.model" --onefile --name ${{ matrix.EXE }} --distpath /files/dist/ /files/src/extract_otp_secrets.py'
       - name: Check binary size
         shell: bash
         run: |
