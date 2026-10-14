@@ -2239,11 +2239,11 @@
         },
         "platformdirs": {
             "hashes": [
-                "sha256:63743c02414e755de4e31b8f68125c1407495b86c5a006e203c01ff8b9924250",
-                "sha256:78bfb9db2a8471ed7eebe3c3c932da413911042994e699b384fbb4493fa872d7"
+                "sha256:1aa0b0d3f224c1f07c295121e312a5a24a180d6ae5a8425ea1784b3e3863e9c0",
+                "sha256:3dbcf4cd708f21cf876c4eaa90e58412bc4f033d87143f41b1493ff77c25b7e1"
             ],
-            "markers": "python_version >= '3.10'",
-            "version": "==4.12.4"
+            "markers": "python_version >= '3.11'",
+            "version": "==4.13.0"
         },
         "pluggy": {
             "hashes": [
@@ -2294,12 +2294,12 @@
         },
         "pylint": {
             "hashes": [
-                "sha256:235f13dc418c0041c649b42a5c35c99f2ffc6ca8b6a7574958eac5335906a68a",
-                "sha256:e34c8636edc7d60a2eaadca4ad6c18a49e202361987a26e81b2a17fa92be28e1"
+                "sha256:9928603068edfa0d1a3c167f174b099d4b97c3db75d32d0fcdd029770b4713a9",
+                "sha256:a85357cae24f33ad8d86c8f3daaa92c600ae4012b54a57299cee76000e9364cf"
             ],
             "index": "pypi",
             "markers": "python_full_version >= '3.10.0'",
-            "version": "==4.1.2"
+            "version": "==4.1.3"
         },
         "pyproject-hooks": {
             "hashes": [
