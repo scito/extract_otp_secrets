@@ -2247,11 +2247,11 @@
         },
         "pluggy": {
             "hashes": [
-                "sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3",
-                "sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746"
+                "sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec",
+                "sha256:d1eaa46ebb595891b860ab086b4d09c8588af65ebd4361b8e8f4bb8920b90ba8"
             ],
-            "markers": "python_version >= '3.9'",
-            "version": "==1.6.0"
+            "markers": "python_version >= '3.10'",
+            "version": "==1.7.0"
         },
         "protobuf": {
             "hashes": [
@@ -2329,12 +2329,12 @@
         },
         "pytest-mock": {
             "hashes": [
-                "sha256:007cfeb257801d88d9c0b2a7b5a15a15e73b71968dfd72e7bf8c4a2f8393aec8",
-                "sha256:5a8395528b8f498205f3718f575228d0edaed7425fff638f87d1a6c3e0383636"
+                "sha256:c6bf5fd123e9635471c63c46ee23044076b4a9f5fca2e39b11e468917c1199ec",
+                "sha256:cd162ca2495584a1fd854b4f80cfe520399a7654a462a42a84cd268844a9122b"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==3.16.0"
+            "version": "==3.16.1"
         },
         "tomlkit": {
             "hashes": [
