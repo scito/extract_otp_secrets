@@ -22,8 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 3.x is used to run code coverage
-        python-version: ["3.x", "3.14", "3.13", "3.12", "3.11", "3.10"]
+        # 3.14 is used to run code coverage
+        python-version: ["3.14", "3.13", "3.12", "3.11", "3.10"]
         platform: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
 #        exclude:
 
@@ -61,13 +61,13 @@ jobs:
         run: |
           mypy --install-types --non-interactive src/*.py tests/*.py
           mypy --strict src/*.py tests/*.py
-        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
+        if: matrix.python-version == '3.14' && matrix.platform == 'ubuntu-latest'
       - name: Test with pytest
         run: pytest
-        if: (matrix.python-version != '3.x' || matrix.platform != 'ubuntu-latest') && (matrix.python-version != '3.10' && matrix.platform != 'macos-latest')
+        if: (matrix.python-version != '3.14' || matrix.platform != 'ubuntu-latest') && (matrix.python-version != '3.10' && matrix.platform != 'macos-latest')
       - name: Test with pytest (with code coverage)
         run: pytest --cov=extract_otp_secrets_test --junitxml=pytest.xml --cov-report=term-missing | tee pytest-coverage.txt
-        if: matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
+        if: matrix.python-version == '3.14' && matrix.platform == 'ubuntu-latest'
       # https://github.com/marketplace/actions/pytest-coverage-comment
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
@@ -75,6 +75,6 @@ jobs:
           pytest-coverage-path: ./pytest-coverage.txt
           junitxml-path: ./pytest.xml
         if: |
-          false && matrix.python-version == '3.x' && matrix.platform == 'ubuntu-latest'
+          false && matrix.python-version == '3.14' && matrix.platform == 'ubuntu-latest'
           && !contains(github.ref, 'refs/tags/')
 
