@@ -20,7 +20,6 @@ classifiers = [
     "Topic :: Utilities",
     "Topic :: Security",
     "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -41,7 +40,6 @@ classifiers = [
 dependencies = [
   "colorama>=0.4.6",
   "opencv-contrib-python==5.0.0.93",
-  "numpy>=2.2,<2.3 ; python_version >= '3.10' and python_version < '3.11'",
   "numpy>=2.4,<2.5 ; python_version >= '3.11' and python_version < '3.12'",
   "numpy>=2.4 ; python_version >= '3.12' and python_version < '3.15'",
   "numpy>=2.5.2 ; python_version >= '3.15'",
@@ -58,7 +56,7 @@ license = {text = "GNU General Public License v3 (GPLv3)"}
 readme = "README.md"
 authors = [{name = "scito", email = "info@scito.ch"}]
 maintainers = [{name = "scito", email = "info@scito.ch"}]
-requires-python = ">=3.10, <4"
+requires-python = ">=3.11, <4"
 scripts = {extract_otp_secrets = "extract_otp_secrets:sys_main"}
 urls = {Project-URL = "https://github.com/scito/extract_otp_secrets", Bug-Reports = "https://github.com/scito/extract_otp_secrets/issues", Source = "https://github.com/scito/extract_otp_secrets"}
 
