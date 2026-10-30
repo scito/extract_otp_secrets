@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         # 3.15 is used to run code coverage
-        python-version: ["3.15", "3.14", "3.13", "3.12", "3.11", "3.10"]
+        python-version: ["3.15", "3.14", "3.13", "3.12", "3.11"]
         platform: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
 #        exclude:
 
@@ -64,7 +64,7 @@ jobs:
         if: matrix.python-version == '3.15' && matrix.platform == 'ubuntu-latest'
       - name: Test with pytest
         run: pytest
-        if: (matrix.python-version != '3.15' || matrix.platform != 'ubuntu-latest') && (matrix.python-version != '3.10' && matrix.platform != 'macos-latest')
+        if: (matrix.python-version != '3.15' || matrix.platform != 'ubuntu-latest')
       - name: Test with pytest (with code coverage)
         run: pytest --cov=extract_otp_secrets_test --junitxml=pytest.xml --cov-report=term-missing | tee pytest-coverage.txt
         if: matrix.python-version == '3.15' && matrix.platform == 'ubuntu-latest'

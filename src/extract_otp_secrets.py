@@ -30,7 +30,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # workaround for PYTHON <= 3.10
+from __future__ import annotations  # workaround for <= PYTHON 3.13 (PEP 649): annotations reference optional modules (cv2, tkinter, numpy)
 
 import argparse
 import base64
@@ -46,8 +46,7 @@ import sys
 import urllib.parse as urlparse
 from enum import Enum, IntEnum
 from importlib.metadata import PackageNotFoundError, version
-from typing import (Any, Final, List, Optional, Sequence, TextIO, Tuple,
-                    TypedDict, cast)
+from typing import Any, Final, Sequence, TextIO, TypedDict, cast
 
 import colorama
 from qrcode import QRCode
@@ -140,7 +139,7 @@ LogLevel = IntEnum('LogLevel', ['QUIET', 'NORMAL', 'VERBOSE', 'MORE_VERBOSE', 'D
 
 # Constants
 CAMERA: Final[str] = 'camera'
-CV2_QRMODES: List[str] = [QRMode.CV2.name, QRMode.CV2_WECHAT.name]
+CV2_QRMODES: list[str] = [QRMode.CV2.name, QRMode.CV2_WECHAT.name]
 
 # Global variable declaration
 verbose: IntEnum = LogLevel.NORMAL
@@ -200,10 +199,7 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> pb.MigrationP
         return None
     parsed_url = urlparse.urlparse(otp_url)
     if verbose >= LogLevel.DEBUG: log_debug(f"parsed_url={parsed_url}")
-    try:
-        params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
-    except Exception:  # workaround for PYTHON <= 3.10
-        params = {}
+    params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
     if verbose >= LogLevel.DEBUG: log_debug(f"querystring params={params}")
     if 'data' not in params:
         log_error(f"could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}")
@@ -353,12 +349,12 @@ def extract_otps_from_camera(args: Args) -> Otps:
             if qr_mode in [QRMode.QREADER, QRMode.QREADER_DEEP]:
                 detections = qreader.detect(img)
                 detection = detections[0] if detections else None
-                bbox: Tuple[int, int, int, int] | None = None
+                bbox: tuple[int, int, int, int] | None = None
                 if detection is not None:
                     bbox_xyxy = cast('np.ndarray', detection['bbox_xyxy'])
                     bbox = (int(bbox_xyxy[0]), int(bbox_xyxy[1]), int(bbox_xyxy[2]), int(bbox_xyxy[3]))
                 if qr_mode == QRMode.QREADER_DEEP:
-                    results = cast(Tuple[Optional[str], ...], qreader.detect_and_decode(img))
+                    results = cast(tuple[str | None, ...], qreader.detect_and_decode(img))
                     otp_url = next((result for result in results if result), None)
                 elif qr_mode == QRMode.QREADER:
                     otp_url = qreader.decode(img, detection) if detection is not None else None
@@ -414,7 +410,7 @@ def extract_otps_from_camera(args: Args) -> Otps:
     return otps
 
 
-def get_color(new_otps_count: int, otp_url: Optional[str]) -> ColorBGR:
+def get_color(new_otps_count: int, otp_url: str | None) -> ColorBGR:
     if new_otps_count:
         return SUCCESS_COLOR
     else:
@@ -432,7 +428,7 @@ def cv2_draw_box(img: cv2.typing.MatLike, raw_pts: cv2.typing.MatLike | list[tup
     return pts
 
 
-def cv2_print_text(img: cv2.typing.MatLike, text: str, line_number: int, position: TextPosition, color: ColorBGR, opposite_len: Optional[int] = None) -> None:
+def cv2_print_text(img: cv2.typing.MatLike, text: str, line_number: int, position: TextPosition, color: ColorBGR, opposite_len: int | None = None) -> None:
     window_dim = cv2.getWindowImageRect(WINDOW_NAME)
     out_text = text
     if opposite_len:
@@ -449,7 +445,7 @@ def cv2_print_text(img: cv2.typing.MatLike, text: str, line_number: int, positio
     cv2.putText(img, out_text, pos, FONT, FONT_SCALE, color, FONT_THICKNESS, FONT_LINE_STYLE)
 
 
-def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> Tuple[bool, QRMode]:
+def cv2_handle_pressed_keys(qr_mode: QRMode, otps: Otps) -> tuple[bool, QRMode]:
     key = cv2.waitKey(1) & 0xFF
     quit = False
     if key == 27 or key == ord('q') or key == ord('Q') or key == 13:
@@ -639,7 +635,7 @@ def decode_qr_img_otp_urls(img: Any, qr_mode: QRMode) -> OtpUrls:
     if qr_mode in [QRMode.QREADER, QRMode.QREADER_DEEP]:
         qreader_instance = QReader()
         if qr_mode == QRMode.QREADER_DEEP:
-            results = cast(Tuple[Optional[str], ...], qreader_instance.detect_and_decode(img))
+            results = cast(tuple[str | None, ...], qreader_instance.detect_and_decode(img))
             otp_urls += [otp_url for otp_url in results if otp_url]
         else:
             detections = qreader_instance.detect(img)
@@ -692,7 +688,7 @@ def build_otp_url(secret: str, raw_otp: pb.MigrationPayload.OtpParameters) -> st
     return otp_url
 
 
-def print_otp(otp: Otp, out: Optional[TextIO] = None) -> None:
+def print_otp(otp: Otp, out: TextIO | None = None) -> None:
     print(f"Name:    {otp['name']}", file=out)
     print(f"Secret:  {otp['secret']}", file=out)
     if otp['issuer']: print(f"Issuer:  {otp['issuer']}", file=out)
@@ -703,7 +699,7 @@ def print_otp(otp: Otp, out: Optional[TextIO] = None) -> None:
         print(otp['url'], file=out)
 
 
-def write_url(otp: Otp, out: Optional[TextIO] = None) -> None:
+def write_url(otp: Otp, out: TextIO | None = None) -> None:
     print(otp['url'], file=out)
 
 
@@ -724,7 +720,7 @@ def save_qr_image_file(otp_url: OtpUrl, name: str) -> None:
     img.save(name)  # type: ignore
 
 
-def print_qr(otp_url: str, out: Optional[TextIO] = None) -> None:
+def print_qr(otp_url: str, out: TextIO | None = None) -> None:
     qr = QRCode()
     qr.add_data(otp_url)
     qr.print_ascii(out)

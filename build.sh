@@ -608,6 +608,8 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
+        echo "QRDET_MODEL_DIR: $QRDET_MODEL_DIR"
+
         cmd="time pyinstaller -y --specpath installer --add-data \"$QRDET_MODEL_DIR:qrdet/.model\" --onefile $clean_flag src/extract_otp_secrets.py"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"

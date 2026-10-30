@@ -4,7 +4,7 @@
     "build": {
         "dockerfile": "Dockerfile",
         "context": "..",
-        //Update 'VARIANT' to pick a Python version: 3, 3.10, ...
+        //Update 'VARIANT' to pick a Python version: 3, 3.11, ...
         "args": {
             "VARIANT": "3.14"
         }

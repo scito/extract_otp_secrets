@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # workaround for PYTHON <= 3.10
 import csv
 import glob
 import io
@@ -23,7 +22,7 @@ import re
 import shutil
 import sys
 import pathlib
-from typing import BinaryIO, Any, List
+from typing import Any, BinaryIO, Self
 
 
 # Types
@@ -31,15 +30,13 @@ PathLike = str | pathlib.Path
 
 
 # Ref. https://stackoverflow.com/a/16571630
-# workaround for PYTHON <= 3.10: class Capturing(list[Any]):
-class Capturing(List[Any]):
+class Capturing(list[Any]):
     '''Capture stdout and stderr
 Usage:
 with Capturing() as output:
     print("Output")
 '''
-    # TODO remove type ignore if fixed, see https://github.com/python/mypy/issues/11871, https://stackoverflow.com/questions/72174409/type-hinting-the-return-value-of-a-class-method-that-returns-self
-    def __enter__(self):  # type: ignore
+    def __enter__(self) -> Self:
         self._stdout = sys.stdout
         sys.stdout = self._stringio_std = io.StringIO()
         self._stderr = sys.stderr
@@ -73,19 +70,19 @@ def remove_dir_with_files(dir: PathLike) -> None:
     if os.path.exists(dir): shutil.rmtree(dir)
 
 
-def read_csv(filename: str) -> List[List[str]]:
+def read_csv(filename: str) -> list[list[str]]:
     """Returns a list of lines."""
     with open(filename, "r", encoding="utf-8", newline='') as infile:
-        lines: List[List[str]] = []
+        lines: list[list[str]] = []
         reader = csv.reader(infile)
         for line in reader:
             lines.append(line)
         return lines
 
 
-def read_csv_str(data_str: str) -> List[List[str]]:
+def read_csv_str(data_str: str) -> list[list[str]]:
     """Returns a list of lines."""
-    lines: List[List[str]] = []
+    lines: list[list[str]] = []
     reader = csv.reader(data_str.splitlines())
     for line in reader:
         lines.append(line)
@@ -103,7 +100,7 @@ def read_json_str(data_str: str) -> Any:
     return json.loads(data_str)
 
 
-def read_file_to_list(filename: str) -> List[str]:
+def read_file_to_list(filename: str) -> list[str]:
     """Returns a list of lines."""
     with open(filename, "r", encoding="utf-8") as infile:
         return infile.readlines()

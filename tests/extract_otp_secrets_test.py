@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations  # workaround for PYTHON <= 3.10
 
 import io
 import os
@@ -27,7 +26,7 @@ import re
 import sys
 import time
 from enum import Enum
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 import colorama
 import pytest
@@ -558,8 +557,6 @@ def test_normalize_bytes() -> None:
 
 # Generate verbose output:
 # for color in '' '-n'; do for level in '' '-v' '-vv' '-vvv'; do python3.11 src/extract_otp_secrets.py example_export.txt $color $level > tests/data/print_verbose_output$color$level.txt; done; done
-# workaround for PYTHON <= 3.10
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="fileinput.input encoding exists since PYTHON 3.10 OR Windows fatal exception: access violation")
 @pytest.mark.parametrize("verbose_level", ['', '-v', '-vv', '-vvv' if not sys.platform.startswith("win") else None])
 @pytest.mark.parametrize("color", ['', '-n'])
 def test_extract_verbose(verbose_level: str, color: str, capsys: pytest.CaptureFixture[str], relaxed: bool) -> None:
@@ -678,14 +675,14 @@ MockMode = Enum('MockMode', ['REPEAT_FIRST_ENDLESS', 'LOOP_LIST'])
 class MockCam:
 
     read_counter: int = 0
-    read_files: List[str] = []
+    read_files: list[str] = []
     mock_mode: MockMode
 
-    def __init__(self, files: List[str] = ['example_export.png'], mock_mode: MockMode = MockMode.REPEAT_FIRST_ENDLESS):
+    def __init__(self, files: list[str] = ['example_export.png'], mock_mode: MockMode = MockMode.REPEAT_FIRST_ENDLESS):
         self.read_files = files
         self.image_mode = mock_mode
 
-    def read(self) -> Tuple[bool, Any]:
+    def read(self) -> tuple[bool, Any]:
         if self.image_mode == MockMode.REPEAT_FIRST_ENDLESS:
             file = self.read_files[0]
         elif self.image_mode == MockMode.LOOP_LIST:
@@ -723,7 +720,7 @@ class MockCam:
     ('CV2', 'tests/data/lena_std.tif', None),
     ('CV2_WECHAT', 'tests/data/lena_std.tif', None),
 ])
-def test_extract_otps_from_camera(qr_reader: Optional[str], file: str, success: bool, capsys: pytest.CaptureFixture[str], mocker: MockerFixture) -> None:
+def test_extract_otps_from_camera(qr_reader: str | None, file: str, success: bool, capsys: pytest.CaptureFixture[str], mocker: MockerFixture) -> None:
     if cv2_available:
         # Arrange
         mockCam = MockCam([file])
@@ -810,7 +807,7 @@ def test_verbose_and_quiet(capsys: pytest.CaptureFixture[str]) -> None:
     ('-C', '0', False, False),
     ('-n', None, False, False),
 ])
-def test_quiet(parameter: str, parameter_value: Optional[str], stdout_expected: bool, stderr_expected: bool, capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
+def test_quiet(parameter: str, parameter_value: str | None, stdout_expected: bool, stderr_expected: bool, capsys: pytest.CaptureFixture[str], tmp_path: pathlib.Path) -> None:
     if parameter in ['-Q', '-C'] and not cv2_available:
         return
 
