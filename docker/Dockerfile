@@ -1,5 +1,5 @@
 # --build-arg BASE_IMAGE=python:3.11-slim-buster
-ARG BASE_IMAGE=python:3.14-slim-trixie
+ARG BASE_IMAGE=python:3.15-slim-trixie
 FROM $BASE_IMAGE
 
 # https://docs.docker.com/engine/reference/builder/
