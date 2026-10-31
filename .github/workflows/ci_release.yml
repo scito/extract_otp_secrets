@@ -89,7 +89,7 @@ jobs:
             https://api.github.com/repos/scito/extract_otp_secrets/releases \
             --silent \
             --show-error \
-            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"## Executables\n\nDownload the executable for your platform and execute it, see [README.md](https://github.com/scito/extract_otp_secrets#readme)\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.31) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.31) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | MacOS arm64 (bare executable, see [README.md](https://github.com/scito/extract_otp_secrets#readme); optional libzbar must be installed manually, see [README.md](https://github.com/scito/extract_otp_secrets#readme)) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.dmg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.pkg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n","draft":true,"prerelease":false,"generate_release_notes":true}')
+            -d '{"tag_name":"${{ github.ref }}","target_commitish":"master","name":"${{ steps.meta.outputs.version }} - ${{ steps.meta.outputs.date }}","body":"## Executables\n\nDownload the executable for your platform and execute it, see [README.md](https://github.com/scito/extract_otp_secrets#readme)\n\n | Executable | Description |\n | --- | --- |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_x86_64 | Linux x86_64/amd64 (glibc >= 2.36) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_linux_arm64 | Linux arm64 (glibc >= 2.36) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_x86_64.exe | Windows x86_64/amd64/x64 |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_win_arm64.exe | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64 | MacOS arm64 (bare executable, see [README.md](https://github.com/scito/extract_otp_secrets#readme); optional libzbar must be installed manually, see [README.md](https://github.com/scito/extract_otp_secrets#readme)) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_x86_64 | N/A |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.dmg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n | extract_otp_secrets${{ steps.meta.outputs.inline_version }}_macos_arm64.pkg | N/A, see [README.md](https://github.com/scito/extract_otp_secrets#readme) |\n","draft":true,"prerelease":false,"generate_release_notes":true}')
           release_id=$(jq -r '.id' <<< "$response")
           if [ "$release_id" == "null" ] || [ -z "$release_id" ]; then
             echo "::error::Failed to create release, no id in response:"
@@ -184,6 +184,10 @@ jobs:
         # TODO upload digests to assets
         run: |
           echo "extract_otp_secrets: ${{ steps.docker_build_bookworm.outputs.digest }}"
+
+      - name: Print glibc version of docker image
+        run: |
+          docker run --pull always --entrypoint /bin/bash --rm docker.io/scit0/extract_otp_secrets:bookworm -c 'ldd --version | head -n 1'
 
         # TODO use local docker image https://stackoverflow.com/a/61155718/1663871
         # https://github.com/multiarch/qemu-user-static
