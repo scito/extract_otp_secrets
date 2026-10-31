@@ -102,6 +102,11 @@ jobs:
           # build on feature branches, push only on master branch
           push: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions'}}
 
+      - name: Print glibc version of image
+        if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions' }}
+        run: |
+          docker run --pull always --entrypoint /bin/bash --rm docker.io/scit0/extract_otp_secrets:trixie-${{ matrix.PLATFORM_ARCH }} -c 'ldd --version | head -n 1'
+
       - name: Image digest
         # TODO upload digests to assets
         run: |
@@ -354,6 +359,11 @@ jobs:
           provenance: true
           sbom: true
           push: ${{ github.secret_source == 'Actions' }}
+
+      - name: Print glibc version of image
+        if: ${{ github.ref == 'refs/heads/master' && github.secret_source == 'Actions' }}
+        run: |
+          docker run --pull always --entrypoint /bin/bash --rm docker.io/scit0/extract_otp_secrets:bookworm-${{ matrix.PLATFORM_ARCH }} -c 'ldd --version | head -n 1'
 
       - name: Image digest
         # TODO upload digests to assets

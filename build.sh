@@ -604,6 +604,10 @@ if $build_local; then
         eval "$cmd"
         echo "local glibc: $LOCAL_GLIBC_VERSION"
 
+        cmd="$PYTHON -c 'from qreader import QReader; QReader()'"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+        
         cmd="QRDET_MODEL_DIR=\$($PYTHON -c 'import qrdet, os; print(os.path.dirname(qrdet.__file__))')/.model"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
@@ -635,7 +639,10 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="QRDET_MODEL_DIR=\$($PYTHON -c 'import qrdet, os; print(os.path.dirname(qrdet.__file__))')/.model"
+        cmd="$PYTHON -c 'from qreader import QReader; QReader()'"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+                cmd="QRDET_MODEL_DIR=\$($PYTHON -c 'import qrdet, os; print(os.path.dirname(qrdet.__file__))')/.model"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
