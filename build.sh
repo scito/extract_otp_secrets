@@ -73,6 +73,46 @@ askContinueYn() {
     fi
 }
 
+# Sets the pinned version of a package in Pipfile, pyproject.toml and requirements.txt
+# $1: package name
+# $2: new version
+# Example call: updatePackageVersion protobuf 7.36.2
+updatePackageVersion() {
+    local package="$1"
+    local new_version="$2"
+
+    cmd="perl -i -pe 's%^(\Q$package\E = \")[^\"]*\"%\${1}$new_version\"%' Pipfile"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="perl -i -pe 's%^(\s*\"\Q$package\E==)[^\"]*\"%\${1}$new_version\"%' pyproject.toml"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    cmd="perl -i -pe 's%^(\Q$package\E==)\S*%\${1}$new_version%' requirements.txt"
+    if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+    eval "$cmd"
+
+    grep -qxF "$package = \"$new_version\"" Pipfile \
+        && grep -qF "\"$package==$new_version\"" pyproject.toml \
+        && grep -qxF "$package==$new_version" requirements.txt \
+        || { echo -e "${red}$package $new_version was not set in all of Pipfile, pyproject.toml and requirements.txt${reset}" >&2; abort $LINENO; }
+}
+
+# Prints the latest version of a package on PyPI
+# $1: package name
+# Example call: getPypiVersion protobuf
+getPypiVersion() {
+    curl -sfL "https://pypi.org/pypi/$1/json" | jq -r '.info.version // empty'
+}
+
+# Prints the pinned version of a package in requirements.txt
+# $1: package name
+# Example call: getRequirementsVersion protobuf
+getRequirementsVersion() {
+    perl -ne 'print $1 if /^\Q'"$1"'\E==(\S+)/' requirements.txt
+}
+
 # Reference: https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
 
 if [[ "$MSYSTEM" == "MINGW64" || "$MSYSTEM" == "MINGW32" || "$MSYSTEM" == "UCRT64" ]]; then
@@ -111,7 +151,7 @@ while test $# -gt 0; do
             echo
             echo "Options:"
             echo "-i                      Interactive mode, all steps must be confirmed"
-            echo "-C                      Ignore version check of protobuf/protoc"
+            echo "-C                      Ignore version check of protobuf/protoc and opencv-contrib-python"
             echo "-e                      Build exe"
             echo "-n                      Build nuitka exe"
             echo "-d                      Build docker"
@@ -303,24 +343,24 @@ if $build_local; then
 
     if ! $ignore_version_check; then
         echo -e "\n\nChecking Protoc version..."
-        cmd="VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest | grep -E '<title>' | perl -pe's%.*Protocol Buffers v(\d+\.\d+(\.\d+)?).*%\1%')"
+        cmd="PROTOC_VERSION=$(curl -sL https://github.com/protocolbuffers/protobuf/releases/latest | grep -E '<title>' | perl -pe's%.*Protocol Buffers v(\d+\.\d+(\.\d+)?).*%\1%')"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
         echo
 
-        OLDVERSION=$(cat $BIN/$DEST/.VERSION.txt || echo "")
-        echo -e "\nProtoc remote version $VERSION\n"
-        echo -e "Protoc local version: $OLDVERSION\n"
+        OLD_PROTOC_VERSION=$(cat $BIN/$DEST/.PROTOC_VERSION.txt || echo "")
+        echo -e "\nProtoc remote version $PROTOC_VERSION\n"
+        echo -e "Protoc local version: $OLD_PROTOC_VERSION\n"
 
-        if [ "$OLDVERSION" != "$VERSION" ]; then
-            echo "Upgrade protoc from $OLDVERSION to $VERSION"
+        if [ "$OLD_PROTOC_VERSION" != "$PROTOC_VERSION" ]; then
+            echo "Upgrade protoc from $OLD_PROTOC_VERSION to $PROTOC_VERSION"
 
-            NAME="protoc-$VERSION"
+            NAME="protoc-$PROTOC_VERSION"
             ARCHIVE="$NAME.zip"
 
             mkdir -p $DOWNLOADS
             # https://github.com/protocolbuffers/protobuf/releases/download/v21.6/protoc-21.6-linux-x86_64.zip
-            cmd="wget --trust-server-names https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-linux-x86_64.zip -O $DOWNLOADS/$ARCHIVE"
+            cmd="wget --trust-server-names https://github.com/protocolbuffers/protobuf/releases/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip -O $DOWNLOADS/$ARCHIVE"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -332,7 +372,7 @@ if $build_local; then
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
-            cmd="echo $VERSION > $BIN/$NAME/.VERSION.txt; echo $VERSION > $BIN/$NAME/.VERSION_$VERSION.txt"
+            cmd="echo $PROTOC_VERSION > $BIN/$NAME/.PROTOC_VERSION.txt; echo $PROTOC_VERSION > $BIN/$NAME/.PROTOC_VERSION_$PROTOC_VERSION.txt"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -358,14 +398,67 @@ if $build_local; then
 
             # Update README.md
 
-            cmd="perl -i -pe 's%proto(buf|c)([- ])(\d\.)?$OLDVERSION%proto\$1\$2\${3}$VERSION%g' README.md && perl -i -pe 's%(protobuf/releases/tag/v)$OLDVERSION%\${1}$VERSION%g' README.md"
+            # An empty OLD_PROTOC_VERSION would match and corrupt every "protoc " and "protobuf " in README.md
+            if [ -n "$OLD_PROTOC_VERSION" ]; then
+                cmd="perl -i -pe 's%proto(buf|c)([- ])(\d\.)?\Q$OLD_PROTOC_VERSION\E%proto\$1\$2\${3}$PROTOC_VERSION%g' README.md && perl -i -pe 's%(protobuf/releases/tag/v)\Q$OLD_PROTOC_VERSION\E%\${1}$PROTOC_VERSION%g' README.md"
+                if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+                eval "$cmd"
+            else
+                echo -e "${yellow}No local protoc version found. README.md not updated.${reset}"
+            fi
+
+            # Update protobuf version in Pipfile, pyproject.toml, requirements.txt and README.md
+
+            echo -e "\n\nChecking protobuf version..."
+            cmd="PROTOBUF_VERSION=$(getPypiVersion protobuf)"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
+            [ -n "$PROTOBUF_VERSION" ] || { echo -e "${red}Cannot get protobuf version from PyPI${reset}" >&2; abort $LINENO; }
+
+            OLD_PROTOBUF_VERSION=$(getRequirementsVersion protobuf)
+            echo -e "\nprotobuf remote version: $PROTOBUF_VERSION\n"
+            echo -e "protobuf local version: $OLD_PROTOBUF_VERSION\n"
+
+            if [[ "$PROTOBUF_VERSION" != *".$PROTOBUF_VERSION" ]]; then
+                echo -e "${yellow}protobuf $PROTOBUF_VERSION on PyPI does not match protoc $PROTOBUF_VERSION. Pipfile, pyproject.toml and requirements.txt not updated.${reset}"
+            elif [ -z "$OLD_PROTOBUF_VERSION" ]; then
+                echo -e "${yellow}No protobuf version found in requirements.txt. Pipfile, pyproject.toml and requirements.txt not updated.${reset}"
+            elif [ "$OLD_PROTOBUF_VERSION" != "$PROTOBUF_VERSION" ]; then
+                echo "Upgrade protobuf from $OLD_PROTOBUF_VERSION to $PROTOBUF_VERSION"
+
+                updatePackageVersion protobuf "$PROTOBUF_VERSION"
+
+                cmd="perl -i -pe 's%(badge/protobuf-)[\d.]+%\${1}$PROTOBUF_VERSION%g' README.md"
+                if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+                eval "$cmd"
+            else
+                echo -e "\nprotobuf version has not changed."
+            fi
         else
             echo -e "\nVersion has not changed. Quit"
         fi
+
+        echo -e "\n\nChecking opencv-contrib-python version..."
+        cmd="OPENCV_VERSION=$(getPypiVersion opencv-contrib-python)"
+        if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
+        eval "$cmd"
+        [ -n "$OPENCV_VERSION" ] || { echo -e "${red}Cannot get opencv-contrib-python version from PyPI${reset}" >&2; abort $LINENO; }
+
+        OLD_OPENCV_VERSION=$(getRequirementsVersion opencv-contrib-python)
+        echo -e "\nopencv-contrib-python remote version: $OPENCV_VERSION\n"
+        echo -e "opencv-contrib-python local version: $OLD_OPENCV_VERSION\n"
+
+        if [ -z "$OLD_OPENCV_VERSION" ]; then
+            echo -e "${yellow}No opencv-contrib-python version found in requirements.txt. Pipfile, pyproject.toml and requirements.txt not updated.${reset}"
+        elif [ "$OLD_OPENCV_VERSION" != "$OPENCV_VERSION" ]; then
+            echo "Upgrade opencv-contrib-python from $OLD_OPENCV_VERSION to $OPENCV_VERSION"
+
+            updatePackageVersion opencv-contrib-python "$OPENCV_VERSION"
+        else
+            echo -e "\nopencv-contrib-python version has not changed."
+        fi
     else
-        echo -e "\nIgnore version check. Using existing protoc version.\n"
+        echo -e "\nIgnore version check. Using existing protoc and opencv-contrib-python versions.\n"
     fi
 
     if $build_base; then
