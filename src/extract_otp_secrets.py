@@ -34,6 +34,7 @@ from __future__ import annotations  # workaround for <= PYTHON 3.13 (PEP 649): a
 
 import argparse
 import base64
+import binascii
 import csv
 import fileinput
 import glob
@@ -208,7 +209,11 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> pb.MigrationP
     if verbose >= LogLevel.DEBUG: log_debug(f"data_base64={data_base64}")
     data_base64_fixed = data_base64.replace(' ', '+')
     if verbose >= LogLevel.DEBUG: log_debug(f"data_base64_fixed={data_base64_fixed}")
-    data = base64.b64decode(data_base64_fixed, validate=True)
+    try:
+        data = base64.b64decode(data_base64_fixed, validate=True)
+    except binascii.Error as e:
+        log_error(f"Cannot decode base64 data of otpauth-migration url\nsource: {source}\nurl: {otp_url}", e)
+        return None
     payload = pb.MigrationPayload()
     try:
         payload.ParseFromString(data)
@@ -367,14 +372,16 @@ def extract_otps_from_camera(args: Args) -> Otps:
                     otp_url = qrcode.data.decode('utf-8')
                     new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
                     cv2_draw_box(img, [qrcode.polygon], get_color(new_otps_count, otp_url))
-            elif qr_mode in [QRMode.CV2, QRMode.CV2_WECHAT]:
-                if QRMode.CV2:
-                    otp_url, raw_pts, _ = cv2_qr.detectAndDecode(img)
-                else:
-                    otp_url, raw_pts = cv2_qr_wechat.detectAndDecode(img)
+            elif qr_mode == QRMode.CV2:
+                otp_url, raw_pts, _ = cv2_qr.detectAndDecode(img)
                 if raw_pts is not None:
                     if otp_url:
                         new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
+                    cv2_draw_box(img, raw_pts, get_color(new_otps_count, otp_url))
+            elif qr_mode == QRMode.CV2_WECHAT:
+                wechat_otp_urls, wechat_raw_pts = cv2_qr_wechat.detectAndDecode(img)
+                for otp_url, raw_pts in zip(wechat_otp_urls, wechat_raw_pts):
+                    new_otps_count = extract_otps_from_otp_url(otp_url, otp_urls, otps, args)
                     cv2_draw_box(img, raw_pts, get_color(new_otps_count, otp_url))
             else:
                 abort(f"Invalid QReader mode: {qr_mode.name}")
@@ -642,7 +649,8 @@ def decode_qr_img_otp_urls(img: Any, qr_mode: QRMode) -> OtpUrls:
             otp_urls += [otp_url for detection in detections if (otp_url := qreader_instance.decode(img, detection))]
     elif qr_mode == QRMode.CV2:
         otp_url, _, _ = cv2.QRCodeDetector().detectAndDecode(img)
-        otp_urls.append(otp_url)
+        if otp_url:
+            otp_urls.append(otp_url)
     elif qr_mode == QRMode.CV2_WECHAT:
         otp_url, _ = cv2.wechat_qrcode.WeChatQRCode().detectAndDecode(img)
         otp_urls += list(otp_url)
