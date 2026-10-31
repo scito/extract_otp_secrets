@@ -297,7 +297,7 @@ if $build_local; then
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
     
-    cmd="$PIP install -U -r requirements-dev.txt"
+    cmd="$PIP install -U --upgrade-strategy eager -r requirements-dev.txt"
     if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
     eval "$cmd"
 
@@ -370,13 +370,13 @@ if $build_local; then
 
     if $build_base; then
         # Upgrade pip requirements
-        cmd="pip install -U pip"
+        cmd="pip install -U --upgrade-strategy eager pip"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
         $PIP --version
 
-        cmd="$PIP install -U -r requirements.txt $EXTRA_INDEX_URL"
+        cmd="$PIP install -U --upgrade-strategy eager -r requirements.txt $EXTRA_INDEX_URL"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -415,7 +415,7 @@ if $build_local; then
 
         # pip -e install
 
-        cmd="$PIP install -U -e ."
+        cmd="$PIP install -U --upgrade-strategy eager -e ."
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -458,7 +458,7 @@ if $build_local; then
 
     # Pipenv
     if $run_pipenv; then
-        cmd="$PIP install -U pipenv"
+        cmd="$PIP install -U --upgrade-strategy eager pipenv"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -484,7 +484,7 @@ if $build_local; then
 
         # pip -e install
 
-        cmd="$PIPENV run pip install -U -e ."
+        cmd="$PIPENV run pip install -U --upgrade-strategy eager -e ."
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -519,7 +519,7 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$PIP install -U uv"
+        cmd="$PIP install -U --upgrade-strategy eager uv"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -635,7 +635,7 @@ if $build_local; then
         eval "$cmd"
         echo "local glibc: $LOCAL_GLIBC_VERSION"
 
-        cmd="$PIP install -U pyqt5"
+        cmd="$PIP install -U --upgrade-strategy eager pyqt5"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -762,7 +762,7 @@ if $build_docker; then
 
     if $build_exe; then
         if $build_x86_64; then
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt && pip install --no-cache-dir --force-reinstall --no-deps torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --collect-all torch --collect-all torchvision --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64_trixie --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils && pip install -U --upgrade-strategy eager pip && pip install --no-cache-dir -U --upgrade-strategy eager -r /files/requirements.txt && pip install -U --upgrade-strategy eager --no-cache-dir --force-reinstall --no-deps torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -U --upgrade-strategy eager pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --collect-all torch --collect-all torchvision --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64_trixie --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -778,7 +778,7 @@ if $build_docker; then
             BOOKWORM_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bookworm -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
             echo "Bookworm glibc: $BOOKWORM_GLIBC_VERSION"
 
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt && pip install --no-cache-dir --force-reinstall --no-deps torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --collect-all torch --collect-all torchvision --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils && pip install -U --upgrade-strategy eager pip && pip install --no-cache-dir -U --upgrade-strategy eager -r /files/requirements.txt && pip install -U --upgrade-strategy eager --no-cache-dir --force-reinstall --no-deps torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -U  --upgrade-strategy eager pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller -y --specpath installer --collect-all torch --collect-all torchvision --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_x86_64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -793,7 +793,7 @@ if $build_docker; then
 
         if $build_arm; then
             # build linux/arm64
-            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm-arm64 -c 'apt-get update && apt-get -y install binutils && pip install -U pip && pip install --no-cache-dir -U -r /files/requirements.txt && pip install --no-cache-dir --force-reinstall --no-deps torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller --specpath installer -y --collect-all torch --collect-all torchvision --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm-arm64 -c 'apt-get update && apt-get -y install binutils && pip install -U --upgrade-strategy eager pip && pip install --no-cache-dir -U --upgrade-strategy eager -r /files/requirements.txt && pip install -U --upgrade-strategy eager --no-cache-dir --force-reinstall --no-deps torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -U --upgrade-strategy eager pyinstaller && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && pyinstaller --specpath installer -y --collect-all torch --collect-all torchvision --add-data \"\$QRDET_MODEL_DIR:qrdet/.model\" --onefile --name extract_otp_secrets_linux_arm64 --distpath /files/dist/ /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -805,7 +805,7 @@ if $build_docker; then
 
     if $build_nuitka_exe; then
         if $build_x86_64; then
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_trixie_compiled /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U --upgrade-strategy eager pip && pip install -U --upgrade-strategy eager -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_trixie_compiled /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -825,7 +825,7 @@ if $build_docker; then
             BOOKWORM_GLIBC_VERSION=$($DOCKER run --network none --entrypoint /bin/bash --rm extract_otp_secrets:bookworm -c 'ldd --version | sed "1!d" | sed -E "s/.* ([[:digit:]]+\.[[:digit:]]+)$/\1/"')
             echo "Bookworm glibc: $BOOKWORM_GLIBC_VERSION"
 
-            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_bookworm_compiled /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/amd64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm -c 'apt-get update && apt-get -y install binutils build-essential patchelf && pip install -U --upgrade-strategy eager pip && pip install -U --upgrade-strategy eager -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_x86_64_bookworm_compiled /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
@@ -844,7 +844,7 @@ if $build_docker; then
 
         if $build_arm; then
             # build linux/arm64
-            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm-arm64 -c 'apt-get update && apt-get -y install binutils build-essential patchelf qt5-default && pip install -U pip && pip install -U -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_arm64_compiled /files/src/extract_otp_secrets.py'"
+            cmd="$DOCKER run --platform linux/arm64 --network=host --entrypoint /bin/bash --rm -v \"$($PWD):/files\" -w /files extract_otp_secrets:bookworm-arm64 -c 'apt-get update && apt-get -y install binutils build-essential patchelf qt5-default && pip install -U --upgrade-strategy eager pip && pip install -U --upgrade-strategy eager -r /files/requirements.txt && pip install nuitka pyqt5 && PYTHONHASHSEED=31 && QRDET_MODEL_DIR=\$(python -c \"import qrdet, os; print(os.path.dirname(qrdet.__file__))\")/.model && python -m nuitka --enable-plugin=tk-inter --enable-plugin=pyqt5 --include-data-dir=\"\$QRDET_MODEL_DIR\"=qrdet/.model --onefile --output-dir=/files/build/docker/nuitka --output-filename=extract_otp_secrets_linux_arm64_compiled /files/src/extract_otp_secrets.py'"
             if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
             eval "$cmd"
 
