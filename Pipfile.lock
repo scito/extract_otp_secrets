@@ -2213,10 +2213,10 @@
         },
         "nuitka": {
             "hashes": [
-                "sha256:3bed65735d5cfc53dc13070f9f17c52dbe584c0f03de32b6ef011f5db674add9"
+                "sha256:e98e0c9a3224b581cf8ec0fab92b039b90fb7fa78673550c22833a82de444b25"
             ],
             "index": "pypi",
-            "version": "==4.3.3"
+            "version": "==4.3.4"
         },
         "packaging": {
             "hashes": [
