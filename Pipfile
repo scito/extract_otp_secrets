@@ -4,28 +4,17 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-colorama = "0.4.6"
-opencv-contrib-python = "5.0.0.93"
-numpy = ">=2.4"
-# for macOS: opencv-contrib-python = "<=4.7.0"
-pillow = "*"
-pyzbar = "*"
-protobuf = "7.36.2"
-qrcode = "*"
-qreader = ">=3.16,<4.0"
+extract-otp-secrets = {path = ".", editable = true}
 
 [dev-packages]
-build = "*"
-flake8 = "*"
-gfm-toc = "*"
-mypy = "*"
-mypy-protobuf = "*"
-nuitka = "*"
-pylint = "*"
-pytest = "*"
-pytest-cov = "*"
-pytest-mock = "*"
-types-protobuf = "*"
+colorama = ">=0.4.6"
+opencv-contrib-python = "==5.0.0.93"
+pillow = "*"
+protobuf = "==7.36.2"
+pyzbar = "*"
+qrcode = "*"
+qreader = "<4.0,>=3.16"
+numpy = {version = ">=2.5.2", markers = "python_version >= \"3.15\""}
 
 [requires]
-python_version = "3.14"
+python_version = "3.15"
