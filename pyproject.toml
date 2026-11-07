@@ -34,7 +34,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows :: Windows 11",
     "Operating System :: MacOS",
     "Natural Language :: English",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Typing :: Typed",
 ]
 dependencies = [
@@ -52,7 +51,7 @@ dependencies = [
 description = "Extracts one time password (OTP) secrets from QR codes exported by two-factor authentication (2FA) apps such as 'Google Authenticator'"
 dynamic = ["version"]
 keywords = ["python", "security", "json", "otp", "csv", "protobuf", "qrcode", "two-factor", "totp", "google-authenticator", "recovery", "proto3", "mfa", "two-factor-authentication", "tfa", "qr-codes", "otpauth", "2fa", "security-tools", "cv2"]
-license = {text = "GNU General Public License v3 (GPLv3)"}
+license = "GPL-3.0-or-later"
 readme = "README.md"
 authors = [{name = "scito", email = "info@scito.ch"}]
 maintainers = [{name = "scito", email = "info@scito.ch"}]
