@@ -561,7 +561,7 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="# $PIPENV --rm || echo 'No virtualenv to remove'"
+        cmd="$PIPENV remove || echo 'No virtualenv to remove'"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
@@ -577,7 +577,7 @@ if $build_local; then
 
         # pip -e install
 
-        cmd="$PIPENV run pip install -U --upgrade-strategy eager -e ."
+        cmd="$PIPENV install -e ."
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
