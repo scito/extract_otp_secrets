@@ -200,7 +200,11 @@ def get_payload_from_otp_url(otp_url: str, i: int, source: str) -> pb.MigrationP
         return None
     parsed_url = urlparse.urlparse(otp_url)
     if verbose >= LogLevel.DEBUG: log_debug(f"parsed_url={parsed_url}")
-    params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
+    try:
+        params = urlparse.parse_qs(parsed_url.query, strict_parsing=True)
+    except ValueError as e:
+        log_error(f"could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}", e)
+        return None
     if verbose >= LogLevel.DEBUG: log_debug(f"querystring params={params}")
     if 'data' not in params:
         log_error(f"could not parse query parameter in input url\nsource: {source}\nurl: {otp_url}")
