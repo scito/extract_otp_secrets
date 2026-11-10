@@ -124,6 +124,16 @@ Type:    totp
 '''
         self.assertEqual(actual_output, expected_output)
 
+    def test_extract_malformed_query_returns_none(self) -> None:
+        # A query field without '=' must not crash with ValueError,
+        # it is reported like other undecodable inputs.
+        self.assertIsNone(
+            extract_otp_secrets.get_payload_from_otp_url(
+                'otpauth-migration://offline?data', 1, 'in.txt'))
+        self.assertIsNone(
+            extract_otp_secrets.get_payload_from_otp_url(
+                'otpauth-migration://offline?foo', 1, 'in.txt'))
+
     def test_extract_not_encoded_plus(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
