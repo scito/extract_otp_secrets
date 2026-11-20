@@ -8,7 +8,7 @@ extract-otp-secrets = {path = ".", editable = true}
 
 [dev-packages]
 colorama = ">=0.4.6"
-opencv-contrib-python = "==5.0.0.93"
+opencv-contrib-python = "5.1.0.95"
 pillow = "*"
 protobuf = "==7.36.2"
 pyzbar = "*"

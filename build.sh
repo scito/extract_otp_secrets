@@ -638,7 +638,7 @@ if $build_local; then
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
-        cmd="$UV pip install $VERBOSE -U -e . $EXTRA_INDEX_URL --exclude excludes.txt"
+        cmd="$UV pip install $VERBOSE -U -e . --exclude excludes.txt"
         if $interactive ; then askContinueYn "$cmd"; else echo -e "${cyan}$cmd${reset}";fi
         eval "$cmd"
 
