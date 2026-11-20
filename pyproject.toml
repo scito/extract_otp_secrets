@@ -5,6 +5,7 @@ requires = [
   # https://setuptools-git-versioning.readthedocs.io/en/latest/differences.html
    "setuptools-git-versioning",
   "wheel>=0.46.3",
+  "packaging>=24.2"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -38,7 +39,7 @@ classifiers = [
 ]
 dependencies = [
   "colorama>=0.4.6",
-  "opencv-contrib-python==5.0.0.93",
+  "opencv-contrib-python==5.1.0.95",
   "numpy>=2.4,<2.5 ; python_version >= '3.11' and python_version < '3.12'",
   "numpy>=2.4 ; python_version >= '3.12' and python_version < '3.15'",
   "numpy>=2.5.2 ; python_version >= '3.15'",
